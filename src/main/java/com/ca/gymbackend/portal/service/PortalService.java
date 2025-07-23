@@ -11,6 +11,9 @@ public class PortalService {
     @Autowired
     private PortalMapper portalMapper;
 
+    public void register(UserDto userDto) {
+        portalMapper.insertUser(userDto);
+    }
     public UserDto findByAccountName(String accountName,String password){
         return portalMapper.findByLogin(accountName, password);
     }
