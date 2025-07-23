@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,5 +31,27 @@ public class PortalController {
         }
         String token = jwtUtil.generateToken(user.getId());
         return ResponseEntity.ok(new LoginResponse(true, token, user.getName()));
+    }
+
+    @PostMapping("/verify-token")
+    public ResponseEntity<?> verifyToken(@RequestHeader(value = "Authorization", required = false) String authHeader) {
+        try {
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return ResponseEntity.status(401).body(new ApiResponse(false, "Authorization 헤더가 없거나 형식이 올바르지 않습니다."));
+            }
+            String token = authHeader.substring(7);
+            boolean isValid = jwtUtil.validateToken(token);
+
+            if (isValid) {
+                Integer userId = jwtUtil.getUserId(token);
+                UserDto user = portalService.findById(userId);
+
+                return ResponseEntity.ok(new ApiResponse(true, user.getName()));
+            } else {
+                return ResponseEntity.status(401).body(new ApiResponse(false, "토큰이 유효하지 않습니다."));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(new ApiResponse(false, "토큰 검증 중 오류가 발생했습니다."));
+        }
     }
 }

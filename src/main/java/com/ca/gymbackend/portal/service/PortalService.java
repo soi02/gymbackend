@@ -15,4 +15,8 @@ public class PortalService {
         return portalMapper.findByLogin(accountName, password);
     }
 
+    public UserDto findById(Integer id){
+        return portalMapper.findById(id);
+    }
+
 }

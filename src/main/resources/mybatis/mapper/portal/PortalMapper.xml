@@ -5,4 +5,8 @@
         SELECT * FROM user
         WHERE account_name = #{accountName} AND password = #{password}
     </select>
+    <select id="findById">
+        SELECT * FROM user
+        WHERE id=#{id}
+    </select>
 </mapper>
