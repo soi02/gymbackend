@@ -53,7 +53,8 @@ public class PortalController {
             return ResponseEntity.status(401).body(new ApiResponse(false, "아이디 또는 비밀번호가 올바르지 않습니다."));
         }
         String token = jwtUtil.generateToken(userDto.getId());
-        return ResponseEntity.ok(new LoginResponse(true, token, userDto.getName()));
+        
+        return ResponseEntity.ok(new LoginResponse(true, token, userDto.getName(), userDto.getId()));
     }
 
     @PostMapping("/verify-token")
