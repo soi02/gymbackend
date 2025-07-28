@@ -7,5 +7,6 @@ public class WorkoutGuideDto {
     private int guideId;
     private int elementId;
     private String instruction;
-    private String video;
+    private String videoUrl;
 }
+
