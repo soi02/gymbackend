@@ -39,4 +39,8 @@ public class BuddyServiceImpl {
 
         buddyMapper.insertBuddyList(buddyDto);
     }
+
+    public void updateIsBuddy(int userId) {
+        buddyMapper.updateIsBuddy(userId);
+    }
 }

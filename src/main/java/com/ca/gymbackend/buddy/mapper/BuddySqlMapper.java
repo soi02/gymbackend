@@ -12,4 +12,6 @@ public interface BuddySqlMapper {
 
     public AgeDto findByAgeId(int id);
 
+    public void updateIsBuddy(int userId);
+
 }

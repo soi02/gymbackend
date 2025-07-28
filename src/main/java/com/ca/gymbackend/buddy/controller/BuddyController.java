@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ca.gymbackend.buddy.dto.BuddyDto;
 import com.ca.gymbackend.buddy.service.BuddyServiceImpl;
+import com.ca.gymbackend.security.JwtUtil;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/buddy")
@@ -15,12 +18,30 @@ public class BuddyController {
 
     @Autowired
     private BuddyServiceImpl buddyService;
+    @Autowired
+    private JwtUtil jwtUtil;
 
+    // @PostMapping("/register")
+    // public String registerBuddy(@RequestBody BuddyDto buddyDto) {
+    // buddyService.registerBuddy(buddyDto);
+    // System.out.println("넘어온 buddyDto: " + buddyDto);
+    // System.out.println("buddyAgeList: " + buddyDto.getBuddyAgeList());
+    // return "버디 등록 완료";
+    // }
     @PostMapping("/register")
-    public String registerBuddy(@RequestBody BuddyDto buddyDto) {
+    public String registerBuddy(@RequestBody BuddyDto buddyDto, HttpServletRequest request) {
+        String token = request.getHeader("Authorization").substring(7); // "Bearer " 제거
+        Integer userId = jwtUtil.getUserId(token); // JwtUtil에 이미 존재함
+
+        System.out.println("Before set: " + buddyDto.getUserId());
+        buddyDto.setUserId(userId);
+        System.out.println("After set: " + buddyDto.getUserId());
+
         buddyService.registerBuddy(buddyDto);
-        System.out.println("넘어온 buddyDto: " + buddyDto);
-        System.out.println("buddyAgeList: " + buddyDto.getBuddyAgeList());
+        buddyService.updateIsBuddy(buddyDto.getUserId());
+
+        // System.out.println("넘어온 buddyDto: " + buddyDto);
+        // System.out.println("buddyAgeList: " + buddyDto.getBuddyAgeList());
         return "버디 등록 완료";
     }
 }

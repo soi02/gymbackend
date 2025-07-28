@@ -14,4 +14,10 @@
         SELECT * FROM buddy_age WHERE id = #{id}
     </select>
 
+    <update id="updateIsBuddy" parameterType="int">
+        UPDATE user
+        SET is_buddy = true
+        WHERE id = #{userId}
+    </update>
+
 </mapper>
