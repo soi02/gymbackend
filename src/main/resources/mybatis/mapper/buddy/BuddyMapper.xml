@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ca.gymbackend.buddy.mapper.BuddySqlMapper">
+
+    <insert id="insertBuddyList" parameterType="com.ca.gymbackend.buddy.dto.BuddyDto">
+        INSERT INTO buddy (user_id, buddy_age_id, preferred_gender, intro)
+        VALUES
+        <foreach collection="buddyAgeList" item="age" separator=",">
+            (#{userId}, #{age.id}, #{preferredGender}, #{intro})
+        </foreach>
+    </insert>
+
+</mapper>
