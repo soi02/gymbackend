@@ -9,10 +9,20 @@
     </select>
 
 
-    <select id="findWorkoutGuide" resultType="com.ca.gymbackend.routine.dto.WorkoutGuideDto">
-    SELECT * FROM workout_guide
-    WHERE element_id = #{id}
-
+    <select id="findWorkoutGuide" resultType="com.ca.gymbackend.routine.response.WorkoutGuideList">
+        SELECT 
+            we.element_id, 
+            we.element_name, 
+            we.element_picture, 
+            wc.category_name, 
+            wg.instruction, 
+            wm.memo_content
+        FROM workout_element we
+        LEFT JOIN workout_category wc ON we.category_id = wc.category_id
+        LEFT JOIN workout_guide wg ON wg.element_id = we.element_id
+        LEFT JOIN workout_memo wm ON wm.element_id = we.element_id
+        WHERE we.element_id = #{id}
     </select>
+
 
 </mapper>

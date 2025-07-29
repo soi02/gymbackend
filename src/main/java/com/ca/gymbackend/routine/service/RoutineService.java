@@ -5,9 +5,9 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.ca.gymbackend.routine.dto.WorkoutGuideDto;
 import com.ca.gymbackend.routine.mapper.RoutineSqlMapper;
 import com.ca.gymbackend.routine.response.EveryWorkoutList;
+import com.ca.gymbackend.routine.response.WorkoutGuideList;
 
 @Service
 public class RoutineService {
@@ -20,7 +20,7 @@ public class RoutineService {
         return routineSqlMapper.findAllWorkout();
     }
 
-    public List<WorkoutGuideDto> getWorkoutGuide(int id) {
+    public List<WorkoutGuideList> getWorkoutGuide(int id) {
         return routineSqlMapper.findWorkoutGuide(id);
     }
 }
