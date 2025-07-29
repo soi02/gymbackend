@@ -24,19 +24,19 @@ public class ChallengeController {
     private final ChallengeServiceImpl challengeService;
 
     // 챌린지 생성
-@PostMapping("/registerChallengeProcess")
-public String registerChallenge(
-        @ModelAttribute ChallengeCreateRequest challengeRequest,
-        @RequestParam("challengeImage") MultipartFile imageFile) {
+    @PostMapping("/registerChallengeProcess")
+    public String registerChallenge(
+            @ModelAttribute ChallengeCreateRequest challengeRequest,
+            @RequestParam("challengeImage") MultipartFile imageFile) {
 
-    try {
-        challengeService.registerChallenge(challengeRequest, imageFile);
-        return "챌린지 생성 완료";
-    } catch (Exception e) {
-        e.printStackTrace();
-        return "챌린지 생성 실패";
+        try {
+            challengeService.registerChallenge(challengeRequest, imageFile);
+            return "챌린지 생성 완료";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "챌린지 생성 실패";
+        }
     }
-}
 
 
     // 챌린지 리스트 가져오기
@@ -45,6 +45,9 @@ public String registerChallenge(
         System.out.println("🔥 [챌린지 목록 응답] 🔥");
         return challengeService.getAllChallengeList();
     }
+
+
+
 
 
 

@@ -57,6 +57,7 @@ public class PortalController {
                                                                                                        // (선택적)
     ) {
         UserDto userDto = new UserDto();
+        userDto.setId(userRequest.getId());
         userDto.setName(userRequest.getName());
         // userDto.setAge(userRequest.getAge());
         userDto.setGender(userRequest.getGender());
@@ -129,7 +130,7 @@ public class PortalController {
                 Integer userId = jwtUtil.getUserId(token);
                 UserDto userDto = portalService.findById(userId);
 
-                return ResponseEntity.ok(new ApiResponse(true, userDto.getName()));
+                return ResponseEntity.ok(new ApiResponse(true, userDto.getName(), userDto.getId()));
             } else {
                 return ResponseEntity.status(401).body(new ApiResponse(false, "토큰이 유효하지 않습니다."));
             }
