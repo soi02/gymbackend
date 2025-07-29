@@ -2,9 +2,17 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ca.gymbackend.routine.mapper.RoutineSqlMapper">
 
-<select id="findAllWorkout" resultType="com.ca.gymbackend.routine.dto.WorkoutElementDto">
-  SELECT * FROM workout_element;
-</select>
+    <select id="findAllWorkout" resultType="com.ca.gymbackend.routine.response.EveryWorkoutList">
+    SELECT c.category_name, c.category_id, e.element_id, e.element_name, e.element_picture FROM workout_element e
+    INNER JOIN workout_category c
+    ON e.category_id = c.category_id
+    </select>
 
+
+    <select id="findWorkoutGuide" resultType="com.ca.gymbackend.routine.dto.WorkoutGuideDto">
+    SELECT * FROM workout_guide
+    WHERE element_id = #{id}
+
+    </select>
 
 </mapper>

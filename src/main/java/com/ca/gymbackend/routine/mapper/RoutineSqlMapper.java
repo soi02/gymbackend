@@ -4,9 +4,11 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
 
-import com.ca.gymbackend.routine.dto.WorkoutElementDto;
+import com.ca.gymbackend.routine.dto.WorkoutGuideDto;
+import com.ca.gymbackend.routine.response.EveryWorkoutList;
 
 @Mapper
 public interface RoutineSqlMapper {
-    public List<WorkoutElementDto> findAllWorkout();
+    public List<EveryWorkoutList> findAllWorkout();
+    public List<WorkoutGuideDto> findWorkoutGuide(int id);
 }
