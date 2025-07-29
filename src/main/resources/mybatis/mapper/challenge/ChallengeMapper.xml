@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ca.gymbackend.challenge.mapper.ChallengeMapper">
+
+    <!-- 챌린지 생성 -->
+
+    <!-- 생성 순서 1. 챌린지 등록 -->
+    <insert id="createChallenge" useGeneratedKeys="true" keyProperty="id" >
+        INSERT INTO challenge (
+            challenge_creator,
+            challenge_title,
+            challenge_description,
+            challenge_max_members,
+            challenge_start_date,
+            challenge_end_date,
+            created_at
+        ) VALUES (
+            #{challengeCreator},
+            #{challengeTitle},
+            #{challengeDescription},
+            #{challengeMaxMembers},
+            #{challengeStartDate},
+            #{challengeEndDate},
+            NOW()
+        );
+    </insert>
+
+    <!-- 생성 순서 2. 마지막 insert된 challenge_id 가져오기 -->
+    <select id="findLastInsertedChallengeId" resultType="int">
+        SELECT LAST_INSERT_ID();
+    </select>
+
+    <!-- 생성 순서 3. 챌린지 - 키워드 연결 -->
+    <insert id="createChallengeKeyword">
+        INSERT INTO challenge_keyword (challenge_id, challenge_keyword_id)
+        VALUES (#{challengeId}, #{challengeKeywordId});
+    </insert>
+
+
+    <!-- 챌린지 가져오기 (목록) -->
+    <select id="findAllChallengeList" resultType="com.ca.gymbackend.challenge.dto.ChallengeCreateRequest">
+        SELECT * FROM challenge
+    </select>
+
+</mapper>
