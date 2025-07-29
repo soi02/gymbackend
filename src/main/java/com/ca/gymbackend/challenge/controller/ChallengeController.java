@@ -21,17 +21,20 @@ public class ChallengeController {
     private final ChallengeServiceImpl challengeService;
 
     // 챌린지 생성
-    @PostMapping("createChallenge")
+    @PostMapping("registerChallengeProcess")
     public String registerChallengeProcess(@RequestBody ChallengeCreateRequest challengeCreateRequest) {
         challengeService.registerChallenge(challengeCreateRequest);
+        
         return "챌린지 생성 완료";
     }
 
     // 챌린지 리스트 가져오기
     @GetMapping("getChallengeList")
     public List<ChallengeCreateRequest> getAllChallengeListProcess() {
+        System.out.println("🔥 [챌린지 목록 응답] 🔥");
         return challengeService.getAllChallengeList();
     }
+
 
 
 }

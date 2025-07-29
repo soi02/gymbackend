@@ -7,12 +7,13 @@ import lombok.Data;
 
 @Data
 public class ChallengeCreateRequest {
-    private int id;
+    private int challengeId;
     private String challengeCreator;
     private String challengeTitle;
     private String challengeDescription;
     private int challengeMaxMembers;
     private LocalDate challengeStartDate;
     private LocalDate challengeEndDate;
+    private String challengeThumnailPath;
     private List<Integer> challengeKeywordIds;
 }
