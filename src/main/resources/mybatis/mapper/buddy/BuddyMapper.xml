@@ -20,4 +20,21 @@
         WHERE id = #{userId}
     </update>
 
+   <select id="getBuddyUserList" resultType="map">
+        SELECT 
+            u.id AS userId,
+            u.name,
+            u.account_name AS accountName,
+            u.profile_image AS profileImage,
+            u.is_buddy,
+            b.id AS buddyId,
+            b.preferred_gender AS preferredGender,
+            b.intro,
+            ba.age AS buddyAge
+        FROM user u
+        JOIN buddy b ON u.id = b.user_id
+        JOIN buddy_age ba ON b.buddy_age_id = ba.id
+        WHERE u.is_buddy = true
+    </select>
+
 </mapper>

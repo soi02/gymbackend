@@ -6,8 +6,20 @@ meta {
 
 post {
   url: http://localhost:8080/api/buddy/register
-  body: none
+  body: json
   auth: inherit
+}
+
+body:json {
+  {
+    "userId": 1,
+    "preferredGender": "ANY",
+    "intro": "버디 구해요",
+    "buddyAgeList": [
+      { "id": 1, "age": 10 },
+      { "id": 2, "age": 20 }
+    ]
+  }
 }
 
 settings {
