@@ -2,8 +2,8 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ca.gymbackend.portal.mapper.PortalMapper">
 <insert id="insertUser">
-    INSERT INTO user(account_name,password,name,age,gender,birth,address,phone,profile_image,height,weight,muscle_mass,is_buddy)
-    VALUES(#{accountName},#{password},#{name},#{age},#{gender},#{birth},#{address},#{phone},#{profileImage},#{height},#{weight},#{muscleMass},#{buddy})
+    INSERT INTO user(account_name,password,name,gender,birth,address,phone,profile_image,height,weight,muscle_mass,is_buddy)
+    VALUES(#{accountName},#{password},#{name},#{gender},#{birth},#{address},#{phone},#{profileImage},#{height},#{weight},#{muscleMass},#{buddy})
 </insert>
 
 

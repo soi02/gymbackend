@@ -28,7 +28,7 @@ public class PortalController {
     public ResponseEntity<?> register(@RequestBody UserRequest userRequest) {
         UserDto userDto = new UserDto();
         userDto.setName(userRequest.getName());
-        userDto.setAge(userRequest.getAge());
+        // userDto.setAge(userRequest.getAge());
         userDto.setGender(userRequest.getGender());
         userDto.setAccountName(userRequest.getAccountName());
         userDto.setPassword(userRequest.getPassword());
