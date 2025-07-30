@@ -5,15 +5,15 @@
     <!-- 챌린지 생성 -->
 
     <!-- 생성 순서 1. 챌린지 등록 -->
-    <insert id="createChallenge" useGeneratedKeys="true" keyProperty="id" >
+    <insert id="createChallenge" useGeneratedKeys="true" keyProperty="challengeId" >
         INSERT INTO challenge (
-            challenge_creator AS challengeCreator,
-            challenge_title AS challengeTitle,
-            challenge_description AS challengeDescription,
-            challenge_max_members AS challengeMaxMembers,
-            challenge_start_date AS challengeStartDate,
-            challenge_end_date AS challengeEndDate,
-            challenge_thumnail_path AS challengeThumnailPath,
+            challenge_creator,
+            challenge_title,
+            challenge_description,
+            challenge_max_members,
+            challenge_start_date,
+            challenge_end_date,
+            challenge_thumnail_path,
             created_at
         ) VALUES (
             #{challengeCreator},
@@ -43,6 +43,7 @@
     <select id="findAllChallengeList" resultType="com.ca.gymbackend.challenge.dto.ChallengeCreateRequest">
         SELECT
             challenge_id AS challengeId,
+            challenge_creator AS challengeCreator,
             challenge_title AS challengeTitle,
             challenge_description AS challengeDescription,
             challenge_max_members AS challengeMaxMembers,

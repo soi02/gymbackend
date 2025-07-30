@@ -3,12 +3,17 @@ package com.ca.gymbackend.challenge.service;
 import com.ca.gymbackend.challenge.dto.ChallengeCreateRequest;
 import com.ca.gymbackend.challenge.mapper.ChallengeMapper;
 import lombok.RequiredArgsConstructor;
+import net.coobird.thumbnailator.Thumbnails;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.nio.file.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,40 +27,60 @@ public class ChallengeServiceImpl {
     @Qualifier("fileRootPath") // application.yml 또는 @Bean에서 설정한 경로 주입
     private String rootPath;
 
-    /**
-     * 챌린지 등록 (이미지 업로드 포함)
-     */
-    public void registerChallenge(ChallengeCreateRequest request, MultipartFile imageFile) throws Exception {
-        // 1. 이미지 업로드
-        if (imageFile != null && !imageFile.isEmpty()) {
-            String fileName = UUID.randomUUID() + "_" + imageFile.getOriginalFilename();
-            Path dirPath = Paths.get(rootPath, "challengeImages");
-            Files.createDirectories(dirPath); // 폴더 없으면 생성
+    // 챌린지 생성
+    // 1. 이미지 저장
+    public String saveChallengeThumbnailImage(byte[] buffer, String originalFilename) {
+        try {
+            String uuid = UUID.randomUUID().toString();
+            long currentTime = System.currentTimeMillis();
 
-            Path filePath = dirPath.resolve(fileName);
-            Files.copy(imageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+            String filename = uuid + "_" + currentTime;
+            String ext = originalFilename.substring(originalFilename.lastIndexOf("."));
+            filename += ext;
 
-            // 썸네일 경로 저장 (프론트에 줄 경로 or DB 저장용)
-            request.setChallengeThumnailPath("/challengeImages/" + fileName);
-        }
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd/");
+            String todayPath = simpleDateFormat.format(new Date(currentTime));
+            Path dirPath = Paths.get(rootPath, "challengeImages", todayPath);
+            Files.createDirectories(dirPath);
 
-        // 2. 챌린지 insert
-        challengeMapper.createChallenge(request);
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(buffer);
+            Path filePath = dirPath.resolve(filename);
+            System.out.println("✅ 저장 경로: " + filePath.toString());
 
-        // 3. 생성된 챌린지 ID 가져오기
-        int challengeId = challengeMapper.findLastInsertedChallengeId();
 
-        // 4. 챌린지-키워드 연결 insert
-        if (request.getChallengeKeywordIds() != null) {
-            for (Integer keywordId : request.getChallengeKeywordIds()) {
-                challengeMapper.createChallengeKeyword(challengeId, keywordId);
-            }
+            Thumbnails.of(inputStream)
+                      .scale(1.0)
+                      .toFile(filePath.toFile());
+
+            return "/challengeImages/" + todayPath + filename;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
     }
 
-    /**
-     * 챌린지 전체 목록 조회
-     */
+
+    // 2. 챌린지 정보 DB에 저장 insert
+    public void saveChallengeData(ChallengeCreateRequest challengeCreateRequest) {
+        challengeMapper.createChallenge(challengeCreateRequest);
+    }
+
+    // 3. 방금 생성된 챌린지 ID 가져오기 조회
+    public int getGeneratedChallengeId() {
+        return challengeMapper.findLastInsertedChallengeId();
+    }
+
+    // 4. 챌린지-키워드 연결 insert
+    public void saveChallengekeywordMapping(int challengeId, List<Integer> challengeKeywordIds) {
+        if (challengeKeywordIds != null) {
+            for (Integer challengeKeywordId : challengeKeywordIds) {
+                challengeMapper.createChallengeKeyword(challengeId, challengeKeywordId);
+            }
+        }
+    }
+    
+
+    // 챌린지 전체 목록 조회
     public List<ChallengeCreateRequest> getAllChallengeList() {
         return challengeMapper.findAllChallengeList();
     }
