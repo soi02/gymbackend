@@ -1,5 +1,7 @@
-package com.ca.gymbackend.security; // 현재 패키지명 유지
+package com.ca.gymbackend.security; // 이 패키지 또는 com.ca.gymbackend.config 패키지로 이동
 
+import org.springframework.beans.factory.annotation.Autowired; // 추가
+import org.springframework.beans.factory.annotation.Qualifier; // 추가
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -8,9 +10,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-    // 이미지가 저장되는 실제 파일 시스템 경로
-    // 반드시 끝에 슬래시(/)를 붙여야 합니다.
-    private final String externalUploadPath = "file:///C:/uploadFiles/"; 
+    // ValueConfig에서 정의한 "fileRootPath" 빈을 주입받습니다.
+    @Autowired
+    @Qualifier("fileRootPath")
+    private String fileRootPath; // 변수명도 명확하게 변경 (externalUploadPath 대신)
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
@@ -23,14 +26,16 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // "/challengeImages/**" 패턴으로 들어오는 요청을
-        // C:/uploadFiles/challengeImages/ 경로에서 찾도록 매핑합니다.
+
+        // 디버그 출력도 주입받은 경로를 사용하도록 변경
+        System.out.println("DEBUG: fileRootPath = " + fileRootPath);
+        System.out.println("DEBUG: Challenge Images Path = " + fileRootPath + "challengeImages/");
+        System.out.println("DEBUG: Upload Files Path = " + fileRootPath);
+
         registry.addResourceHandler("/challengeImages/**")
-                .addResourceLocations(externalUploadPath + "challengeImages/"); // 외부 절대 경로 지정
+                .addResourceLocations("file:///" + fileRootPath + "challengeImages/"); // file:/// 접두사 명시
         
-        // ✅ Buddy 이미지 처리를 위한 "/uploadFiles/**" 요청을 "C:/uploadFiles/" 에서 찾도록 매핑
-        // 이 경로는 user.profile_image가 "2025/07/30/..." 이런 형태일 때 작동합니다.
-        registry.addResourceHandler("/uploadFiles/**") // <--- 이 줄 추가
-                .addResourceLocations(externalUploadPath); // <--- 이 줄 추가 (C:/uploadFiles/ 전체를 매핑)
+        registry.addResourceHandler("/uploadFiles/**")
+                .addResourceLocations("file:///" + fileRootPath); // file:/// 접두사 명시
     }
 }
