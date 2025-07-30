@@ -21,20 +21,24 @@
     </update>
 
    <select id="getBuddyUserList" resultType="map">
-        SELECT 
-            u.id AS userId,
+       SELECT 
+            u.id AS user_id,
             u.name,
-            u.account_name AS accountName,
-            u.profile_image AS profileImage,
-            u.is_buddy,
-            b.id AS buddyId,
-            b.preferred_gender AS preferredGender,
+            u.gender,
+            u.birth ,
+            u.address,
+            u.phone,
+            u.height ,
+            u.weight ,
+            u.muscle_mass ,
+            u.profile_image,
             b.intro,
-            ba.age AS buddyAge
+        GROUP_CONCAT(ba.age ORDER BY ba.age SEPARATOR ', ') AS buddy_ages
         FROM user u
         JOIN buddy b ON u.id = b.user_id
         JOIN buddy_age ba ON b.buddy_age_id = ba.id
         WHERE u.is_buddy = true
+        GROUP BY u.id
     </select>
 
 </mapper>

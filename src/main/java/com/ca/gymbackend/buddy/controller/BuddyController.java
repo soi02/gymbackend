@@ -1,6 +1,11 @@
 package com.ca.gymbackend.buddy.controller;
 
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,5 +48,11 @@ public class BuddyController {
         // System.out.println("넘어온 buddyDto: " + buddyDto);
         // System.out.println("buddyAgeList: " + buddyDto.getBuddyAgeList());
         return "버디 등록 완료";
+    }
+
+    @GetMapping("/list")
+    public ResponseEntity<List<Map<String, Object>>> getBuddyUserList() {
+        List<Map<String, Object>> result = buddyService.getBuddyUserList();
+        return ResponseEntity.ok(result);
     }
 }
