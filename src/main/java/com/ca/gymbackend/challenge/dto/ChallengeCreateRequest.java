@@ -19,4 +19,5 @@ public class ChallengeCreateRequest {
 
 
     private String challengeThumnailPath; // 파일 저장 경로
+    
 }

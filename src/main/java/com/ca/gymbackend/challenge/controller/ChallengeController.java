@@ -29,7 +29,7 @@ public class ChallengeController {
 public String registerChallengeProcess(
         @ModelAttribute ChallengeCreateRequest challengeCreateRequest,
         @RequestParam(value = "challengeKeywordIds", required = false) List<Integer> challengeKeywordIds,
-        @RequestPart(value = "challengeThumnailPath", required = false) MultipartFile challengeThumnailPath) {
+        @RequestPart(value = "challengeThumnailImage", required = false) MultipartFile challengeThumnailImage) {
     
     System.out.println("컨트롤러 진입");
 
@@ -40,11 +40,11 @@ public String registerChallengeProcess(
 
     try {
         // 1. 이미지 저장
-        if (challengeThumnailPath != null && !challengeThumnailPath.isEmpty()) {
-            System.out.println("이미지 업로드 시작: " + challengeThumnailPath.getOriginalFilename());
+        if (challengeThumnailImage != null && !challengeThumnailImage.isEmpty()) {
+            System.out.println("이미지 업로드 시작: " + challengeThumnailImage.getOriginalFilename());
             String imagePath = challengeService.saveChallengeThumbnailImage(
-                challengeThumnailPath.getBytes(),
-                challengeThumnailPath.getOriginalFilename());
+                challengeThumnailImage.getBytes(),
+                challengeThumnailImage.getOriginalFilename());
 
             if (imagePath == null) {
                 return "이미지 저장 중 오류 발생";
