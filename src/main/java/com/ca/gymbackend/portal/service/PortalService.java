@@ -43,7 +43,7 @@ public class PortalService {
 
     // 이미지
     public UserDto saveImage(byte[] buffer,String originalFilename){
-        String fileDirPathString = fileRootPath;
+        String fileDirPathString = fileRootPath;    //d여기까진 경로 똑같이 해야함
         String uuid = UUID.randomUUID().toString(); // 랜덤한 문자열을 굉장히 큰 문자를 만들어줌
         long currentTime = System.currentTimeMillis(); // 현재 시간을
 
