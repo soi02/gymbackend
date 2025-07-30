@@ -41,4 +41,22 @@
         GROUP BY u.id
     </select>
 
+
+    <!-- 매칭 -->
+    <insert id="insertMatching">
+        INSERT INTO matching (send_buddy_id, receiver_buddy_id)
+        VALUES (#{sendBuddyId}, #{receiverBuddyId});
+    </insert>
+
+    <update id="updateMatchingStatus" parameterType="map">
+        UPDATE matching
+        SET status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <!-- <insert id="insertInitialChat" parameterType="map">
+        INSERT INTO chat (matching_id, send_buddy_id, message, sent_at, is_read)
+        VALUES (#{matchingId}, #{sendBuddyId}, '채팅이 시작되었습니다.', NOW(), false)
+    </insert> -->
+
 </mapper>

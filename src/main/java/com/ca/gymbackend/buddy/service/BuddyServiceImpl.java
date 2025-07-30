@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ca.gymbackend.buddy.dto.AgeDto;
 import com.ca.gymbackend.buddy.dto.BuddyDto;
@@ -47,5 +48,21 @@ public class BuddyServiceImpl {
 
     public List<Map<String, Object>> getBuddyUserList() {
         return buddyMapper.getBuddyUserList();
+    }
+
+    // 매칭
+    @Transactional
+    public void sendMatchingRequest(int sendBuddyId, int receiverBuddyId) {
+        buddyMapper.insertMatching(sendBuddyId, receiverBuddyId);
+    }
+
+    @Transactional
+    public void respondToMatching(int id, String status, int sendBuddyId) {
+        buddyMapper.updateMatchingStatus(id, status);
+
+        // if ("수락".equals(status)) {
+        //     // 수락한 경우만 채팅 시작
+        //     buddyMapper.insertInitialChat(id, sendBuddyId);
+        // }
     }
 }
