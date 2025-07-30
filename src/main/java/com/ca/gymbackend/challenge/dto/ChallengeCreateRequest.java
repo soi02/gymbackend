@@ -15,6 +15,7 @@ public class ChallengeCreateRequest {
     private int challengeMaxMembers;
     private LocalDate challengeStartDate;
     private LocalDate challengeEndDate;
+    private int challengeDurationDays;
     private List<Integer> challengeKeywordIds;
 
 

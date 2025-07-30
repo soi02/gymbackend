@@ -13,7 +13,8 @@
             challenge_max_members,
             challenge_start_date,
             challenge_end_date,
-            challenge_thumnail_path,
+            challenge_duration_days,
+            challenge_thumbnail_path,
             created_at
         ) VALUES (
             #{challengeCreator},
@@ -22,6 +23,7 @@
             #{challengeMaxMembers},
             #{challengeStartDate},
             #{challengeEndDate},
+            #{challengeDurationDays},
             #{challengeThumbnailPath},
             NOW()
         );
@@ -49,7 +51,8 @@
             challenge_max_members AS challengeMaxMembers,
             challenge_start_date AS challengeStartDate,
             challenge_end_date AS challengeEndDate,
-            challenge_thumnail_path AS challengeThumbnailPath
+            challenge_duration_days AS challengeDurationDays,
+            challenge_thumbnail_path AS challengeThumbnailPath
         FROM challenge
     </select>
 
