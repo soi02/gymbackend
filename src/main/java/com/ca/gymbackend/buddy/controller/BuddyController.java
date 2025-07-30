@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -77,5 +78,10 @@ public class BuddyController {
         } catch (Exception e) {
             return ResponseEntity.status(500).body("응답 실패: " + e.getMessage());
         }
+    }
+
+    @GetMapping("/matching-notifications/{buddyId}")
+    public List<Map<String, Object>> getMatchingNotifications(@PathVariable int buddyId) {
+        return buddyService.getMatchingNotifications(buddyId);
     }
 }

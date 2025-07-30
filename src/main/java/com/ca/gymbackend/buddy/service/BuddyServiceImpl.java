@@ -65,4 +65,8 @@ public class BuddyServiceImpl {
         //     buddyMapper.insertInitialChat(id, sendBuddyId);
         // }
     }
+
+    public List<Map<String, Object>> getMatchingNotifications(int buddyId) {
+        return buddyMapper.selectMatchingNotifications(buddyId);
+    }
 }
