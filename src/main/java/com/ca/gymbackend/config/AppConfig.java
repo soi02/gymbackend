@@ -17,12 +17,12 @@ public class AppConfig implements WebMvcConfigurer{
     @Qualifier("fileRootPath")
     private String rootPath;
 
-    @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // System.out.println("gggg:" + rootPath);
-        registry.addResourceHandler("/uploadFiles/**")
-                .addResourceLocations("file:///" + rootPath);
-    }
+    // @Override
+    // public void addResourceHandlers(ResourceHandlerRegistry registry) {
+    //     // System.out.println("gggg:" + rootPath);
+    //     registry.addResourceHandler("/uploadFiles/**")
+    //             .addResourceLocations("file:///" + rootPath);
+    // }
 
     @Bean
     public HttpClient httpClient() {

@@ -22,7 +22,7 @@
             #{challengeMaxMembers},
             #{challengeStartDate},
             #{challengeEndDate},
-            #{challengeThumnailPath},
+            #{challengeThumbnailPath},
             NOW()
         );
     </insert>
@@ -49,7 +49,7 @@
             challenge_max_members AS challengeMaxMembers,
             challenge_start_date AS challengeStartDate,
             challenge_end_date AS challengeEndDate,
-            challenge_thumnail_path AS challengeThumnailPath
+            challenge_thumnail_path AS challengeThumbnailPath
         FROM challenge
     </select>
 

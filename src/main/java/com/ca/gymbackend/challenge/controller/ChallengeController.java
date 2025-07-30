@@ -29,28 +29,28 @@ public class ChallengeController {
 public String registerChallengeProcess(
         @ModelAttribute ChallengeCreateRequest challengeCreateRequest,
         @RequestParam(value = "challengeKeywordIds", required = false) List<Integer> challengeKeywordIds,
-        @RequestPart(value = "challengeThumnailImage", required = false) MultipartFile challengeThumnailImage) {
+        @RequestPart(value = "challengeThumbnailImage", required = false) MultipartFile challengeThumbnailImage) {
     
     System.out.println("컨트롤러 진입");
 
-    // if (challengeCreateRequest.getChallengeCreator() == null) {
-    //     return "로그인 사용자만 챌린지를 생성할 수 있습니다.";
-    // }
+    if (challengeCreateRequest.getChallengeCreator() == null) {
+        return "로그인 사용자만 챌린지를 생성할 수 있습니다.";
+    }
 
 
     try {
         // 1. 이미지 저장
-        if (challengeThumnailImage != null && !challengeThumnailImage.isEmpty()) {
-            System.out.println("이미지 업로드 시작: " + challengeThumnailImage.getOriginalFilename());
+        if (challengeThumbnailImage != null && !challengeThumbnailImage.isEmpty()) {
+            System.out.println("이미지 업로드 시작: " + challengeThumbnailImage.getOriginalFilename());
             String imagePath = challengeService.saveChallengeThumbnailImage(
-                challengeThumnailImage.getBytes(),
-                challengeThumnailImage.getOriginalFilename());
+                challengeThumbnailImage.getBytes(),
+                challengeThumbnailImage.getOriginalFilename());
 
             if (imagePath == null) {
                 return "이미지 저장 중 오류 발생";
             }
 
-            challengeCreateRequest.setChallengeThumnailPath(imagePath);
+            challengeCreateRequest.setChallengeThumbnailPath(imagePath);
         }
 
         // 2. 키워드 별도 바인딩

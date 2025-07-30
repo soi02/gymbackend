@@ -18,6 +18,6 @@ public class ChallengeCreateRequest {
     private List<Integer> challengeKeywordIds;
 
 
-    private String challengeThumnailPath; // 파일 저장 경로
+    private String challengeThumbnailPath; // 파일 저장 경로
     
 }
