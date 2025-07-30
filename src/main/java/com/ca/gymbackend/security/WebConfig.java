@@ -2,7 +2,7 @@ package com.ca.gymbackend.security; // 현재 패키지명 유지
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry; // 이 import 추가
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
@@ -28,10 +28,9 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addResourceHandler("/challengeImages/**")
                 .addResourceLocations(externalUploadPath + "challengeImages/"); // 외부 절대 경로 지정
         
-        // 만약 src/main/resources/static 또는 src/main/resources/public 에
-        // 다른 정적 파일(CSS, JS, 기본 이미지 등)이 있다면,
-        // Spring Boot가 기본적으로 이들을 서빙하지만, 명시적으로 추가하는 것도 좋은 방법입니다.
-        // registry.addResourceHandler("/**")
-        //         .addResourceLocations("classpath:/static/", "classpath:/public/");
+        // ✅ Buddy 이미지 처리를 위한 "/uploadFiles/**" 요청을 "C:/uploadFiles/" 에서 찾도록 매핑
+        // 이 경로는 user.profile_image가 "2025/07/30/..." 이런 형태일 때 작동합니다.
+        registry.addResourceHandler("/uploadFiles/**") // <--- 이 줄 추가
+                .addResourceLocations(externalUploadPath); // <--- 이 줄 추가 (C:/uploadFiles/ 전체를 매핑)
     }
 }
