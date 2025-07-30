@@ -2,6 +2,7 @@ package com.ca.gymbackend.buddy.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,5 +43,9 @@ public class BuddyServiceImpl {
 
     public void updateIsBuddy(int userId) {
         buddyMapper.updateIsBuddy(userId);
+    }
+
+    public List<Map<String, Object>> getBuddyUserList() {
+        return buddyMapper.getBuddyUserList();
     }
 }
