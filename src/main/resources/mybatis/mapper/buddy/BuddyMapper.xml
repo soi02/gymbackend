@@ -41,4 +41,43 @@
         GROUP BY u.id
     </select>
 
+
+    <!-- 매칭 -->
+    <insert id="insertMatching">
+        INSERT INTO matching (send_buddy_id, receiver_buddy_id)
+        VALUES (#{sendBuddyId}, #{receiverBuddyId});
+    </insert>
+
+    <update id="updateMatchingStatus" parameterType="map">
+        UPDATE matching
+        SET status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <select id="selectMatchingNotifications" resultType="map">
+        SELECT 
+            m.id AS matching_id,
+            m.send_buddy_id,
+            m.receiver_buddy_id,
+            m.status,
+            sb.intro AS sender_intro,
+            rb.intro AS receiver_intro,
+            su.name AS sender_name,
+            ru.name AS receiver_name,
+            su.profile_image AS sender_image,
+            ru.profile_image AS receiver_image
+        FROM matching m
+        JOIN buddy sb ON m.send_buddy_id = sb.id
+        JOIN buddy rb ON m.receiver_buddy_id = rb.id
+        JOIN user su ON sb.user_id = su.id
+        JOIN user ru ON rb.user_id = ru.id
+        WHERE m.send_buddy_id = #{buddyId} OR m.receiver_buddy_id = #{buddyId}
+        ORDER BY m.id DESC
+    </select>
+
+    <!-- <insert id="insertInitialChat" parameterType="map">
+        INSERT INTO chat (matching_id, send_buddy_id, message, sent_at, is_read)
+        VALUES (#{matchingId}, #{sendBuddyId}, '채팅이 시작되었습니다.', NOW(), false)
+    </insert> -->
+
 </mapper>
