@@ -75,15 +75,6 @@ public class ChallengeServiceImpl {
     }
 
     // 4. 챌린지-키워드 연결 insert
-    // public void saveChallengekeywordMapping(int challengeId, List<Integer> challengeKeywordIds) {
-    //     if (challengeKeywordIds != null) {
-    //         for (Integer challengeKeywordId : challengeKeywordIds) {
-    //             challengeMapper.createChallengeKeyword(challengeId, challengeKeywordId);
-    //         }
-    //     }
-    // }
-
-    // 4. 챌린지-키워드 연결 insert
     public void saveChallengekeywordMapping(int challengeId, List<String> selectedKeywordNameList) {
         if (selectedKeywordNameList != null && !selectedKeywordNameList.isEmpty()) { // null 체크와 비어있는지 체크
             for (String keywordName : selectedKeywordNameList) { // 키워드 이름을 순회
@@ -117,7 +108,7 @@ public class ChallengeServiceImpl {
             return null;
         }
 
-        // 서비스 계층에서 수동으로 데이터 가공 (키워드만)
+        // 서비스 계층에서 수동으로 데이터 가공 (키워드만
         // challengeKeywordsString (String)을 challengeKeywords List<String>타입으로 변환
         // INNER JOIN을 사용했으므로 이 keywordsString은 보통 NULL이 아니겠지만,
         // 혹시 모를 상황(예: GROUP_CONCAT이 빈 문자열 반환)을 대비하여 NULL/빈 문자열 체크는 유지
