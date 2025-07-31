@@ -25,11 +25,11 @@ public class ChallengeController {
     private final ChallengeServiceImpl challengeService;
 
     // 챌린지 생성
-@PostMapping("/registerChallengeProcess")
-public String registerChallengeProcess(
-        @ModelAttribute ChallengeCreateRequest challengeCreateRequest,
-        @RequestParam(value = "challengeKeywordIds", required = false) List<Integer> challengeKeywordIds,
-        @RequestPart(value = "challengeThumbnailImage", required = false) MultipartFile challengeThumbnailImage) {
+    @PostMapping("/registerChallengeProcess")
+    public String registerChallengeProcess(
+            @ModelAttribute ChallengeCreateRequest challengeCreateRequest,
+            @RequestParam(value = "challengeKeywordIds", required = false) List<Integer> challengeKeywordIds,
+            @RequestPart(value = "challengeThumbnailImage", required = false) MultipartFile challengeThumbnailImage) {
     
     System.out.println("컨트롤러 진입");
 
@@ -81,6 +81,9 @@ public String registerChallengeProcess(
 
 
 
+
+    // 챌린지 상세보기
+    
 
 
 
