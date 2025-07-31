@@ -34,11 +34,19 @@
         SELECT LAST_INSERT_ID();
     </select>
 
+    <!-- 키워드 이름으로 키워드 ID 조회 -->
+    <select id="findKeywordIdByKeywordName" parameterType="string" resultType="int">
+        SELECT keyword_id FROM keyword WHERE keyword_name = #{keywordName}
+    </select>
+    
     <!-- 생성 순서 3. 챌린지 - 키워드 연결 -->
     <insert id="createChallengeKeyword">
-        INSERT INTO challenge_keyword (challenge_id, challenge_keyword_id)
-        VALUES (#{challengeId}, #{challengeKeywordId});
+        INSERT INTO challenge_keyword (challenge_id, keyword_id)
+        VALUES (#{challengeId}, #{keywordId});
     </insert>
+
+
+
 
 
     <!-- 챌린지 가져오기 (목록) -->
@@ -56,4 +64,41 @@
         FROM challenge
     </select>
 
+
+
+
+    <!-- 챌린지 상세보기 -->
+    <select id="findChallengeDetailByChallengeId" parameterType="int" resultType="com.ca.gymbackend.challenge.dto.ChallengeDetailResponse">
+        SELECT
+            c.challenge_id,
+            c.challenge_creator,
+            c.challenge_title,
+            c.challenge_description,
+            c.challenge_max_members,
+            c.challenge_participant_count AS participant_count,
+            c.challenge_start_date,
+            c.challenge_end_date,
+            c.challenge_duration_days,
+            c.challenge_thumbnail_path,
+         
+            CASE
+                WHEN c.challenge_start_date &gt; CURDATE() THEN '예정'
+                WHEN c.challenge_end_date &lt; CURDATE() THEN '종료'
+                ELSE '진행 중'
+            END AS challenge_status,
+
+            GROUP_CONCAT(k.keyword_name ORDER BY k.keyword_name ASC SEPARATOR ',') AS challenge_keywords_string
+        FROM
+            challenge c
+        INNER JOIN
+            challenge_keyword ck ON c.challenge_id = ck.challenge_id
+        INNER JOIN
+            keyword k ON ck.keyword_id = k.keyword_id
+        WHERE
+            c.challenge_id = #{challengeId}
+        GROUP BY
+            c.challenge_id, c.challenge_creator, c.challenge_title, c.challenge_description,
+            c.challenge_max_members, c.challenge_participant_count, c.challenge_start_date,
+            c.challenge_end_date, c.challenge_duration_days, c.challenge_thumbnail_path, c.created_at
+    </select>
 </mapper>
