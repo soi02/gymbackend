@@ -50,8 +50,8 @@ public class RoutineService {
             int planId = plan.getPlanId();
             
             for (WorkoutSetDto set : workout.getSets()) {
-    
-                routineSqlMapper.insertWorkoutSet(planId, set);
+                set.setPlanId(planId);
+                routineSqlMapper.insertWorkoutSet(set);
             }
         }
     }

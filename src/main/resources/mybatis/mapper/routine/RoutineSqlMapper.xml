@@ -34,10 +34,12 @@
         VALUES (#{routineId}, #{elementId}, #{createdAt})
     </insert>
 
-    <insert id="insertWorkoutSet" parameterType="map">
-        INSERT INTO workout_set (plan_id, kg, reps)
-        VALUES (#{planId}, #{set.kg}, #{set.reps})
-    </insert>
+<insert id="insertWorkoutSet" parameterType="com.ca.gymbackend.routine.dto.WorkoutSetDto">
+  INSERT INTO workout_set (kg, reps, plan_id)
+  VALUES (#{kg}, #{reps}, #{planId})
+</insert>
+
+
 
 
 

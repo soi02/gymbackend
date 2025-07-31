@@ -39,6 +39,9 @@ public class RoutineController {
 
     @PostMapping("/saveRoutine")
     public ResponseEntity<?> saveRoutine(@RequestBody RoutineSaveRequest request) {
+           System.out.println("🔥 saveRoutine() 진입!");
+    System.out.println("📦 받은 요청: " + request);
+       
         try {
             routineService.saveRoutine(request);
             return ResponseEntity.ok("루틴 저장 완료");

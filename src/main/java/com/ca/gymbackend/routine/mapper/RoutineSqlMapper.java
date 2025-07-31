@@ -16,5 +16,5 @@ public interface RoutineSqlMapper {
     public List<WorkoutGuideList> findWorkoutGuide(int id);
     public void insertRoutineInfo(RoutineInfoDto routine);
     public void insertWorkoutPlan(WorkoutPlanDto plan);
-    public void insertWorkoutSet(int planId, WorkoutSetDto WorkoutSetDto);
+    public void insertWorkoutSet(WorkoutSetDto set);
 }
