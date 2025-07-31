@@ -24,5 +24,21 @@
         WHERE we.element_id = #{id}
     </select>
 
+    <insert id="insertRoutineInfo" parameterType="com.ca.gymbackend.routine.dto.RoutineInfoDto" useGeneratedKeys="true" keyProperty="routineId">
+        INSERT INTO routine_info (user_id, routine_name, created_at)
+        VALUES (#{userId}, #{routineName}, #{createdAt})
+    </insert>
+
+    <insert id="insertWorkoutPlan" parameterType="com.ca.gymbackend.routine.dto.WorkoutPlanDto" useGeneratedKeys="true" keyProperty="planId">
+        INSERT INTO workout_plan (routine_id, element_id, created_at)
+        VALUES (#{routineId}, #{elementId}, #{createdAt})
+    </insert>
+
+    <insert id="insertWorkoutSet" parameterType="map">
+        INSERT INTO workout_set (plan_id, kg, reps)
+        VALUES (#{planId}, #{set.kg}, #{set.reps})
+    </insert>
+
+
 
 </mapper>
