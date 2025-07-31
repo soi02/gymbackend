@@ -96,4 +96,31 @@
             c.challenge_max_members, c.challenge_participant_count,
             c.challenge_duration_days, c.challenge_thumbnail_path, c.created_at
     </select>
+
+
+
+
+    <!-- 챌린지 도전 시작 -->
+    <!-- user_challenge 테이블에 사용자 챌린지 정보를 삽입 -->
+    <insert id="insertUserChallenge">
+        INSERT INTO user_challenge (
+            user_id,
+            challenge_id,
+            personal_join_date,
+            personal_end_date,
+            challenge_completed
+        ) VALUES (
+            #{userId},
+            #{challengeId},
+            NOW(),
+            DATE_ADD(NOW(), 
+            INTERVAL (SELECT challenge_duration_days FROM challenge WHERE challenge_id = #{challengeId}) DAY), 'N'                     );
+    </insert>
+
+    <update id="increaseChallengeParticipantCount">
+        UPDATE challenge
+        SET challenge_participant_count = challenge_participant_count + 1
+        WHERE challenge_id = #{challengeId};
+    </update>
+
 </mapper>

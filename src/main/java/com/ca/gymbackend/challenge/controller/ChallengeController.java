@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 // import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -14,13 +15,14 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.ca.gymbackend.challenge.dto.ChallengeCreateRequest;
 import com.ca.gymbackend.challenge.dto.ChallengeDetailResponse;
+import com.ca.gymbackend.challenge.dto.ChallengeStartRequest;
 import com.ca.gymbackend.challenge.service.ChallengeServiceImpl;
 
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/challengeList")
+@RequestMapping("/api/challenge")
 public class ChallengeController {
     
     private final ChallengeServiceImpl challengeService;
@@ -99,6 +101,39 @@ public class ChallengeController {
 
         return challengeDetailResponse;
     }
+    
+
+
+
+
+    // 챌린지 도전 시작
+    @PostMapping("/startChallengeProcess")
+    public String startChallengeProcess(
+        @RequestBody ChallengeStartRequest challengeStartRequest) {
+            if (challengeStartRequest.getUserId() == 0 || challengeStartRequest.getChallengeId() == 0) {
+                return "에러: UserId와 ChallengeId 는 null 이 아니어야 합니다.";
+            }
+
+            try {
+                // 1. user_challenge 테이블에 사용자 챌린지 정보를 삽입
+                challengeService.insertUserChallengeInfo(
+                    challengeStartRequest.getUserId(), 
+                    challengeStartRequest.getChallengeId()
+                );
+
+                // 2. challenge 테이블의 participant_count를 1 증가시키기
+                challengeService.increaseChallengeParticipantCountInfo(
+                    challengeStartRequest.getChallengeId()
+                );
+
+                return "챌린지 도전 시작 성공";
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                return "에러: 챌린지 도전 시작 실패 " + e.getMessage();
+            }
+        }
+        
     
 
 
