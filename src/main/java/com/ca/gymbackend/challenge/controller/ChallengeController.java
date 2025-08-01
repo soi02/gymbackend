@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.ca.gymbackend.challenge.dto.ChallengeCreateRequest;
 import com.ca.gymbackend.challenge.dto.ChallengeDetailResponse;
+import com.ca.gymbackend.challenge.dto.ChallengeMyRecordDetailResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeMyRecordsResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeStartRequest;
 import com.ca.gymbackend.challenge.service.ChallengeServiceImpl;
@@ -91,9 +92,18 @@ public class ChallengeController {
 
     // 챌린지 상세보기
     @GetMapping("/getChallengeDetailByChallengeIdProcess")
-    public ChallengeDetailResponse getChallengeDetailByChallengeIdProcess(@RequestParam("challengeId") int challengeId) {
-         System.out.println(">>> getChallengeDetailByChallengeIdProcess 호출됨. challengeId: " + challengeId); // <--- 이 로그 추가
-        ChallengeDetailResponse challengeDetailResponse = challengeService.getChallengeDetailByChallengeId(challengeId);
+    public ChallengeDetailResponse getChallengeDetailByChallengeIdProcess(
+        @RequestParam("challengeId") int challengeId,
+        @RequestParam(value = "userId", required = false) Integer userId) {
+
+        System.out.println(">>> getChallengeDetailByChallengeIdProcess 호출됨. challengeId: " + challengeId + ", userId: " + userId); 
+
+        // userId가 null일 경우 0으로 설정하여, 비로그인 상태임을 서비스에 전달
+        if (userId == null) {
+            userId = 0;
+        }
+
+        ChallengeDetailResponse challengeDetailResponse = challengeService.getChallengeDetailByChallengeId(challengeId, userId);
 
         if(challengeDetailResponse == null) {
             System.out.println("챌린지를 찾을 수 없습니다.");
@@ -116,13 +126,20 @@ public class ChallengeController {
             }
 
             try {
-                // 1. user_challenge 테이블에 사용자 챌린지 정보를 삽입
+
+                // 1. 중복 참여 여부 확인 (서비스 메서드 분리)
+                challengeService.checkExistsUserChallenge(
+                    challengeStartRequest.getUserId(), 
+                    challengeStartRequest.getChallengeId()
+                );
+
+                // 2. user_challenge 테이블에 사용자 챌린지 정보를 삽입
                 challengeService.insertUserChallengeInfo(
                     challengeStartRequest.getUserId(), 
                     challengeStartRequest.getChallengeId()
                 );
 
-                // 2. challenge 테이블의 participant_count를 1 증가시키기
+                // 3. challenge 테이블의 participant_count를 1 증가시키기
                 challengeService.increaseChallengeParticipantCountInfo(
                     challengeStartRequest.getChallengeId()
                 );
@@ -144,5 +161,16 @@ public class ChallengeController {
         public List<ChallengeMyRecordsResponse> getAllMyChallengeListProcess(@RequestParam("userId") int userId) {
             return challengeService.getAllMyChallengeList(userId);
         }
+
+
+
+        // 특정 사용자의 특정 챌린지 상세 정보 & 인증 기록 조회
+        @GetMapping("/getMyRecordDetailProcess")
+        public ChallengeMyRecordDetailResponse getMyRecordDetailProcess(
+            @RequestParam("userId") int userId,
+            @RequestParam("challengeId") int challengeId) {
+                return challengeService.getMyRecordDetail(userId, challengeId);
+            }
+        
 
 }

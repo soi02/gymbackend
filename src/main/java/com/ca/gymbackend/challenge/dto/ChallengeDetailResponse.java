@@ -29,4 +29,7 @@ public class ChallengeDetailResponse {
     // 서비스 레이어에서 이 필드 값을 List<String> challengeKeywords로 변환한 후,
     // 이 필드(challengeKeywordsString)는 null로 설정하여 클라이언트에는 보내지 않습니다.
     private String challengeKeywordsString; // SQL 쿼리의 'AS challengeKeywordsString'과 일치해야 합니다.
+
+
+    private boolean isUserParticipating;
 }

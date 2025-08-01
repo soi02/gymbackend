@@ -2,7 +2,10 @@ package com.ca.gymbackend.challenge.service;
 
 import com.ca.gymbackend.challenge.dto.ChallengeCreateRequest;
 import com.ca.gymbackend.challenge.dto.ChallengeDetailResponse;
+import com.ca.gymbackend.challenge.dto.ChallengeInfo;
+import com.ca.gymbackend.challenge.dto.ChallengeMyRecordDetailResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeMyRecordsResponse;
+import com.ca.gymbackend.challenge.dto.ChallengeRecordInfo;
 import com.ca.gymbackend.challenge.mapper.ChallengeMapper;
 import lombok.RequiredArgsConstructor;
 import net.coobird.thumbnailator.Thumbnails;
@@ -101,7 +104,7 @@ public class ChallengeServiceImpl {
 
 
     // 챌린지 상세보기
-    public ChallengeDetailResponse getChallengeDetailByChallengeId(int challengeId) {
+    public ChallengeDetailResponse getChallengeDetailByChallengeId(int challengeId, Integer userId) {
 
         ChallengeDetailResponse challengeDetailResponse = challengeMapper.findChallengeDetailByChallengeId(challengeId);
 
@@ -130,6 +133,11 @@ public class ChallengeServiceImpl {
 
         // challengeStatus는 이미 SQL 쿼리에서 계산되어 들어왔으므로 별도 로직이 필요 없습니다.
 
+        // ★★★ 추가된 로직: userId를 사용하여 참여 여부 확인 ★★★
+        // Mapper에 existsUserChallenge(int userId, int challengeId) 메서드가 필요
+        boolean isParticipating = challengeMapper.existsUserChallenge(userId, challengeId) > 0;
+        challengeDetailResponse.setUserParticipating(isParticipating);
+
         return challengeDetailResponse;
     }
 
@@ -137,6 +145,14 @@ public class ChallengeServiceImpl {
 
 
     // 챌린지 도전 시작
+    // user_challenge 테이블에 이미 해당사용자와 챌린지Id 의 조합이 존재하는지 확인
+    public void checkExistsUserChallenge (int userId, int challengeId) {
+        int existingCount = challengeMapper.existsUserChallenge(userId, challengeId);
+        if(existingCount > 0) {
+            throw new IllegalStateException("이미 참여 중인 챌린지입니다.");
+        }
+    }
+
     // 1. user_challenge 테이블에 사용자 챌린지 정보를 삽입
     public void insertUserChallengeInfo(int userId, int challengeId) {
         challengeMapper.insertUserChallenge(userId, challengeId);
@@ -175,8 +191,37 @@ public class ChallengeServiceImpl {
             challenge.setTodayAttended(todayAttended);
 
             return challenge; // 출석일수, 출석여부 정보 추가된 객체임
-        }).collect(Collectors.toList()); // challenge 객체를 List 형태로 다시 묶어준다
+        }).collect(Collectors.toList()); // challenge 객체를 List 형태로 다시 묶어준다        
+    }
 
-        
+
+
+
+    // 특정 사용자의 특정 챌린지 상세 정보 & 인증 기록 조회
+    public ChallengeMyRecordDetailResponse getMyRecordDetail(int userId, int challengeId) {
+
+        // 챌린지 기본 정보 조회
+        ChallengeInfo challengeInfo = challengeMapper.findChallengeInfoByChallengeId(challengeId);
+
+        // 챌린지 정보가 없으면 예외 던짐
+        if (challengeInfo == null) {
+            throw new IllegalArgumentException("challengeId에 해당하는 챌린지 정보가 없습니다: " + challengeId);
+        }
+
+        // 사용자의 챌린지 인증 기록 조회
+        List<ChallengeRecordInfo> challengeRecordInfoList = challengeMapper.findChallengeRecordList(userId, challengeId);
+
+        // 인증 횟수 계산
+        int daysAttended = challengeRecordInfoList.size();
+
+        // DTO에 정확한 인증 횟수 설정
+        challengeInfo.setDaysAttended(daysAttended);
+
+        // 최종 응답 DTO 조립
+        return new ChallengeMyRecordDetailResponse(challengeInfo, challengeRecordInfoList);
+
+
+
+
     }
 }
