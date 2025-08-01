@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import com.ca.gymbackend.challenge.dto.ChallengeCreateRequest;
+import com.ca.gymbackend.challenge.dto.ChallengeDetailResponse;
 
 @Mapper
 public interface ChallengeMapper {
@@ -18,15 +19,31 @@ public interface ChallengeMapper {
     // 생성 순서 2. 방금 DB 에 insert 된 챌린지의 프라이머리키 값(AutoIncrement)을 가져오기
     public int findLastInsertedChallengeId(); // AutoIncrement된 challenge_id 조회
 
+    // 키워드 이름으로 키워드 ID 조회
+    public Integer findKeywordIdByKeywordName(@Param("keywordName") String keywordName);
+
     // 생성 순서 3. 챌린지와 키워드 연결 (다대다 관계 처리)
-    public void createChallengeKeyword(@Param("challengeId") int challengeId, @Param("challengeKeywordId") int challengeKeywordId);
+    public void createChallengeKeyword(@Param("challengeId") int challengeId, @Param("keywordId") int keywordId);
 
 
 
 
     // 챌린지 가져오기 (목록)
     public List<ChallengeCreateRequest> findAllChallengeList();
+
+
+
+    // 챌린지 상세보기
+    public ChallengeDetailResponse findChallengeDetailByChallengeId(@Param("challengeId") int challengeId);
     
+
+
+    // 챌린지 도전 시작
+    // 1. user_challenge 테이블에 사용자 챌린지 정보를 삽입
+    public void insertUserChallenge(@Param("userId") int userId, @Param("challengeId") int challengeId);
+
+    // 2. challenge 테이블의 participant_count를 1 증가시키기
+    public void increaseChallengeParticipantCount(@Param("challengeId") int challengeId);
 
 
 }
