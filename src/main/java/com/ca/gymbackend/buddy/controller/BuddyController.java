@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ca.gymbackend.buddy.dto.BuddyDto;
+import com.ca.gymbackend.buddy.dto.ChatDto;
 import com.ca.gymbackend.buddy.dto.MatchingDto;
 import com.ca.gymbackend.buddy.service.BuddyServiceImpl;
 import com.ca.gymbackend.security.JwtUtil;
@@ -63,17 +64,39 @@ public class BuddyController {
     @PostMapping("/request")
     public ResponseEntity<?> sendMatchingRequest(@RequestBody MatchingDto dto) {
         try {
+            System.out.println("====================");
+            System.out.println("받은 MatchingDto: " + dto); // <-- 이게 null이면 문제는 프론트 or DTO
+            System.out.println("senderId: " + dto.getSendBuddyId());
+            System.out.println("receiverId: " + dto.getReceiverBuddyId());
             buddyService.sendMatchingRequest(dto.getSendBuddyId(), dto.getReceiverBuddyId());
+            System.out.println(dto.getReceiverBuddyId());
             return ResponseEntity.ok("매칭 요청 성공");
         } catch (Exception e) {
             return ResponseEntity.status(500).body("매칭 요청 실패: " + e.getMessage());
         }
     }
 
+    // @PostMapping("/response")
+    // public ResponseEntity<?> respondToMatching(@RequestBody MatchingDto dto) {
+    // try {
+    // buddyService.respondToMatching(dto.getId(), dto.getStatus(),
+    // dto.getSendBuddyId());
+    // return ResponseEntity.ok("응답 처리 완료");
+    // } catch (Exception e) {
+    // return ResponseEntity.status(500).body("응답 실패: " + e.getMessage());
+    // }
+    // }
     @PostMapping("/response")
     public ResponseEntity<?> respondToMatching(@RequestBody MatchingDto dto) {
         try {
             buddyService.respondToMatching(dto.getId(), dto.getStatus(), dto.getSendBuddyId());
+
+            // 매칭 수락 후 채팅 시작 메시지 삽입
+            if ("수락".equals(dto.getStatus())) {
+                // matching_id와 sendBuddyId를 넘김
+                buddyService.insertInitialChat(dto.getId(), dto.getSendBuddyId());
+            }
+
             return ResponseEntity.ok("응답 처리 완료");
         } catch (Exception e) {
             return ResponseEntity.status(500).body("응답 실패: " + e.getMessage());
@@ -83,5 +106,34 @@ public class BuddyController {
     @GetMapping("/matching-notifications/{buddyId}")
     public List<Map<String, Object>> getMatchingNotifications(@PathVariable int buddyId) {
         return buddyService.getMatchingNotifications(buddyId);
+    }
+
+    // 채팅 관련 API
+    @PostMapping("/send")
+    public ResponseEntity<?> sendChat(@RequestBody ChatDto chatDto) {
+        try {
+            buddyService.sendChat(chatDto);
+            return ResponseEntity.ok("메시지 전송 성공");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("메시지 전송 실패: " + e.getMessage());
+        }
+    }
+
+    // 특정 매칭 채팅 목록 조회
+    @GetMapping("/list/{matchingId}")
+    public ResponseEntity<List<ChatDto>> getChatsByMatchingId(@PathVariable int matchingId) {
+        List<ChatDto> chats = buddyService.getChatsByMatchingId(matchingId);
+        return ResponseEntity.ok(chats);
+    }
+
+    // 메시지 읽음 처리 (옵션)
+    @PostMapping("/read/{chatId}")
+    public ResponseEntity<?> markChatAsRead(@PathVariable int chatId) {
+        try {
+            buddyService.markChatAsRead(chatId);
+            return ResponseEntity.ok("읽음 처리 완료");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("읽음 처리 실패: " + e.getMessage());
+        }
     }
 }

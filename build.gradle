@@ -37,6 +37,9 @@ dependencies {
 
 	// thumbnailator
     implementation 'net.coobird:thumbnailator:0.4.20'
+
+	//websocket
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 }
 
 tasks.named('test') {

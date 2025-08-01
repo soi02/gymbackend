@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.ca.gymbackend.challenge.dto.ChallengeCreateRequest;
 import com.ca.gymbackend.challenge.dto.ChallengeDetailResponse;
+import com.ca.gymbackend.challenge.dto.ChallengeMyRecordsResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeStartRequest;
 import com.ca.gymbackend.challenge.service.ChallengeServiceImpl;
 
@@ -137,5 +138,11 @@ public class ChallengeController {
     
 
 
+
+        // 나의 수련기록 조회
+        @GetMapping("/getAllMyChallengeListProcess")
+        public List<ChallengeMyRecordsResponse> getAllMyChallengeListProcess(@RequestParam("userId") int userId) {
+            return challengeService.getAllMyChallengeList(userId);
+        }
 
 }
