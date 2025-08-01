@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import lombok.Data;
 
 @Data
-public class RoutineInfoDto {
+public class Routine {
     private int routineId;
     private int userId;
     private String routineName;
