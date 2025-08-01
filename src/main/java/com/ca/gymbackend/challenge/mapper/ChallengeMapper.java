@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Param;
 
 import com.ca.gymbackend.challenge.dto.ChallengeCreateRequest;
 import com.ca.gymbackend.challenge.dto.ChallengeDetailResponse;
+import com.ca.gymbackend.challenge.dto.ChallengeMyRecordsResponse;
 
 @Mapper
 public interface ChallengeMapper {
@@ -44,6 +45,20 @@ public interface ChallengeMapper {
 
     // 2. challenge 테이블의 participant_count를 1 증가시키기
     public void increaseChallengeParticipantCount(@Param("challengeId") int challengeId);
+
+
+
+    
+
+    // 나의 수련기록
+    // 내가 참여한 챌린지 목록 조회
+    List<ChallengeMyRecordsResponse> findAllMyChallengeList(@Param("userId") int userId);
+
+    // 특정 챌린지의 총 출석 일수를 조회
+    int countAttendanceDays(@Param("userId") int userId, @Param("challengeId") int challengeId);
+
+    // 특정 챌린지에서 오늘 출석했는지 출석여부 확인
+    int hasAttendedToday(@Param("userId") int userId, @Param("challengeId") int challengeId);
 
 
 }
