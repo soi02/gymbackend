@@ -75,9 +75,27 @@
         ORDER BY m.id DESC
     </select>
 
-    <!-- <insert id="insertInitialChat" parameterType="map">
+    <!-- // 채팅 -->
+    <insert id="insertInitialChat" parameterType="map">
         INSERT INTO chat (matching_id, send_buddy_id, message, sent_at, is_read)
         VALUES (#{matchingId}, #{sendBuddyId}, '채팅이 시작되었습니다.', NOW(), false)
-    </insert> -->
+    </insert>
+
+
+    <insert id="insertChat" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO chat(matching_id, send_buddy_id, message, is_read, sent_at)
+        VALUES(#{matchingId}, #{sendBuddyId}, #{message}, #{isRead}, #{sentAt})
+    </insert>
+
+    <select id="selectChatsByMatchingId" parameterType="int">
+        SELECT id, matching_id, send_buddy_id, message, is_read, sent_at
+        FROM chat
+        WHERE matching_id = #{matchingId}
+        ORDER BY sent_at ASC
+    </select>
+
+    <update id="updateChatReadStatus" parameterType="int">
+        UPDATE chat SET is_read = true WHERE id = #{id}
+    </update>
 
 </mapper>

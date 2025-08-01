@@ -1,12 +1,17 @@
 package com.ca.gymbackend.routine.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor
+@AllArgsConstructor
 @Data
 public class WorkoutSetDto {
-    private int setId;
+    private Integer setId;
     private double kg;
     private int reps;
+    private int planId;
 }
 
 

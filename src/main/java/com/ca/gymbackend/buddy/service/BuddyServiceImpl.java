@@ -1,6 +1,8 @@
 package com.ca.gymbackend.buddy.service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -10,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ca.gymbackend.buddy.dto.AgeDto;
 import com.ca.gymbackend.buddy.dto.BuddyDto;
+import com.ca.gymbackend.buddy.dto.ChatDto;
 import com.ca.gymbackend.buddy.mapper.BuddySqlMapper;
 
 @Service
@@ -68,5 +71,32 @@ public class BuddyServiceImpl {
 
     public List<Map<String, Object>> getMatchingNotifications(int buddyId) {
         return buddyMapper.selectMatchingNotifications(buddyId);
+    }
+
+
+    // 채팅
+    public void insertInitialChat(int matchingId, int sendBuddyId) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("matchingId", matchingId);
+        params.put("sendBuddyId", sendBuddyId);
+        buddyMapper.insertInitialChat(params);
+    }
+
+    public void sendChat(ChatDto chatDto) {
+        if (chatDto.getSentAt() == null) {
+            chatDto.setSentAt(LocalDateTime.now());
+        }
+        chatDto.setRead(false);
+        buddyMapper.insertChat(chatDto);
+    }
+
+    
+    public List<ChatDto> getChatsByMatchingId(int matchingId) {
+        return buddyMapper.selectChatsByMatchingId(matchingId);
+    }
+
+    
+    public void markChatAsRead(int chatId) {
+        buddyMapper.updateChatReadStatus(chatId);
     }
 }
