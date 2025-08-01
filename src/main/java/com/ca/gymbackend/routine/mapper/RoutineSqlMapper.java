@@ -8,6 +8,7 @@ import com.ca.gymbackend.routine.dto.RoutineDto;
 import com.ca.gymbackend.routine.dto.RoutineDetailDto;
 import com.ca.gymbackend.routine.dto.RoutineSetDto;
 import com.ca.gymbackend.routine.response.EveryWorkoutList;
+import com.ca.gymbackend.routine.response.RoutineByUserId;
 import com.ca.gymbackend.routine.response.WorkoutGuideList;
 
 @Mapper
@@ -17,4 +18,5 @@ public interface RoutineSqlMapper {
     public void insertRoutineInfo(RoutineDto routine);
     public void insertRoutineDetail(RoutineDetailDto detail);
     public void insertRoutineSet(RoutineSetDto set);
+    public List<RoutineByUserId> findRoutinesByUserId(int userId);
 }

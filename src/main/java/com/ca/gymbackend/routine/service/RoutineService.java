@@ -15,6 +15,7 @@ import com.ca.gymbackend.routine.request.RoutineSaveDetailDto;
 import com.ca.gymbackend.routine.request.RoutineSaveRequest;
 import com.ca.gymbackend.routine.request.RoutineSaveSetDto;
 import com.ca.gymbackend.routine.response.EveryWorkoutList;
+import com.ca.gymbackend.routine.response.RoutineByUserId;
 import com.ca.gymbackend.routine.response.WorkoutGuideList;
 
 @Service
@@ -83,7 +84,11 @@ public class RoutineService {
                 routineSqlMapper.insertRoutineSet(set);
             }
         }
-        }
+    }
+
+    public List<RoutineByUserId> getRoutinesByUserId(int userId) {
+        return routineSqlMapper.findRoutinesByUserId(userId);
+    }
 
 
 }
