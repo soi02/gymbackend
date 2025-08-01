@@ -44,5 +44,22 @@
 
 
 
+    <select id="findRoutinesByUserId" resultType="com.ca.gymbackend.routine.response.RoutineByUserId">
+        SELECT
+            r.routine_id AS routineId,
+            r.user_id AS userId,
+            r.routine_name AS routineName,
+            rd.detail_id AS detailId,
+            rd.element_id AS elementId,
+            rd.element_order AS elementOrder,
+            rs.set_id AS setId,
+            rs.kg AS kg,
+            rs.reps AS reps
+        FROM routine r
+        INNER JOIN routine_detail rd ON r.routine_id = rd.routine_id
+        INNER JOIN routine_set rs ON rs.detail_id = rd.detail_id
+        WHERE r.user_id = #{userId}
+    </select>
+
 
 </mapper>

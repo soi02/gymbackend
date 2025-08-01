@@ -52,6 +52,11 @@ public class RoutineController {
         }
 
     }
+
+    @GetMapping("/getRoutinesByUserId/{userId}")
+    public ResponseEntity<?> getRoutinesByUserId(@PathVariable("userId") int userId) {
+        return ResponseEntity.ok(routineService.getRoutinesByUserId(userId));
+    }
     
 
 }

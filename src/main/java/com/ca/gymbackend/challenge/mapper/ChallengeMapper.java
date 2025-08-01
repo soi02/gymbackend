@@ -7,7 +7,9 @@ import org.apache.ibatis.annotations.Param;
 
 import com.ca.gymbackend.challenge.dto.ChallengeCreateRequest;
 import com.ca.gymbackend.challenge.dto.ChallengeDetailResponse;
+import com.ca.gymbackend.challenge.dto.ChallengeInfo;
 import com.ca.gymbackend.challenge.dto.ChallengeMyRecordsResponse;
+import com.ca.gymbackend.challenge.dto.ChallengeRecordInfo;
 
 @Mapper
 public interface ChallengeMapper {
@@ -40,6 +42,9 @@ public interface ChallengeMapper {
 
 
     // 챌린지 도전 시작
+    // user_challenge 테이블에 이미 해당사용자와 챌린지Id 의 조합이 존재하는지 확인
+    public int existsUserChallenge(@Param("userId") int userId, @Param("challengeId") int challengeId);
+
     // 1. user_challenge 테이블에 사용자 챌린지 정보를 삽입
     public void insertUserChallenge(@Param("userId") int userId, @Param("challengeId") int challengeId);
 
@@ -52,13 +57,29 @@ public interface ChallengeMapper {
 
     // 나의 수련기록
     // 내가 참여한 챌린지 목록 조회
-    List<ChallengeMyRecordsResponse> findAllMyChallengeList(@Param("userId") int userId);
+    public List<ChallengeMyRecordsResponse> findAllMyChallengeList(@Param("userId") int userId);
 
     // 특정 챌린지의 총 출석 일수를 조회
-    int countAttendanceDays(@Param("userId") int userId, @Param("challengeId") int challengeId);
+    public int countAttendanceDays(@Param("userId") int userId, @Param("challengeId") int challengeId);
 
     // 특정 챌린지에서 오늘 출석했는지 출석여부 확인
-    int hasAttendedToday(@Param("userId") int userId, @Param("challengeId") int challengeId);
+    public int hasAttendedToday(@Param("userId") int userId, @Param("challengeId") int challengeId);
+
+
+
+
+
+
+    // 특정 사용자의 특정 챌린지 상세 정보 & 인증 기록 조회
+    // 챌린지 ID로 챌린지 상세 정보(ChallengeInfo) 조회
+    public ChallengeInfo findChallengeInfoByChallengeId(@Param("challengeId") int challengeId);
+
+    // 사용자 ID와 챌린지 ID로 인증 기록 리스트 조회
+    public List<ChallengeRecordInfo> findChallengeRecordList(@Param("userId") int userId, @Param("challengeId") int challengeId);
+
+    // 사용자 ID와 챌린지 ID로 인증 횟수(카운트) 조회
+    public int countAttendanceRecordList(@Param("userId") int userId, @Param("challengeId") int challengeId);
+
 
 
 }
