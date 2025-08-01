@@ -29,6 +29,8 @@ public class BuddyController {
     private BuddyServiceImpl buddyService;
     @Autowired
     private JwtUtil jwtUtil;
+    @Autowired
+    private ChatWebSocketController buddyChatController;
 
     // @PostMapping("/register")
     // public String registerBuddy(@RequestBody BuddyDto buddyDto) {
@@ -86,15 +88,31 @@ public class BuddyController {
     // return ResponseEntity.status(500).body("응답 실패: " + e.getMessage());
     // }
     // }
+    // @PostMapping("/response")
+    // public ResponseEntity<?> respondToMatching(@RequestBody MatchingDto dto) {
+    // try {
+    // buddyService.respondToMatching(dto.getId(), dto.getStatus(),
+    // dto.getSendBuddyId());
+
+    // // 매칭 수락 후 채팅 시작 메시지 삽입
+    // if ("수락".equals(dto.getStatus())) {
+    // // matching_id와 sendBuddyId를 넘김
+    // buddyService.insertInitialChat(dto.getId(), dto.getSendBuddyId());
+    // }
+
+    // return ResponseEntity.ok("응답 처리 완료");
+    // } catch (Exception e) {
+    // return ResponseEntity.status(500).body("응답 실패: " + e.getMessage());
+    // }
+    // }
     @PostMapping("/response")
     public ResponseEntity<?> respondToMatching(@RequestBody MatchingDto dto) {
         try {
             buddyService.respondToMatching(dto.getId(), dto.getStatus(), dto.getSendBuddyId());
 
-            // 매칭 수락 후 채팅 시작 메시지 삽입
             if ("수락".equals(dto.getStatus())) {
-                // matching_id와 sendBuddyId를 넘김
-                buddyService.insertInitialChat(dto.getId(), dto.getSendBuddyId());
+                // DB와 WebSocket 동시에 처리
+                buddyChatController.sendInitialChatViaWebSocket(dto.getId(), dto.getSendBuddyId());
             }
 
             return ResponseEntity.ok("응답 처리 완료");

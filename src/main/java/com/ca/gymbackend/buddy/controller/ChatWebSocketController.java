@@ -14,8 +14,10 @@ import com.ca.gymbackend.buddy.service.BuddyServiceImpl;
 
 @Controller
 public class ChatWebSocketController {
-    // @Autowired
-    // private BuddyServiceImpl buddyService;
+    @Autowired
+    private BuddyServiceImpl buddyService;
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate; // 특정 목적지로 메시지를 보내는 데
 
     // // @MessageMapping("/chat/send") // 클라이언트가 보낼 경로
     // // @SendTo("/topic/chat/{matchingId}") // 클라이언트가 구독할 경로
@@ -71,9 +73,39 @@ public class ChatWebSocketController {
     // public ChatDto sendMessage(ChatDto message) {
     // return message;
     // }
+    // @MessageMapping("/chat.sendMessage")
+    // @SendTo("/topic/public/{matchingId}")
+    // public ChatDto sendMessage(ChatDto message) {
+    // return message;
+    // }
+
     @MessageMapping("/chat.sendMessage")
-    @SendTo("/topic/public/{matchingId}")
-    public ChatDto sendMessage(ChatDto message) {
-        return message;
+    public void sendMessage(ChatDto chatDto) {
+        // DB 저장
+        buddyService.sendChat(chatDto);
+
+        // WebSocket 브로드캐스트
+        messagingTemplate.convertAndSend(
+                "/topic/public/" + chatDto.getMatchingId(),
+                chatDto);
     }
+
+    // 매칭 수락 시 자동 초기 메시지 WebSocket 브로드캐스트용
+    public void sendInitialChatViaWebSocket(int matchingId, int sendBuddyId) {
+        ChatDto initialChat = new ChatDto();
+        initialChat.setMatchingId(matchingId);
+        initialChat.setSendBuddyId(sendBuddyId);
+        initialChat.setMessage("채팅이 시작되었습니다.");
+        initialChat.setRead(false);
+        initialChat.setSentAt(LocalDateTime.now());
+
+        // DB 저장
+        buddyService.sendChat(initialChat);
+
+        // 브로드캐스트
+        messagingTemplate.convertAndSend(
+                "/topic/public/" + matchingId,
+                initialChat);
+    }
+
 }
