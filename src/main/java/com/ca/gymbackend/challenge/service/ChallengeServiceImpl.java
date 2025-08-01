@@ -6,10 +6,11 @@ import com.ca.gymbackend.challenge.mapper.ChallengeMapper;
 import lombok.RequiredArgsConstructor;
 import net.coobird.thumbnailator.Thumbnails;
 
+import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
+// import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.nio.file.*;
@@ -75,15 +76,6 @@ public class ChallengeServiceImpl {
     }
 
     // 4. 챌린지-키워드 연결 insert
-    // public void saveChallengekeywordMapping(int challengeId, List<Integer> challengeKeywordIds) {
-    //     if (challengeKeywordIds != null) {
-    //         for (Integer challengeKeywordId : challengeKeywordIds) {
-    //             challengeMapper.createChallengeKeyword(challengeId, challengeKeywordId);
-    //         }
-    //     }
-    // }
-
-    // 4. 챌린지-키워드 연결 insert
     public void saveChallengekeywordMapping(int challengeId, List<String> selectedKeywordNameList) {
         if (selectedKeywordNameList != null && !selectedKeywordNameList.isEmpty()) { // null 체크와 비어있는지 체크
             for (String keywordName : selectedKeywordNameList) { // 키워드 이름을 순회
@@ -117,7 +109,7 @@ public class ChallengeServiceImpl {
             return null;
         }
 
-        // 서비스 계층에서 수동으로 데이터 가공 (키워드만)
+        // 서비스 계층에서 수동으로 데이터 가공 (키워드만
         // challengeKeywordsString (String)을 challengeKeywords List<String>타입으로 변환
         // INNER JOIN을 사용했으므로 이 keywordsString은 보통 NULL이 아니겠지만,
         // 혹시 모를 상황(예: GROUP_CONCAT이 빈 문자열 반환)을 대비하여 NULL/빈 문자열 체크는 유지
@@ -138,5 +130,19 @@ public class ChallengeServiceImpl {
         // challengeStatus는 이미 SQL 쿼리에서 계산되어 들어왔으므로 별도 로직이 필요 없습니다.
 
         return challengeDetailResponse;
+    }
+
+
+
+
+    // 챌린지 도전 시작
+    // 1. user_challenge 테이블에 사용자 챌린지 정보를 삽입
+    public void insertUserChallengeInfo(int userId, int challengeId) {
+        challengeMapper.insertUserChallenge(userId, challengeId);
+    }
+
+    // 2. challenge 테이블의 participant_count를 1 증가시키기
+    public void increaseChallengeParticipantCountInfo(int challengeId){
+        challengeMapper.increaseChallengeParticipantCount(challengeId);
     }
 }

@@ -11,8 +11,8 @@
             challenge_title,
             challenge_description,
             challenge_max_members,
-            challenge_start_date,
-            challenge_end_date,
+            challenge_recruit_start_date,
+            challenge_recruit_end_date,
             challenge_duration_days,
             challenge_thumbnail_path,
             created_at
@@ -21,8 +21,8 @@
             #{challengeTitle},
             #{challengeDescription},
             #{challengeMaxMembers},
-            #{challengeStartDate},
-            #{challengeEndDate},
+            #{challengeRecruitStartDate},
+            #{challengeRecruitEndDate},
             #{challengeDurationDays},
             #{challengeThumbnailPath},
             NOW()
@@ -38,7 +38,7 @@
     <select id="findKeywordIdByKeywordName" parameterType="string" resultType="int">
         SELECT keyword_id FROM keyword WHERE keyword_name = #{keywordName}
     </select>
-    
+
     <!-- 생성 순서 3. 챌린지 - 키워드 연결 -->
     <insert id="createChallengeKeyword">
         INSERT INTO challenge_keyword (challenge_id, keyword_id)
@@ -57,8 +57,8 @@
             challenge_title AS challengeTitle,
             challenge_description AS challengeDescription,
             challenge_max_members AS challengeMaxMembers,
-            challenge_start_date AS challengeStartDate,
-            challenge_end_date AS challengeEndDate,
+            challenge_recruit_start_date AS challengeRecruitStartDate,
+            challenge_recruit_end_date AS challengeRecruitEndDate,
             challenge_duration_days AS challengeDurationDays,
             challenge_thumbnail_path AS challengeThumbnailPath
         FROM challenge
@@ -70,24 +70,19 @@
     <!-- 챌린지 상세보기 -->
     <select id="findChallengeDetailByChallengeId" parameterType="int" resultType="com.ca.gymbackend.challenge.dto.ChallengeDetailResponse">
         SELECT
-            c.challenge_id,
-            c.challenge_creator,
-            c.challenge_title,
-            c.challenge_description,
-            c.challenge_max_members,
-            c.challenge_participant_count AS participant_count,
-            c.challenge_start_date,
-            c.challenge_end_date,
-            c.challenge_duration_days,
-            c.challenge_thumbnail_path,
-         
-            CASE
-                WHEN c.challenge_start_date &gt; CURDATE() THEN '예정'
-                WHEN c.challenge_end_date &lt; CURDATE() THEN '종료'
-                ELSE '진행 중'
-            END AS challenge_status,
-
-            GROUP_CONCAT(k.keyword_name ORDER BY k.keyword_name ASC SEPARATOR ',') AS challenge_keywords_string
+            c.challenge_id AS challengeId,
+            c.challenge_creator AS challengeCreator, 
+            c.challenge_title AS challengeTitle, 
+            c.challenge_description AS challengeDescription, 
+            c.challenge_max_members AS challengeMaxMembers, 
+            c.challenge_participant_count AS participantCount, 
+            c.challenge_recruit_start_date AS challengeRecruitStartDate, 
+            c.challenge_recruit_end_date AS challengeRecruitEndDate,     
+            c.challenge_duration_days AS challengeDurationDays, 
+            c.challenge_thumbnail_path AS challengeThumbnailPath, 
+            
+            GROUP_CONCAT(k.keyword_name ORDER BY k.keyword_name ASC SEPARATOR ',') AS challengeKeywordsString
+    
         FROM
             challenge c
         INNER JOIN
@@ -98,7 +93,34 @@
             c.challenge_id = #{challengeId}
         GROUP BY
             c.challenge_id, c.challenge_creator, c.challenge_title, c.challenge_description,
-            c.challenge_max_members, c.challenge_participant_count, c.challenge_start_date,
-            c.challenge_end_date, c.challenge_duration_days, c.challenge_thumbnail_path, c.created_at
+            c.challenge_max_members, c.challenge_participant_count,
+            c.challenge_duration_days, c.challenge_thumbnail_path, c.created_at
     </select>
+
+
+
+
+    <!-- 챌린지 도전 시작 -->
+    <!-- user_challenge 테이블에 사용자 챌린지 정보를 삽입 -->
+    <insert id="insertUserChallenge">
+        INSERT INTO user_challenge (
+            user_id,
+            challenge_id,
+            personal_join_date,
+            personal_end_date,
+            challenge_completed
+        ) VALUES (
+            #{userId},
+            #{challengeId},
+            NOW(),
+            DATE_ADD(NOW(), 
+            INTERVAL (SELECT challenge_duration_days FROM challenge WHERE challenge_id = #{challengeId}) DAY), 'N'                     );
+    </insert>
+
+    <update id="increaseChallengeParticipantCount">
+        UPDATE challenge
+        SET challenge_participant_count = challenge_participant_count + 1
+        WHERE challenge_id = #{challengeId};
+    </update>
+
 </mapper>
