@@ -6,10 +6,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
-public class WorkoutRecordDto {
-    private int recordId;
+public class WorkoutLogDto {
+    private int logId;
     private int userId;
-    private int planId;
+    private int workoutId;
     private LocalDate date;
     private int hours;
     private int minutes;

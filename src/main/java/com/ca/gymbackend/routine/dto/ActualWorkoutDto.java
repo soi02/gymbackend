@@ -5,9 +5,9 @@ import java.time.LocalDateTime;
 import lombok.Data;
 
 @Data
-public class RoutineInfoDto {
-    private int routineId;
+public class ActualWorkoutDto {
+    private int workoutId;
     private int userId;
-    private String routineName;
+    private int routineId;
     private LocalDateTime createdAt;
 }

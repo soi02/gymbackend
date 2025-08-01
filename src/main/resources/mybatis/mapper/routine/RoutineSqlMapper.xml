@@ -24,20 +24,22 @@
         WHERE we.element_id = #{id}
     </select>
 
-    <insert id="insertRoutineInfo" parameterType="com.ca.gymbackend.routine.dto.RoutineInfoDto" useGeneratedKeys="true" keyProperty="routineId">
-        INSERT INTO routine_info (user_id, routine_name, created_at)
+    <insert id="insertRoutineInfo" parameterType="com.ca.gymbackend.routine.dto.RoutineDto" useGeneratedKeys="true" keyProperty="routineId">
+        INSERT INTO routine (user_id, routine_name, created_at)
         VALUES (#{userId}, #{routineName}, #{createdAt})
     </insert>
 
-    <insert id="insertWorkoutPlan" parameterType="com.ca.gymbackend.routine.dto.WorkoutPlanDto" useGeneratedKeys="true" keyProperty="planId">
-        INSERT INTO workout_plan (routine_id, element_id, created_at)
-        VALUES (#{routineId}, #{elementId}, #{createdAt})
+    <insert id="insertRoutineDetail" parameterType="com.ca.gymbackend.routine.dto.RoutineDetailDto" useGeneratedKeys="true" keyProperty="detailId">
+        INSERT INTO routine_detail (routine_id, element_id, element_order)
+        VALUES (#{routineId}, #{elementId}, #{elementOrder});
     </insert>
 
-<insert id="insertWorkoutSet" parameterType="com.ca.gymbackend.routine.dto.WorkoutSetDto">
-  INSERT INTO workout_set (kg, reps, plan_id)
-  VALUES (#{kg}, #{reps}, #{planId})
-</insert>
+
+    <insert id="insertRoutineSet" parameterType="com.ca.gymbackend.routine.dto.RoutineSetDto">
+        INSERT INTO routine_set (detail_id, kg, reps)
+        VALUES (#{detailId}, #{kg}, #{reps});
+    </insert>
+
 
 
 

@@ -5,13 +5,9 @@ import java.time.LocalDateTime;
 import lombok.Data;
 
 @Data
-public class WorkoutPlanDto {
-    private int planId;
+public class RoutineDto {
     private int routineId;
-    private int elementId;
-    private int elementOrder;
-    private int setId;
+    private int userId;
+    private String routineName;
     private LocalDateTime createdAt;
 }
-
-

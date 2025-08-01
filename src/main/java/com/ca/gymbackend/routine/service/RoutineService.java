@@ -6,12 +6,14 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.ca.gymbackend.routine.dto.RoutineFromFrontDto;
-import com.ca.gymbackend.routine.dto.RoutineInfoDto;
-import com.ca.gymbackend.routine.dto.WorkoutPlanDto;
-import com.ca.gymbackend.routine.dto.WorkoutSetDto;
+import com.ca.gymbackend.routine.dto.RoutineSetDto;
+import com.ca.gymbackend.routine.dto.RoutineDto;
+import com.ca.gymbackend.routine.dto.RoutineDetailDto;
+// import com.ca.gymbackend.routine.dto.WorkoutPlanDto;
 import com.ca.gymbackend.routine.mapper.RoutineSqlMapper;
+import com.ca.gymbackend.routine.request.RoutineSaveDetailDto;
 import com.ca.gymbackend.routine.request.RoutineSaveRequest;
+import com.ca.gymbackend.routine.request.RoutineSaveSetDto;
 import com.ca.gymbackend.routine.response.EveryWorkoutList;
 import com.ca.gymbackend.routine.response.WorkoutGuideList;
 
@@ -31,28 +33,57 @@ public class RoutineService {
     }
 
     public void saveRoutine(RoutineSaveRequest request) {
-        RoutineInfoDto routine = new RoutineInfoDto();
+        // 1️⃣ 루틴 저장
+        // 루틴 테이블에 새로운 루틴을 등록.
+        // 참고
+
+        // const payload = {
+        //     userId: Number(userId),
+        //     routineName: routineName,
+        //     routineDetailList: routineData.map((workout, idx) => ({
+        //         elementId: workout.elementId,
+        //         elementOrder: idx + 1,
+        //         setList: workout.sets.map(set => ({
+        //             kg: Number(set.weight || 0),
+        //             reps: Number(set.reps || 0)
+        //         }))
+        //     }))
+        // };
+
+
+
+        RoutineDto routine = new RoutineDto();
+        // 프론트에서 받아온 RoutineSaveRequest 데이터에서 userid, routinename을 꺼내와서 세팅
         routine.setUserId(request.getUserId());
         routine.setRoutineName(request.getRoutineName());
         routine.setCreatedAt(LocalDateTime.now());
-
         routineSqlMapper.insertRoutineInfo(routine);
 
+        // 위에서 저장한 루틴의 PK를 가져옴.
         int routineId = routine.getRoutineId();
 
-        for (RoutineFromFrontDto workout : request.getWorkouts()) {
-            WorkoutPlanDto plan = new WorkoutPlanDto();
-            plan.setRoutineId(routineId);
-            plan.setElementId(workout.getElementId());
-            plan.setCreatedAt(LocalDateTime.now());
-            routineSqlMapper.insertWorkoutPlan(plan);
+        // 2️⃣ 루틴 상세 저장
+        // 프론트에서 온 RoutineDetailList를 반복함
+        for (RoutineSaveDetailDto detailDto : request.getRoutineDetailList()) {
+            // 운동 상세 insert용 객체
+            RoutineDetailDto detail = new RoutineDetailDto();
+            detail.setRoutineId(routineId);
+            detail.setElementId(detailDto.getElementId());
+            detail.setElementOrder(detailDto.getElementOrder());
+            routineSqlMapper.insertRoutineDetail(detail);
 
-            int planId = plan.getPlanId();
-            
-            for (WorkoutSetDto set : workout.getSets()) {
-                set.setPlanId(planId);
-                routineSqlMapper.insertWorkoutSet(set);
+            int detailId = detail.getDetailId();
+
+            // 3️⃣ 세트 저장
+            for (RoutineSaveSetDto setDto : detailDto.getSetList()) {
+                RoutineSetDto set = new RoutineSetDto();
+                set.setDetailId(detailId);
+                set.setKg(setDto.getKg());
+                set.setReps(setDto.getReps());
+                routineSqlMapper.insertRoutineSet(set);
             }
         }
-    }
+        }
+
+
 }
