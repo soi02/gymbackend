@@ -133,7 +133,7 @@ public class ChallengeServiceImpl {
 
         // challengeStatus는 이미 SQL 쿼리에서 계산되어 들어왔으므로 별도 로직이 필요 없습니다.
 
-        // ★★★ 추가된 로직: userId를 사용하여 참여 여부 확인 ★★★
+        // 추가된 로직: userId를 사용하여 참여 여부 확인
         // Mapper에 existsUserChallenge(int userId, int challengeId) 메서드가 필요
         boolean isParticipating = challengeMapper.existsUserChallenge(userId, challengeId) > 0;
         challengeDetailResponse.setUserParticipating(isParticipating);

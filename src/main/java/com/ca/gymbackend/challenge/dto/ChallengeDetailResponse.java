@@ -31,5 +31,5 @@ public class ChallengeDetailResponse {
     private String challengeKeywordsString; // SQL 쿼리의 'AS challengeKeywordsString'과 일치해야 합니다.
 
 
-    private boolean isUserParticipating;
+    private boolean userParticipating;
 }
