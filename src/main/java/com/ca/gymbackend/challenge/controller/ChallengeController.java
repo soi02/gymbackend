@@ -60,7 +60,7 @@ public class ChallengeController {
                 }
 
                 challengeCreateRequest.setChallengeThumbnailPath(imagePath);
-            }
+            } 
 
             // 2. 챌린지 정보 DB에 저장
             challengeService.saveChallengeData(challengeCreateRequest);
