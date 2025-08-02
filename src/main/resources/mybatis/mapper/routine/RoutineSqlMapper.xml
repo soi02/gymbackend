@@ -40,6 +40,34 @@
         VALUES (#{detailId}, #{kg}, #{reps});
     </insert>
 
+<!-- Routine 이름 -->
+<select id="findRoutineNameByRoutineId" resultType="String">
+  SELECT routine_name FROM routine WHERE routine_id = #{routineId}
+</select>
+
+<!-- 운동 상세정보 + 세트 포함 -->
+<select id="findRoutineDetailByRoutineId" resultType="com.ca.gymbackend.routine.response.RoutineDetailResponseDto">
+    SELECT
+        r.routine_id,
+        r.routine_name,
+        r.user_id,
+        rd.detail_id,
+        rd.element_order,
+        e.element_id,
+        e.element_name,
+        e.element_picture,
+        c.category_id,
+        c.category_name
+    FROM routine r
+    JOIN routine_detail rd ON r.routine_id = rd.routine_id
+    JOIN workout_element e ON rd.element_id = e.element_id
+    JOIN workout_category c ON e.category_id = c.category_id
+
+    WHERE r.routine_id = #{routineId}
+    ORDER BY r.routine_id, rd.element_order;
+
+</select>
+
 
 
 
@@ -61,5 +89,17 @@
         WHERE r.user_id = #{userId}
     </select>
 
+    <select id="findRoutineSetsByRoutineId" resultType="com.ca.gymbackend.routine.dto.RoutineSetDto">
+        SELECT 
+            rs.set_id AS setId,
+            rs.detail_id AS detailId,
+            rs.kg,
+            rs.reps
+        FROM routine r
+        INNER JOIN routine_detail rd ON r.routine_id = rd.routine_id
+        INNER JOIN routine_set rs ON rs.detail_id = rd.detail_id
+        WHERE r.routine_id = #{routineId}
+        ORDER BY rs.detail_id, rs.set_id;
+    </select>
 
 </mapper>

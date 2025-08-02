@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ca.gymbackend.routine.request.RoutineSaveRequest;
+import com.ca.gymbackend.routine.response.RoutineDetailResponse;
 import com.ca.gymbackend.routine.service.RoutineService;
 
 @RestController
@@ -58,5 +59,14 @@ public class RoutineController {
         return ResponseEntity.ok(routineService.getRoutinesByUserId(userId));
     }
     
+    @GetMapping("/list/{routineId}")
+    public RoutineDetailResponse getRoutineDetail(@PathVariable("routineId") int routineId) {
+        return routineService.getRoutineDetail(routineId);
+    }
+
+    @GetMapping("/routineSets/{routineId}")
+    public RoutineDetailResponse getFullRoutineDetail(@PathVariable("routineId") int routineId) {
+        return routineService.getRoutineDetail(routineId);
+    }
 
 }
