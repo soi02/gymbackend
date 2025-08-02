@@ -1,5 +1,6 @@
 package com.ca.gymbackend.routine.service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -7,13 +8,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.ca.gymbackend.routine.dto.RoutineSetDto;
+import com.ca.gymbackend.routine.dto.WorkoutLogDto;
 import com.ca.gymbackend.routine.dto.RoutineDto;
+import com.ca.gymbackend.portal.dto.UserDto;
+import com.ca.gymbackend.routine.dto.ActualWorkoutDetailDto;
+import com.ca.gymbackend.routine.dto.ActualWorkoutDto;
+import com.ca.gymbackend.routine.dto.ActualWorkoutSetDto;
 import com.ca.gymbackend.routine.dto.RoutineDetailDto;
 // import com.ca.gymbackend.routine.dto.WorkoutPlanDto;
 import com.ca.gymbackend.routine.mapper.RoutineSqlMapper;
+import com.ca.gymbackend.routine.request.ActualWorkoutSaveRequest;
 import com.ca.gymbackend.routine.request.RoutineSaveDetailDto;
 import com.ca.gymbackend.routine.request.RoutineSaveRequest;
 import com.ca.gymbackend.routine.request.RoutineSaveSetDto;
+import com.ca.gymbackend.routine.response.ActualWorkoutResultResponse;
 import com.ca.gymbackend.routine.response.EveryWorkoutList;
 import com.ca.gymbackend.routine.response.RoutineByUserId;
 import com.ca.gymbackend.routine.response.RoutineDetailResponse;
@@ -101,5 +109,72 @@ public class RoutineService {
     }
 
 
+    public int saveActualWorkout(ActualWorkoutSaveRequest request) {
+        // 1. actual_workout 저장
+        ActualWorkoutDto workout = new ActualWorkoutDto();
+        workout.setUserId(request.getUserId());
+        workout.setRoutineId(request.getRoutineId());
+        workout.setCreatedAt(LocalDateTime.now());
+
+        routineSqlMapper.insertActualWorkout(workout); // workout_id 생성됨
+        int workoutId = workout.getWorkoutId();
+
+        // 2. detail + set 저장
+        for (ActualWorkoutSaveRequest.ActualWorkoutDetailDto detailDto : request.getDetails()) {
+            // actual_workout_detail 저장
+            ActualWorkoutDetailDto detail = new ActualWorkoutDetailDto();
+            detail.setWorkoutId(workoutId);
+            detail.setElementId(detailDto.getElementId());
+            detail.setElementOrder(detailDto.getOrder());
+
+            routineSqlMapper.insertActualWorkoutDetail(detail);
+            int detailId = detail.getDetailId();
+
+            // actual_workout_set 저장
+            for (ActualWorkoutSaveRequest.ActualWorkoutDetailDto.ActualWorkoutSetDto setDto : detailDto.getSets()) {
+                ActualWorkoutSetDto set = new ActualWorkoutSetDto();
+                set.setDetailId(detailId);
+                set.setKg(setDto.getKg());
+                set.setReps(setDto.getReps());
+
+                routineSqlMapper.insertActualWorkoutSet(set);
+            }
+        }
+        // 3. workout_log 저장
+        WorkoutLogDto log = new WorkoutLogDto();
+        log.setUserId(request.getUserId());
+        log.setWorkoutId(workoutId);
+        log.setStartTime(request.getStartTime());
+        log.setEndTime(request.getEndTime());
+
+        // 날짜만 따로 추출해서 세팅 (DATE 타입 컬럼)
+        log.setDate(request.getStartTime().toLocalDate());
+
+        // 시간 계산
+        long minutes = Duration.between(request.getStartTime(), request.getEndTime()).toMinutes();
+        log.setMinutes((int) minutes);
+        log.setHours((int) (minutes / 60.0));
+
+        // createdAt
+        log.setCreatedAt(LocalDateTime.now());
+
+        // 칼로리계산
+        UserDto user = routineSqlMapper.findUserById(request.getUserId());
+        double mets = 3.5;
+        double weight = user.getWeight(); // 회원의 체중 (68 이런 값)
+        double hours = (double) minutes / 60.0;
+        int calories = (int) (mets * weight * hours);
+        log.setCalories(calories);
+
+        // 💥 칼로리 계산 로직은 나중에!
+        routineSqlMapper.insertWorkoutLog(log);
+
+        return workoutId;
+
+    }
+
+    public List<ActualWorkoutResultResponse> getWorkoutResult(int workoutId) {
+        return routineSqlMapper.findWorkoutResultByWorkoutId(workoutId);
+    }
 
 }

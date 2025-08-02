@@ -6,8 +6,14 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import com.ca.gymbackend.routine.dto.RoutineDto;
+import com.ca.gymbackend.portal.dto.UserDto;
+import com.ca.gymbackend.routine.dto.ActualWorkoutDetailDto;
+import com.ca.gymbackend.routine.dto.ActualWorkoutDto;
+import com.ca.gymbackend.routine.dto.ActualWorkoutSetDto;
 import com.ca.gymbackend.routine.dto.RoutineDetailDto;
 import com.ca.gymbackend.routine.dto.RoutineSetDto;
+import com.ca.gymbackend.routine.dto.WorkoutLogDto;
+import com.ca.gymbackend.routine.response.ActualWorkoutResultResponse;
 import com.ca.gymbackend.routine.response.EveryWorkoutList;
 import com.ca.gymbackend.routine.response.RoutineByUserId;
 import com.ca.gymbackend.routine.response.RoutineDetailResponseDto;
@@ -24,6 +30,13 @@ public interface RoutineSqlMapper {
     public List<RoutineDetailResponseDto> findRoutineDetailByRoutineId(@Param("routineId") int routineId);
     public List<RoutineSetDto> findRoutineSetsByRoutineId(@Param("routineId") int routineId);
     public String findRoutineNameByRoutineId(@Param("routineId") int routineId);
+    public void insertActualWorkout(ActualWorkoutDto workout);
+    public void insertActualWorkoutDetail(ActualWorkoutDetailDto detail);
+    public void insertActualWorkoutSet(ActualWorkoutSetDto set);
+    public void insertWorkoutLog(WorkoutLogDto log);
+    public UserDto findUserById(@Param("id") int id);
+    public List<ActualWorkoutResultResponse> findWorkoutResultByWorkoutId(int workoutId);
+
 
 
 }

@@ -102,4 +102,53 @@
         ORDER BY rs.detail_id, rs.set_id;
     </select>
 
+    <insert id="insertActualWorkout" useGeneratedKeys="true" keyProperty="workoutId">
+        INSERT INTO actual_workout (user_id, routine_id, created_at)
+        VALUES (#{userId}, #{routineId}, #{createdAt})
+    </insert>
+
+    <insert id="insertActualWorkoutDetail" useGeneratedKeys="true" keyProperty="detailId">
+        INSERT INTO actual_workout_detail (workout_id, element_id, element_order)
+        VALUES (#{workoutId}, #{elementId}, #{elementOrder})
+    </insert>
+
+    <insert id="insertActualWorkoutSet">
+        INSERT INTO actual_workout_set (detail_id, kg, reps)
+        VALUES (#{detailId}, #{kg}, #{reps})
+    </insert>
+
+<insert id="insertWorkoutLog">
+  INSERT INTO workout_log (
+    user_id, workout_id, start_time, end_time, date,
+    hours, minutes, calories, created_at
+  )
+  VALUES (
+    #{userId}, #{workoutId}, #{startTime}, #{endTime}, #{date},
+    #{hours}, #{minutes}, #{calories}, #{createdAt}
+  )
+</insert>
+
+
+<select id="findUserById" resultType="com.ca.gymbackend.portal.dto.UserDto">
+  SELECT * FROM user WHERE id = #{id}
+</select>
+
+<select id="findWorkoutResultByWorkoutId" resultType="com.ca.gymbackend.routine.response.ActualWorkoutResultResponse">
+    SELECT 
+        aw.created_at,
+        awd.detail_id,
+        we.element_name,
+        aws.set_id,
+        aws.kg,
+        aws.reps,
+        we.element_picture
+    FROM actual_workout aw
+    LEFT JOIN actual_workout_detail awd ON aw.workout_id = awd.workout_id
+    LEFT JOIN actual_workout_set aws ON awd.detail_id = aws.detail_id
+    LEFT JOIN workout_element we ON we.element_id = awd.element_id
+    WHERE aw.workout_id = #{workoutId}
+    ORDER BY awd.detail_id, aws.set_id
+</select>
+
+
 </mapper>

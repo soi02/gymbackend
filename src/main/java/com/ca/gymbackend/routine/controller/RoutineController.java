@@ -1,5 +1,8 @@
 package com.ca.gymbackend.routine.controller;
 
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ca.gymbackend.routine.request.ActualWorkoutSaveRequest;
 import com.ca.gymbackend.routine.request.RoutineSaveRequest;
+import com.ca.gymbackend.routine.response.ActualWorkoutResultResponse;
 import com.ca.gymbackend.routine.response.RoutineDetailResponse;
 import com.ca.gymbackend.routine.service.RoutineService;
 
@@ -68,5 +73,30 @@ public class RoutineController {
     public RoutineDetailResponse getFullRoutineDetail(@PathVariable("routineId") int routineId) {
         return routineService.getRoutineDetail(routineId);
     }
+
+    @PostMapping("/saveActualWorkout")
+    public ResponseEntity<?> saveActualWorkout(@RequestBody ActualWorkoutSaveRequest request) {
+        try {
+            int workoutId = routineService.saveActualWorkout(request);
+           return ResponseEntity.ok(Map.of("workoutId", workoutId)); // ✅ 이렇게 반환!
+        } catch(Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                    .body("기록 저장 실패: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/result/{workoutId}")
+    public ResponseEntity<?> getWorkoutResult(@PathVariable("workoutId") int workoutId) {
+        try {
+            List<ActualWorkoutResultResponse> result = routineService.getWorkoutResult(workoutId);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                 .body("결과 조회 실패: " + e.getMessage());
+        }
+    }
+    
 
 }
