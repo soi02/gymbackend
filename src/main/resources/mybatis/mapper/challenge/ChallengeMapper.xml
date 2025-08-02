@@ -204,4 +204,136 @@
         WHERE user_id = #{userId} AND challenge_id = #{challengeId}
     </select>
 
+
+
+
+
+    <!-- 노리개 -->
+    <!-- 사용자의 챌린지 참여 정보 조회 -->
+    <select id="findUserChallengeInfoByUserIdAndChallengeId" resultType="com.ca.gymbackend.challenge.dto.ChallengeUserInfo">
+        SELECT
+            personal_join_date,
+            personal_end_date
+        FROM
+            user_challenge
+        WHERE
+            user_id = #{userId} AND challenge_id = #{challengeId}
+    </select>
+
+
+    <!-- 챌린지 상세 진행 상황 조회 -->
+    <!-- <select id="findChallengeProgressInfo" resultType="com.ca.gymbackend.challenge.dto.ChallengeProgressResponse">
+        SELECT
+            c.challenge_title,
+            c.challenge_duration_days AS totalPeriod,
+            cn.norigae_condition_rate,
+            n.norigae_name,
+            n.norigae_icon_path
+        FROM
+            challenge c
+        JOIN
+            user_challenge uc ON c.challenge_id = uc.challenge_id
+        JOIN
+            challenge_norigae cn ON c.challenge_id = cn.challenge_id
+        JOIN
+            norigae n ON cn.norigae_id = n.norigae_id
+        WHERE
+            c.challenge_id = #{challengeId} AND uc.user_id = #{userId}
+    </select> -->
+
+<!-- 챌린지 기본 정보 조회 -->
+<select id="findChallengeBasicInfo" resultType="com.ca.gymbackend.challenge.dto.ChallengeProgressResponse">
+    SELECT
+        c.challenge_title,
+        c.challenge_duration_days AS totalPeriod
+    FROM
+        challenge c
+    INNER JOIN
+        user_challenge uc ON c.challenge_id = uc.challenge_id
+    WHERE
+        c.challenge_id = #{challengeId} AND uc.user_id = #{userId}
+</select>
+
+<!-- 노리개 정보 조회 -->
+<select id="findChallengeNorigaeInfo" resultType="com.ca.gymbackend.challenge.dto.ChallengeNorigaeInfo">
+    SELECT
+        cn.norigae_condition_rate,
+        n.norigae_name,
+        n.norigae_icon_path
+    FROM
+        challenge_norigae cn
+    INNER JOIN
+        norigae n ON cn.norigae_id = n.norigae_id
+    WHERE
+        cn.challenge_id = #{challengeId}
+</select>
+
+
+
+
+    <!-- 사용자의 출석 기록 조회 -->
+    <select id="findAttendanceRecords" resultType="com.ca.gymbackend.challenge.dto.ChallengeAttendanceRecord">
+        SELECT
+            attendance_date,
+            attendance_image_path
+        FROM
+            attendance_record
+        WHERE
+            challenge_id = #{challengeId} AND user_id = #{userId}
+        ORDER BY
+            attendance_date ASC
+    </select>
+
+    <!-- 총 출석 일수 계산 -->
+    <select id="countAttendedDays" resultType="int">
+        SELECT COUNT(*)
+        FROM attendance_record
+        WHERE challenge_id = #{challengeId} AND user_id = #{userId}
+    </select>
+    
+    <!-- 오늘 날짜로 이미 인증 기록이 있는지 확인 -->
+    <select id="countTodayAttendance" resultType="int">
+        SELECT COUNT(*)
+        FROM attendance_record
+        WHERE user_id = #{userId} AND challenge_id = #{challengeId} AND attendance_date = #{today}
+    </select>
+
+    <!-- 출석 기록 삽입 -->
+    <insert id="insertAttendanceRecord">
+        INSERT INTO attendance_record (user_id, challenge_id, attendance_date, attendance_image_path, created_at)
+        VALUES (#{userId}, #{challengeId}, #{attendanceDate}, #{attendanceImagePath}, NOW())
+    </insert>
+
+
+    <!-- 노리개 지급 로직 관련 추가 메서드 -->
+    <!-- 챌린지의 총 기간 조회 -->
+    <select id="findChallengeTotalDays" resultType="int">
+        SELECT challenge_duration_days
+        FROM challenge
+        WHERE challenge_id = #{challengeId}
+    </select>
+
+    <!-- 해당 챌린지의 노리개 조건 조회 (노리개ID와 달성률) -->
+    <select id="findNorigaeCondition" resultType="com.ca.gymbackend.challenge.dto.ChallengeNorigaeInfo">
+        SELECT norigae_id, norigae_condition_rate
+        FROM challenge_norigae
+        WHERE challenge_id = #{challengeId}
+    </select>
+
+    <!-- 챌린지에 노리개가 이미 지급되었는지 확인 -->
+    <select id="checkIfNorigaeAwarded" resultType="int">
+        SELECT COUNT(*)
+        FROM challenge_norigae
+        WHERE challenge_id = #{challengeId}
+    </select>
+
+    <!-- 챌린지에 노리개를 지급 (challenge_norigae 테이블에 삽입) -->
+    <insert id="awardNorigaeToChallenge">
+        INSERT INTO challenge_norigae (challenge_id, norigae_id, norigae_condition_rate)
+        VALUES (#{challengeId}, #{norigaeId}, #{norigaeConditionRate})
+    </insert>
+
+
+
+
 </mapper>

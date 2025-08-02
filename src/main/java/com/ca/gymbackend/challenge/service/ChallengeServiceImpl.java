@@ -1,11 +1,16 @@
 package com.ca.gymbackend.challenge.service;
 
+import com.ca.gymbackend.challenge.dto.ChallengeAttendanceRecord;
+import com.ca.gymbackend.challenge.dto.ChallengeAttendanceStatus;
 import com.ca.gymbackend.challenge.dto.ChallengeCreateRequest;
 import com.ca.gymbackend.challenge.dto.ChallengeDetailResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeInfo;
 import com.ca.gymbackend.challenge.dto.ChallengeMyRecordDetailResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeMyRecordsResponse;
+import com.ca.gymbackend.challenge.dto.ChallengeNorigaeInfo;
+import com.ca.gymbackend.challenge.dto.ChallengeProgressResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeRecordInfo;
+import com.ca.gymbackend.challenge.dto.ChallengeUserInfo;
 import com.ca.gymbackend.challenge.mapper.ChallengeMapper;
 import lombok.RequiredArgsConstructor;
 import net.coobird.thumbnailator.Thumbnails;
@@ -14,15 +19,20 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 // import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.nio.file.*;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -219,9 +229,154 @@ public class ChallengeServiceImpl {
 
         // 최종 응답 DTO 조립
         return new ChallengeMyRecordDetailResponse(challengeInfo, challengeRecordInfoList);
+    }
 
 
 
+
+
+
+    // 노리개
+    // 챌린지 상세 진행 상황(스티커판)을 조회하는 메서드
+
+public ChallengeProgressResponse getChallengeProgressInfo(int challengeId, int userId) {
+    // 1. 챌린지 기본 정보 조회 (챌린지 제목, 총 기간)
+    ChallengeProgressResponse response = challengeMapper.findChallengeBasicInfo(challengeId, userId);
+
+    if (response == null) {
+        // 사용자가 이 챌린지에 참여하지 않았거나, 챌린지 ID가 유효하지 않은 경우
+        return null;
+    }
+
+    // 2. 노리개 정보 조회
+    // 챌린지 ID만으로 노리개를 찾습니다. 노리개는 챌린지당 하나이므로 userId는 필요 없음
+    ChallengeNorigaeInfo norigae = challengeMapper.findChallengeNorigaeInfo(challengeId);
+
+    // 노리개 정보가 존재하면 응답 객체에 추가
+    if (norigae != null) {
+        response.setNorigaeConditionRate(norigae.getNorigaeConditionRate());
+        response.setNorigaeName(norigae.getNorigaeName());
+        response.setNorigaeIconPath(norigae.getNorigaeIconPath());
+    }
+    // 노리개 정보가 없으면, response 객체의 해당 필드는 null로 남아있음
+
+    // 3. 사용자의 출석 기록 조회
+    List<ChallengeAttendanceRecord> records = challengeMapper.findAttendanceRecords(challengeId, userId);
+
+    // 4. 총 달성 일수 계산
+    int myAchievement = challengeMapper.countAttendedDays(challengeId, userId);
+    response.setMyAchievement(myAchievement);
+
+    // 5. 스티커판 상태 리스트 생성 (기존 로직과 동일)
+    ChallengeUserInfo challengeUserInfo = challengeMapper.findUserChallengeInfoByUserIdAndChallengeId(userId, challengeId);
+    if (challengeUserInfo == null) {
+        return null; // 사용자가 챌린지에 참여하지 않은 경우
+    }
+    LocalDate startDate = challengeUserInfo.getPersonalJoinDate().toLocalDate();
+    LocalDate endDate = challengeUserInfo.getPersonalEndDate().toLocalDate();
+    
+    List<ChallengeAttendanceStatus> statusList = new ArrayList<>();
+    Map<LocalDate, String> attendedDates = records.stream()
+            .collect(Collectors.toMap(ChallengeAttendanceRecord::getAttendanceDate, ChallengeAttendanceRecord::getAttendanceImagePath));
+
+    LocalDate currentDate = startDate;
+    while (!currentDate.isAfter(endDate)) {
+        ChallengeAttendanceStatus status = new ChallengeAttendanceStatus();
+        status.setRecordDate(currentDate);
+
+        if (currentDate.isAfter(LocalDate.now())) {
+            status.setStatus("미래");
+        } else if (attendedDates.containsKey(currentDate)) {
+            status.setStatus("인증완료");
+            status.setPhotoUrl(attendedDates.get(currentDate));
+        } else {
+            status.setStatus("결석");
+        }
+        statusList.add(status);
+        currentDate = currentDate.plusDays(1);
+    }
+    
+    response.setChallengeAttendanceStatus(statusList);
+    return response;
+}
+
+
+    // **새로 추가된 메서드**: 일일 인증 사진을 로컬에 저장하고 URL을 반환합니다.
+    private String saveAttendancePhoto(MultipartFile photo) throws IOException {
+        String uuid = UUID.randomUUID().toString();
+        long currentTime = System.currentTimeMillis();
+
+        String originalFilename = photo.getOriginalFilename();
+        String filename = uuid + "_" + currentTime;
+        String ext = originalFilename.substring(originalFilename.lastIndexOf("."));
+        filename += ext;
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd/");
+        String todayPath = simpleDateFormat.format(new Date(currentTime));
+        Path dirPath = Paths.get(rootPath, "attendancePhotos", todayPath); // 'attendancePhotos' 폴더에 저장
+        Files.createDirectories(dirPath);
+
+        Path filePath = dirPath.resolve(filename);
+        photo.transferTo(filePath); // MultipartFile을 직접 파일로 저장
+
+        return "/attendancePhotos/" + todayPath + filename;
+    }
+
+
+
+    // 일일 인증 기록을 저장하는 메서드
+
+    // @Transactional
+    public void attendChallenge(int userId, int challengeId, MultipartFile photo) {
+        LocalDate today = LocalDate.now();
+        
+        try {
+            // 1. 오늘 날짜로 이미 인증했는지 확인
+            int existingRecordCount = challengeMapper.countTodayAttendance(userId, challengeId, today);
+            if (existingRecordCount > 0) {
+                throw new IllegalStateException("오늘 이미 인증했습니다.");
+            }
+            
+            // 2. 사진 파일 업로드
+            String photoUrl = saveAttendancePhoto(photo); 
+
+            // 3. DB에 출석 기록 저장
+            challengeMapper.insertAttendanceRecord(userId, challengeId, today, photoUrl);
+
+            // 4. 노리개 지급 로직 추가
+            // 총 출석 일수와 챌린지 총 기간을 가져와 달성률 계산
+            int totalAttendedDays = challengeMapper.countAttendedDays(challengeId, userId);
+            int totalChallengeDays = challengeMapper.findChallengeTotalDays(challengeId);
+            
+            // 챌린지 총 기간이 0이 아니어야 계산 가능
+            if (totalChallengeDays > 0) {
+                double achievementRate = (double) totalAttendedDays / totalChallengeDays;
+                
+                // 해당 챌린지의 노리개 조건 조회
+                ChallengeNorigaeInfo norigaeCondition = challengeMapper.findNorigaeCondition(challengeId);
+                
+                // 노리개 조건이 있고, 아직 노리개를 획득하지 않았을 때만 로직 실행
+                if (norigaeCondition != null) {
+                    // 노리개 획득 조건 달성 여부 확인
+                    if (achievementRate >= norigaeCondition.getNorigaeConditionRate()) {
+                        // 이미 노리개가 지급되었는지 확인
+                        boolean norigaeAlreadyAwarded = challengeMapper.checkIfNorigaeAwarded(challengeId) > 0;
+                        
+                        if (!norigaeAlreadyAwarded) {
+                            // 노리개 지급!
+                            challengeMapper.awardNorigaeToChallenge(challengeId, norigaeCondition.getNorigaeId(), norigaeCondition.getNorigaeConditionRate());
+                            // 또는 다른 로직 (예: 사용자에게 알림)
+                            System.out.println("챌린지 " + challengeId + "에 대한 노리개가 지급되었습니다!");
+                        }
+                    }
+                }
+            }
+
+        } catch (IOException e) {
+            throw new RuntimeException("사진 파일 업로드 실패", e);
+        }
 
     }
+
+
 }

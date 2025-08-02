@@ -18,6 +18,7 @@ import com.ca.gymbackend.challenge.dto.ChallengeCreateRequest;
 import com.ca.gymbackend.challenge.dto.ChallengeDetailResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeMyRecordDetailResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeMyRecordsResponse;
+import com.ca.gymbackend.challenge.dto.ChallengeProgressResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeStartRequest;
 import com.ca.gymbackend.challenge.service.ChallengeServiceImpl;
 
@@ -172,5 +173,60 @@ public class ChallengeController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
             }
             return ResponseEntity.ok(challengeMyRecordDetailResponse);
+    }
+
+
+
+
+
+
+
+
+    // 새로운 API 1: 챌린지 상세 진행 상황 조회
+    @GetMapping("/getChallengeProgressProcess")
+    public ResponseEntity<ChallengeProgressResponse> getChallengeProgressProcess(
+            @RequestParam("challengeId") int challengeId,
+            @RequestParam("userId") int userId) {
+        if (challengeId <= 0 || userId <= 0) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
+        
+        ChallengeProgressResponse response = challengeService.getChallengeProgressInfo(challengeId, userId);
+        
+        if (response == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+        
+        return ResponseEntity.ok(response);
+    }
+
+    // 새로운 API 2: 일일 인증 사진 업로드
+    @PostMapping("/attendChallengeProcess")
+    public ResponseEntity<String> attendChallengeProcess(
+            @RequestParam("userId") int userId,
+            @RequestParam("challengeId") int challengeId,
+            @RequestPart("photo") MultipartFile photo) {
+        
+        if (userId <= 0 || challengeId <= 0 || photo == null || photo.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("필수 요청 파라미터가 누락되었습니다.");
+        }
+        
+        try {
+            challengeService.attendChallenge(userId, challengeId, photo);
+            return ResponseEntity.ok("챌린지 인증 완료!");
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("인증 처리 중 오류 발생");
+        }
+    }
+
+
+
+
+
+
+
+
 }
