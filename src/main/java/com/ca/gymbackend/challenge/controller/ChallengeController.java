@@ -60,7 +60,7 @@ public class ChallengeController {
                 }
 
                 challengeCreateRequest.setChallengeThumbnailPath(imagePath);
-            } 
+            }
 
             // 2. 챌린지 정보 DB에 저장
             challengeService.saveChallengeData(challengeCreateRequest);
@@ -153,9 +153,9 @@ public class ChallengeController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
         List<ChallengeMyRecordsResponse> challengeMyRecordsResponseList = challengeService.getAllMyChallengeList(userId);
-        if (challengeMyRecordsResponseList == null || challengeMyRecordsResponseList.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
+        
+        // 챌린지 목록이 비어있더라도 200 OK를 반환하고 빈 리스트를 보냅니다.
+        // 이는 정상적인 응답이며, 프론트엔드가 이를 처리해야 합니다.
         return ResponseEntity.ok(challengeMyRecordsResponseList);
     }
 
