@@ -64,6 +64,9 @@ public class RoutineController {
         return routineService.getRoutineDetail(routineId);
     }
 
-
+    @GetMapping("/routineSets/{routineId}")
+    public RoutineDetailResponse getFullRoutineDetail(@PathVariable("routineId") int routineId) {
+        return routineService.getRoutineDetail(routineId);
+    }
 
 }

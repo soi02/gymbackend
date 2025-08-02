@@ -89,5 +89,17 @@
         WHERE r.user_id = #{userId}
     </select>
 
+    <select id="findRoutineSetsByRoutineId" resultType="com.ca.gymbackend.routine.dto.RoutineSetDto">
+        SELECT 
+            rs.set_id AS setId,
+            rs.detail_id AS detailId,
+            rs.kg,
+            rs.reps
+        FROM routine r
+        INNER JOIN routine_detail rd ON r.routine_id = rd.routine_id
+        INNER JOIN routine_set rs ON rs.detail_id = rd.detail_id
+        WHERE r.routine_id = #{routineId}
+        ORDER BY rs.detail_id, rs.set_id;
+    </select>
 
 </mapper>

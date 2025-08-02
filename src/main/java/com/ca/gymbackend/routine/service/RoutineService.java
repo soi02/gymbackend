@@ -95,8 +95,9 @@ public class RoutineService {
     public RoutineDetailResponse getRoutineDetail(int routineId) {
         String routineName = routineSqlMapper.findRoutineNameByRoutineId(routineId);
         List<RoutineDetailResponseDto> detailList = routineSqlMapper.findRoutineDetailByRoutineId(routineId);
+        List<RoutineSetDto> sets = routineSqlMapper.findRoutineSetsByRoutineId(routineId);
 
-        return new RoutineDetailResponse(routineName, detailList);
+        return new RoutineDetailResponse(routineName, detailList, sets);
     }
 
 
