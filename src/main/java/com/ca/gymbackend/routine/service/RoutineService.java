@@ -16,6 +16,8 @@ import com.ca.gymbackend.routine.request.RoutineSaveRequest;
 import com.ca.gymbackend.routine.request.RoutineSaveSetDto;
 import com.ca.gymbackend.routine.response.EveryWorkoutList;
 import com.ca.gymbackend.routine.response.RoutineByUserId;
+import com.ca.gymbackend.routine.response.RoutineDetailResponse;
+import com.ca.gymbackend.routine.response.RoutineDetailResponseDto;
 import com.ca.gymbackend.routine.response.WorkoutGuideList;
 
 @Service
@@ -89,6 +91,14 @@ public class RoutineService {
     public List<RoutineByUserId> getRoutinesByUserId(int userId) {
         return routineSqlMapper.findRoutinesByUserId(userId);
     }
+
+    public RoutineDetailResponse getRoutineDetail(int routineId) {
+        String routineName = routineSqlMapper.findRoutineNameByRoutineId(routineId);
+        List<RoutineDetailResponseDto> detailList = routineSqlMapper.findRoutineDetailByRoutineId(routineId);
+
+        return new RoutineDetailResponse(routineName, detailList);
+    }
+
 
 
 }
