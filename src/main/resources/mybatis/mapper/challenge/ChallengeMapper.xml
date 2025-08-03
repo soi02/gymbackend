@@ -242,7 +242,7 @@
     </select> -->
 
 <!-- 챌린지 기본 정보 조회 -->
-<select id="findChallengeBasicInfo" resultType="com.ca.gymbackend.challenge.dto.ChallengeProgressResponse">
+<!-- <select id="findChallengeBasicInfo" resultType="com.ca.gymbackend.challenge.dto.ChallengeProgressResponse">
     SELECT
         c.challenge_title,
         c.challenge_duration_days AS totalPeriod
@@ -252,10 +252,29 @@
         user_challenge uc ON c.challenge_id = uc.challenge_id
     WHERE
         c.challenge_id = #{challengeId} AND uc.user_id = #{userId}
+</select> -->
+
+<!-- 챌린지 상세 진행 상황 조회 (노리개 등급 정보 포함) -->
+<select id="findChallengeProgressInfo" resultType="com.ca.gymbackend.challenge.dto.ChallengeProgressResponse">
+    SELECT
+        c.challenge_title,
+        c.challenge_duration_days AS totalPeriod,
+        ucn.awarded_tier_id,
+        nt.norigae_tier_name AS awardedNorigaeName,
+        nt.norigae_tier_icon_path AS awardedNorigaeIconPath
+    FROM
+        challenge c
+    INNER JOIN
+        user_challenge uc ON c.challenge_id = uc.challenge_id
+    LEFT JOIN
+        user_challenge_norigae ucn ON uc.user_id = ucn.user_id AND uc.challenge_id = ucn.challenge_id
+    LEFT JOIN
+        norigae_tier nt ON ucn.awarded_tier_id = nt.norigae_tier_id  WHERE
+        c.challenge_id = #{challengeId} AND uc.user_id = #{userId}
 </select>
 
 <!-- 노리개 정보 조회 -->
-<select id="findChallengeNorigaeInfo" resultType="com.ca.gymbackend.challenge.dto.ChallengeNorigaeInfo">
+<!-- <select id="findChallengeNorigaeInfo" resultType="com.ca.gymbackend.challenge.dto.ChallengeNorigaeInfo">
     SELECT
         cn.norigae_condition_rate,
         n.norigae_name,
@@ -266,7 +285,7 @@
         norigae n ON cn.norigae_id = n.norigae_id
     WHERE
         cn.challenge_id = #{challengeId}
-</select>
+</select> -->
 
 
 
@@ -314,26 +333,49 @@
     </select>
 
     <!-- 해당 챌린지의 노리개 조건 조회 (노리개ID와 달성률) -->
-    <select id="findNorigaeCondition" resultType="com.ca.gymbackend.challenge.dto.ChallengeNorigaeInfo">
+    <!-- <select id="findNorigaeCondition" resultType="com.ca.gymbackend.challenge.dto.ChallengeNorigaeInfo">
         SELECT norigae_id, norigae_condition_rate
         FROM challenge_norigae
         WHERE challenge_id = #{challengeId}
-    </select>
+    </select> -->
 
     <!-- 챌린지에 노리개가 이미 지급되었는지 확인 -->
-    <select id="checkIfNorigaeAwarded" resultType="int">
+    <!-- <select id="checkIfNorigaeAwarded" resultType="int">
         SELECT COUNT(*)
         FROM challenge_norigae
         WHERE challenge_id = #{challengeId}
-    </select>
+    </select> -->
 
     <!-- 챌린지에 노리개를 지급 (challenge_norigae 테이블에 삽입) -->
-    <insert id="awardNorigaeToChallenge">
+    <!-- <insert id="awardNorigaeToChallenge">
         INSERT INTO challenge_norigae (challenge_id, norigae_id, norigae_condition_rate)
         VALUES (#{challengeId}, #{norigaeId}, #{norigaeConditionRate})
-    </insert>
+    </insert> -->
 
 
+<select id="findTierIdByAchievementRate" resultType="int">
+    SELECT norigae_tier_id
+    FROM norigae_tier
+    WHERE norigae_tier_required_rate &lt;= #{rate}
+    ORDER BY norigae_tier_required_rate DESC
+    LIMIT 1
+</select>
 
+<select id="findUserNorigaeTierId" resultType="int">
+    SELECT awarded_tier_id
+    FROM user_challenge_norigae
+    WHERE user_id = #{userId} AND challenge_id = #{challengeId}
+</select>
+
+<insert id="insertUserNorigae">
+    INSERT INTO user_challenge_norigae (user_id, challenge_id, awarded_tier_id, awarded_date)
+    VALUES (#{userId}, #{challengeId}, #{tierId}, NOW())
+</insert>
+
+<update id="updateUserNorigae">
+    UPDATE user_challenge_norigae
+    SET awarded_tier_id = #{tierId}, awarded_date = NOW()
+    WHERE user_id = #{userId} AND challenge_id = #{challengeId}
+</update>
 
 </mapper>

@@ -99,7 +99,10 @@ public interface ChallengeMapper {
     // public ChallengeProgressResponse findChallengeProgressInfo(@Param("challengeId") int challengeId, @Param("userId") int userId);
 
     // 챌린지 기본 정보 조회
-    public ChallengeProgressResponse findChallengeBasicInfo(@Param("challengeId") int challengeId, @Param("userId") int userId);
+    // public ChallengeProgressResponse findChallengeBasicInfo(@Param("challengeId") int challengeId, @Param("userId") int userId);
+
+    // 챌린지 상세 진행 상황 조회 (노리개 등급 정보 포함)
+    ChallengeProgressResponse findChallengeProgressInfo(@Param("challengeId") int challengeId, @Param("userId") int userId);
 
     // 노리개 정보 조회
     public ChallengeNorigaeInfo findChallengeNorigaeInfo(@Param("challengeId") int challengeId);
@@ -126,16 +129,28 @@ public interface ChallengeMapper {
     // 챌린지의 총 기간 조회
     public int findChallengeTotalDays(@Param("challengeId") int challengeId);
     
-    // 해당 챌린지의 노리개 조건 조회 (노리개ID와 달성률)
-    public ChallengeNorigaeInfo findNorigaeCondition(@Param("challengeId") int challengeId);
+    // // 해당 챌린지의 노리개 조건 조회 (노리개ID와 달성률)
+    // public ChallengeNorigaeInfo findNorigaeCondition(@Param("challengeId") int challengeId);
     
-    // 챌린지에 노리개가 이미 지급되었는지 확인
-    public int checkIfNorigaeAwarded(@Param("challengeId") int challengeId);
+    // // 챌린지에 노리개가 이미 지급되었는지 확인
+    // public int checkIfNorigaeAwarded(@Param("challengeId") int challengeId);
      
-    // 챌린지에 노리개를 지급 (challenge_norigae 테이블에 삽입)
-    public void awardNorigaeToChallenge(@Param("challengeId") int challengeId, 
-                                 @Param("norigaeId") int norigaeId,
-                                 @Param("norigaeConditionRate") double norigaeConditionRate);
+    // // 챌린지에 노리개를 지급 (challenge_norigae 테이블에 삽입)
+    // public void awardNorigaeToChallenge(@Param("challengeId") int challengeId, 
+    //                              @Param("norigaeId") int norigaeId,
+    //                              @Param("norigaeConditionRate") double norigaeConditionRate);
+
+    // 달성률에 맞는 노리개 등급 ID 조회 (가장 높은 등급부터 조회)
+    Integer findTierIdByAchievementRate(@Param("rate") double rate);
+
+    // 사용자가 현재 챌린지에서 획득한 노리개 등급 ID 조회
+    Integer findUserNorigaeTierId(@Param("userId") int userId, @Param("challengeId") int challengeId);
+
+    // 사용자에게 노리개 등급 지급 (INSERT)
+    void insertUserNorigae(@Param("userId") int userId, @Param("challengeId") int challengeId, @Param("tierId") int tierId);
+
+    // 사용자의 노리개 등급 업데이트 (UPDATE)
+    void updateUserNorigae(@Param("userId") int userId, @Param("challengeId") int challengeId, @Param("tierId") int tierId);
 }
 
 

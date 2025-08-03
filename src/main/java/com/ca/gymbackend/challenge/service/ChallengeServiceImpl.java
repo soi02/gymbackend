@@ -240,34 +240,22 @@ public class ChallengeServiceImpl {
     // 챌린지 상세 진행 상황(스티커판)을 조회하는 메서드
 
 public ChallengeProgressResponse getChallengeProgressInfo(int challengeId, int userId) {
-    // 1. 챌린지 기본 정보 조회 (챌린지 제목, 총 기간)
-    ChallengeProgressResponse response = challengeMapper.findChallengeBasicInfo(challengeId, userId);
+    // 1. 챌린지 기본 정보와 노리개 등급 정보 조회
+    ChallengeProgressResponse response = challengeMapper.findChallengeProgressInfo(challengeId, userId);
 
     if (response == null) {
         // 사용자가 이 챌린지에 참여하지 않았거나, 챌린지 ID가 유효하지 않은 경우
         return null;
     }
 
-    // 2. 노리개 정보 조회
-    // 챌린지 ID만으로 노리개를 찾습니다. 노리개는 챌린지당 하나이므로 userId는 필요 없음
-    ChallengeNorigaeInfo norigae = challengeMapper.findChallengeNorigaeInfo(challengeId);
-
-    // 노리개 정보가 존재하면 응답 객체에 추가
-    if (norigae != null) {
-        response.setNorigaeConditionRate(norigae.getNorigaeConditionRate());
-        response.setNorigaeName(norigae.getNorigaeName());
-        response.setNorigaeIconPath(norigae.getNorigaeIconPath());
-    }
-    // 노리개 정보가 없으면, response 객체의 해당 필드는 null로 남아있음
+    // 2. 총 달성 일수 계산
+    int myAchievement = challengeMapper.countAttendedDays(challengeId, userId);
+    response.setMyAchievement(myAchievement);
 
     // 3. 사용자의 출석 기록 조회
     List<ChallengeAttendanceRecord> records = challengeMapper.findAttendanceRecords(challengeId, userId);
 
-    // 4. 총 달성 일수 계산
-    int myAchievement = challengeMapper.countAttendedDays(challengeId, userId);
-    response.setMyAchievement(myAchievement);
-
-    // 5. 스티커판 상태 리스트 생성 (기존 로직과 동일)
+    // 4. 스티커판 상태 리스트 생성 (기존 로직과 동일)
     ChallengeUserInfo challengeUserInfo = challengeMapper.findUserChallengeInfoByUserIdAndChallengeId(userId, challengeId);
     if (challengeUserInfo == null) {
         return null; // 사용자가 챌린지에 참여하지 않은 경우
@@ -326,57 +314,75 @@ public ChallengeProgressResponse getChallengeProgressInfo(int challengeId, int u
 
     // 일일 인증 기록을 저장하는 메서드
 
-    // @Transactional
-    public void attendChallenge(int userId, int challengeId, MultipartFile photo) {
-        LocalDate today = LocalDate.now();
-        
-        try {
-            // 1. 오늘 날짜로 이미 인증했는지 확인
-            int existingRecordCount = challengeMapper.countTodayAttendance(userId, challengeId, today);
-            if (existingRecordCount > 0) {
-                throw new IllegalStateException("오늘 이미 인증했습니다.");
-            }
-            
-            // 2. 사진 파일 업로드
-            String photoUrl = saveAttendancePhoto(photo); 
+@Transactional
+public void attendChallenge(int userId, int challengeId, MultipartFile photo) {
+    LocalDate today = LocalDate.now();
 
-            // 3. DB에 출석 기록 저장
-            challengeMapper.insertAttendanceRecord(userId, challengeId, today, photoUrl);
-
-            // 4. 노리개 지급 로직 추가
-            // 총 출석 일수와 챌린지 총 기간을 가져와 달성률 계산
-            int totalAttendedDays = challengeMapper.countAttendedDays(challengeId, userId);
-            int totalChallengeDays = challengeMapper.findChallengeTotalDays(challengeId);
-            
-            // 챌린지 총 기간이 0이 아니어야 계산 가능
-            if (totalChallengeDays > 0) {
-                double achievementRate = (double) totalAttendedDays / totalChallengeDays;
-                
-                // 해당 챌린지의 노리개 조건 조회
-                ChallengeNorigaeInfo norigaeCondition = challengeMapper.findNorigaeCondition(challengeId);
-                
-                // 노리개 조건이 있고, 아직 노리개를 획득하지 않았을 때만 로직 실행
-                if (norigaeCondition != null) {
-                    // 노리개 획득 조건 달성 여부 확인
-                    if (achievementRate >= norigaeCondition.getNorigaeConditionRate()) {
-                        // 이미 노리개가 지급되었는지 확인
-                        boolean norigaeAlreadyAwarded = challengeMapper.checkIfNorigaeAwarded(challengeId) > 0;
-                        
-                        if (!norigaeAlreadyAwarded) {
-                            // 노리개 지급!
-                            challengeMapper.awardNorigaeToChallenge(challengeId, norigaeCondition.getNorigaeId(), norigaeCondition.getNorigaeConditionRate());
-                            // 또는 다른 로직 (예: 사용자에게 알림)
-                            System.out.println("챌린지 " + challengeId + "에 대한 노리개가 지급되었습니다!");
-                        }
-                    }
-                }
-            }
-
-        } catch (IOException e) {
-            throw new RuntimeException("사진 파일 업로드 실패", e);
+    try {
+        // 1. 오늘 날짜로 이미 인증했는지 확인
+        int existingRecordCount = challengeMapper.countTodayAttendance(userId, challengeId, today);
+        if (existingRecordCount > 0) {
+            System.out.println("DEBUG: 이미 오늘 날짜로 인증했으므로 로직 중단.");
+            throw new IllegalStateException("오늘 이미 인증했습니다.");
         }
 
+        // 2. 사진 파일 업로드
+        String photoUrl = saveAttendancePhoto(photo); 
+        System.out.println("DEBUG: 사진 파일 업로드 성공. URL: " + photoUrl);
+
+        // 3. DB에 출석 기록 저장
+        challengeMapper.insertAttendanceRecord(userId, challengeId, today, photoUrl);
+        System.out.println("DEBUG: 출석 기록 DB 저장 성공.");
+
+        // 4. 노리개 지급 (시나리오 1)
+        // 총 달성 일수와 챌린지 총 기간을 가져와 달성률 계산
+        int totalAttendedDays = challengeMapper.countAttendedDays(challengeId, userId);
+        int totalChallengeDays = challengeMapper.findChallengeTotalDays(challengeId);
+        
+        System.out.println("DEBUG: totalAttendedDays = " + totalAttendedDays);
+        System.out.println("DEBUG: totalChallengeDays = " + totalChallengeDays);
+
+        if (totalChallengeDays > 0) {
+            System.out.println("DEBUG: totalChallengeDays > 0 조건 만족.");
+            // 달성률 계산
+            double achievementRate = (double) totalAttendedDays / totalChallengeDays * 100;
+            // 달성률을 정수형으로 변환 (소수점 버림)
+            int intAchievementRate = (int) achievementRate;
+            System.out.println("DEBUG: achievementRate = " + achievementRate + ", intAchievementRate = " + intAchievementRate);
+
+            // 달성률에 맞는 노리개 등급 조회
+            Integer awardedTierId = challengeMapper.findTierIdByAchievementRate(intAchievementRate);
+            System.out.println("DEBUG: awardedTierId = " + awardedTierId); 
+            
+            if (awardedTierId != null) {
+                System.out.println("DEBUG: awardedTierId가 null이 아님. 노리개 지급 로직 계속 진행.");
+                // 현재 사용자가 획득한 노리개 등급이 있는지 확인
+                Integer existingTierId = challengeMapper.findUserNorigaeTierId(userId, challengeId);
+                System.out.println("DEBUG: 기존 노리개 등급 ID (existingTierId) = " + existingTierId);
+                
+                if (existingTierId == null) {
+                    // 획득한 등급이 없다면 새로 지급
+                    challengeMapper.insertUserNorigae(userId, challengeId, awardedTierId);
+                    System.out.println("INFO: 새로운 노리개 등급(" + awardedTierId + ")이 지급되었습니다! (INSERT)");
+                } else if (awardedTierId > existingTierId) {
+                    // 기존 등급보다 더 높은 등급을 달성했다면 업데이트
+                    challengeMapper.updateUserNorigae(userId, challengeId, awardedTierId);
+                    System.out.println("INFO: 노리개 등급이 " + existingTierId + "에서 " + awardedTierId + "로 업데이트되었습니다! (UPDATE)");
+                } else {
+                    System.out.println("INFO: 현재 등급보다 높은 등급이 아니므로 변경 없음.");
+                }
+            } else {
+                System.out.println("DEBUG: awardedTierId가 null임. 노리개 지급 로직 중단.");
+            }
+        } else {
+            System.out.println("DEBUG: totalChallengeDays가 0 이하임. 노리개 지급 로직 실행 안됨.");
+        }
+
+    } catch (IOException e) {
+        System.err.println("ERROR: 사진 파일 업로드 실패: " + e.getMessage());
+        throw new RuntimeException("사진 파일 업로드 실패", e);
     }
+}
 
 
 }
