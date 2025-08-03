@@ -43,11 +43,45 @@ public class ChallengeServiceImpl {
     private final ChallengeMapper challengeMapper;
 
     @Autowired
-    @Qualifier("fileRootPath") // application.yml 또는 @Bean에서 설정한 경로 주입
+    @Qualifier("fileRootPath")
     private String rootPath;
 
-    // 챌린지 생성
-    // 1. 이미지 저장
+
+    @Transactional
+    public void registerChallenge(ChallengeCreateRequest challengeCreateRequest) {
+        
+        // 1. 챌린지 썸네일 이미지 저장
+        String imagePath = null;
+        MultipartFile thumbnailImage = challengeCreateRequest.getChallengeThumbnailImage();
+
+        if (thumbnailImage != null && !thumbnailImage.isEmpty()) {
+            try {
+                imagePath = saveChallengeThumbnailImage(thumbnailImage.getBytes(), thumbnailImage.getOriginalFilename());
+            } catch (IOException e) {
+                // 예외 처리
+                throw new RuntimeException("이미지 저장 중 오류가 발생했습니다.", e);
+            }
+        }
+
+        // 2. 챌린지 정보 DB에 저장
+        // MyBatis의 useGeneratedKeys를 사용하기 위해 DTO에 이미지 경로를 수동으로 설정합니다.
+        challengeCreateRequest.setChallengeThumbnailPath(imagePath);
+        challengeMapper.createChallenge(challengeCreateRequest);
+
+        // 3. 챌린지-키워드 매핑
+        // createChallenge 호출 후, DTO의 challengeId 필드에 DB에서 생성된 ID가 자동으로 채워집니다.
+        int generatedChallengeId = challengeCreateRequest.getChallengeId();
+        List<Integer> selectedKeywordIds = challengeCreateRequest.getChallengeKeywordIds();
+
+        if (selectedKeywordIds != null && !selectedKeywordIds.isEmpty()) {
+            for (Integer keywordId : selectedKeywordIds) {
+                if (keywordId != null) {
+                    challengeMapper.createChallengeKeyword(generatedChallengeId, keywordId);
+                }
+            }
+        }
+    }
+
     public String saveChallengeThumbnailImage(byte[] buffer, String originalFilename) {
         try {
             String uuid = UUID.randomUUID().toString();
@@ -66,41 +100,16 @@ public class ChallengeServiceImpl {
             Path filePath = dirPath.resolve(filename);
             System.out.println("✅ 저장 경로: " + filePath.toString());
 
-
+            // 썸네일 라이브러리 사용
             Thumbnails.of(inputStream)
-                      .scale(1.0)
-                      .toFile(filePath.toFile());
+                    .scale(1.0)
+                    .toFile(filePath.toFile());
 
+            // DB에 저장할 경로 반환
             return "/challengeImages/" + todayPath + filename;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
-        }
-    }
-
-
-    // 2. 챌린지 정보 DB에 저장 insert
-    public void saveChallengeData(ChallengeCreateRequest challengeCreateRequest) {
-        challengeMapper.createChallenge(challengeCreateRequest);
-    }
-
-    // 3. 방금 생성된 챌린지 ID 가져오기 조회
-    public int getGeneratedChallengeId() {
-        return challengeMapper.findLastInsertedChallengeId();
-    }
-
-    // 4. 챌린지-키워드 연결 insert
-    public void saveChallengekeywordMapping(int challengeId, List<String> selectedKeywordNameList) {
-        if (selectedKeywordNameList != null && !selectedKeywordNameList.isEmpty()) { // null 체크와 비어있는지 체크
-            for (String keywordName : selectedKeywordNameList) { // 키워드 이름을 순회
-                Integer keywordId = challengeMapper.findKeywordIdByKeywordName(keywordName); // 키워드 이름으로 키워드 ID 조회
-
-                if (keywordId != null) {
-                    challengeMapper.createChallengeKeyword(challengeId, keywordId);
-                } else {
-                    System.err.println("경고: 키워드 '" + keywordName + "'에 해당하는 ID를 찾을 수 없습니다. 챌린지 " + challengeId + "에 연결되지 않았습니다.");
-                }
-            }
         }
     }
     
@@ -109,6 +118,26 @@ public class ChallengeServiceImpl {
     public List<ChallengeCreateRequest> getAllChallengeList() {
         return challengeMapper.findAllChallengeList();
     }
+
+    // 카테고리 ID로 챌린지 목록 조회
+    public List<ChallengeCreateRequest> getChallengesByCategoryId(Integer categoryId) {
+        if (categoryId == null || categoryId <= 0) {
+            throw new IllegalArgumentException("유효하지 않은 카테고리 ID입니다.");
+        }
+        
+        // 1. 카테고리별 챌린지 목록 조회 (키워드 정보는 없는 상태)
+        List<ChallengeCreateRequest> challenges = challengeMapper.findChallengesByCategoryId(categoryId);
+        
+        // 2. 각 챌린지에 대해 키워드 ID 목록을 조회하여 DTO에 설정
+        for (ChallengeCreateRequest challenge : challenges) {
+            List<Integer> keywordIds = challengeMapper.findKeywordIdsByChallengeId(challenge.getChallengeId());
+            challenge.setChallengeKeywordIds(keywordIds);
+        }
+        
+        return challenges;
+    }
+
+
 
 
 
@@ -150,6 +179,8 @@ public class ChallengeServiceImpl {
 
         return challengeDetailResponse;
     }
+
+
 
 
 
@@ -207,6 +238,7 @@ public class ChallengeServiceImpl {
 
 
 
+
     // 특정 사용자의 특정 챌린지 상세 정보 & 인증 기록 조회
     public ChallengeMyRecordDetailResponse getMyRecordDetail(int userId, int challengeId) {
 
@@ -238,58 +270,57 @@ public class ChallengeServiceImpl {
 
     // 노리개
     // 챌린지 상세 진행 상황(스티커판)을 조회하는 메서드
+    public ChallengeProgressResponse getChallengeProgressInfo(int challengeId, int userId) {
+        // 1. 챌린지 기본 정보와 노리개 등급 정보 조회
+        ChallengeProgressResponse response = challengeMapper.findChallengeProgressInfo(challengeId, userId);
 
-public ChallengeProgressResponse getChallengeProgressInfo(int challengeId, int userId) {
-    // 1. 챌린지 기본 정보와 노리개 등급 정보 조회
-    ChallengeProgressResponse response = challengeMapper.findChallengeProgressInfo(challengeId, userId);
-
-    if (response == null) {
-        // 사용자가 이 챌린지에 참여하지 않았거나, 챌린지 ID가 유효하지 않은 경우
-        return null;
-    }
-
-    // 2. 총 달성 일수 계산
-    int myAchievement = challengeMapper.countAttendedDays(challengeId, userId);
-    response.setMyAchievement(myAchievement);
-
-    // 3. 사용자의 출석 기록 조회
-    List<ChallengeAttendanceRecord> records = challengeMapper.findAttendanceRecords(challengeId, userId);
-
-    // 4. 스티커판 상태 리스트 생성 (기존 로직과 동일)
-    ChallengeUserInfo challengeUserInfo = challengeMapper.findUserChallengeInfoByUserIdAndChallengeId(userId, challengeId);
-    if (challengeUserInfo == null) {
-        return null; // 사용자가 챌린지에 참여하지 않은 경우
-    }
-    LocalDate startDate = challengeUserInfo.getPersonalJoinDate().toLocalDate();
-    LocalDate endDate = challengeUserInfo.getPersonalEndDate().toLocalDate();
-    
-    List<ChallengeAttendanceStatus> statusList = new ArrayList<>();
-    Map<LocalDate, String> attendedDates = records.stream()
-            .collect(Collectors.toMap(ChallengeAttendanceRecord::getAttendanceDate, ChallengeAttendanceRecord::getAttendanceImagePath));
-
-    LocalDate currentDate = startDate;
-    while (!currentDate.isAfter(endDate)) {
-        ChallengeAttendanceStatus status = new ChallengeAttendanceStatus();
-        status.setRecordDate(currentDate);
-
-        if (currentDate.isAfter(LocalDate.now())) {
-            status.setStatus("미래");
-        } else if (attendedDates.containsKey(currentDate)) {
-            status.setStatus("인증완료");
-            status.setPhotoUrl(attendedDates.get(currentDate));
-        } else {
-            status.setStatus("결석");
+        if (response == null) {
+            // 사용자가 이 챌린지에 참여하지 않았거나, 챌린지 ID가 유효하지 않은 경우
+            return null;
         }
-        statusList.add(status);
-        currentDate = currentDate.plusDays(1);
+
+        // 2. 총 달성 일수 계산
+        int myAchievement = challengeMapper.countAttendedDays(challengeId, userId);
+        response.setMyAchievement(myAchievement);
+
+        // 3. 사용자의 출석 기록 조회
+        List<ChallengeAttendanceRecord> records = challengeMapper.findAttendanceRecords(challengeId, userId);
+
+        // 4. 스티커판 상태 리스트 생성 (기존 로직과 동일)
+        ChallengeUserInfo challengeUserInfo = challengeMapper.findUserChallengeInfoByUserIdAndChallengeId(userId, challengeId);
+        if (challengeUserInfo == null) {
+            return null; // 사용자가 챌린지에 참여하지 않은 경우
+        }
+        LocalDate startDate = challengeUserInfo.getPersonalJoinDate().toLocalDate();
+        LocalDate endDate = challengeUserInfo.getPersonalEndDate().toLocalDate();
+        
+        List<ChallengeAttendanceStatus> statusList = new ArrayList<>();
+        Map<LocalDate, String> attendedDates = records.stream()
+                .collect(Collectors.toMap(ChallengeAttendanceRecord::getAttendanceDate, ChallengeAttendanceRecord::getAttendanceImagePath));
+
+        LocalDate currentDate = startDate;
+        while (!currentDate.isAfter(endDate)) {
+            ChallengeAttendanceStatus status = new ChallengeAttendanceStatus();
+            status.setRecordDate(currentDate);
+
+            if (currentDate.isAfter(LocalDate.now())) {
+                status.setStatus("미래");
+            } else if (attendedDates.containsKey(currentDate)) {
+                status.setStatus("인증완료");
+                status.setPhotoUrl(attendedDates.get(currentDate));
+            } else {
+                status.setStatus("결석");
+            }
+            statusList.add(status);
+            currentDate = currentDate.plusDays(1);
+        }
+        
+        response.setChallengeAttendanceStatus(statusList);
+        return response;
     }
-    
-    response.setChallengeAttendanceStatus(statusList);
-    return response;
-}
 
 
-    // **새로 추가된 메서드**: 일일 인증 사진을 로컬에 저장하고 URL을 반환합니다.
+    // 일일 인증 사진을 로컬에 저장하고 URL을 반환
     private String saveAttendancePhoto(MultipartFile photo) throws IOException {
         String uuid = UUID.randomUUID().toString();
         long currentTime = System.currentTimeMillis();
@@ -313,76 +344,79 @@ public ChallengeProgressResponse getChallengeProgressInfo(int challengeId, int u
 
 
     // 일일 인증 기록을 저장하는 메서드
+    @Transactional
+    public void attendChallenge(int userId, int challengeId, MultipartFile photo) {
+        LocalDate today = LocalDate.now();
 
-@Transactional
-public void attendChallenge(int userId, int challengeId, MultipartFile photo) {
-    LocalDate today = LocalDate.now();
+        try {
+            // 1. 오늘 날짜로 이미 인증했는지 확인
+            int existingRecordCount = challengeMapper.countTodayAttendance(userId, challengeId, today);
+            if (existingRecordCount > 0) {
+                System.out.println("DEBUG: 이미 오늘 날짜로 인증했으므로 로직 중단.");
+                throw new IllegalStateException("오늘 이미 인증했습니다.");
+            }
 
-    try {
-        // 1. 오늘 날짜로 이미 인증했는지 확인
-        int existingRecordCount = challengeMapper.countTodayAttendance(userId, challengeId, today);
-        if (existingRecordCount > 0) {
-            System.out.println("DEBUG: 이미 오늘 날짜로 인증했으므로 로직 중단.");
-            throw new IllegalStateException("오늘 이미 인증했습니다.");
-        }
+            // 2. 사진 파일 업로드
+            String photoUrl = saveAttendancePhoto(photo); 
+            System.out.println("DEBUG: 사진 파일 업로드 성공. URL: " + photoUrl);
 
-        // 2. 사진 파일 업로드
-        String photoUrl = saveAttendancePhoto(photo); 
-        System.out.println("DEBUG: 사진 파일 업로드 성공. URL: " + photoUrl);
+            // 3. DB에 출석 기록 저장
+            challengeMapper.insertAttendanceRecord(userId, challengeId, today, photoUrl);
+            System.out.println("DEBUG: 출석 기록 DB 저장 성공.");
 
-        // 3. DB에 출석 기록 저장
-        challengeMapper.insertAttendanceRecord(userId, challengeId, today, photoUrl);
-        System.out.println("DEBUG: 출석 기록 DB 저장 성공.");
-
-        // 4. 노리개 지급 (시나리오 1)
-        // 총 달성 일수와 챌린지 총 기간을 가져와 달성률 계산
-        int totalAttendedDays = challengeMapper.countAttendedDays(challengeId, userId);
-        int totalChallengeDays = challengeMapper.findChallengeTotalDays(challengeId);
-        
-        System.out.println("DEBUG: totalAttendedDays = " + totalAttendedDays);
-        System.out.println("DEBUG: totalChallengeDays = " + totalChallengeDays);
-
-        if (totalChallengeDays > 0) {
-            System.out.println("DEBUG: totalChallengeDays > 0 조건 만족.");
-            // 달성률 계산
-            double achievementRate = (double) totalAttendedDays / totalChallengeDays * 100;
-            // 달성률을 정수형으로 변환 (소수점 버림)
-            int intAchievementRate = (int) achievementRate;
-            System.out.println("DEBUG: achievementRate = " + achievementRate + ", intAchievementRate = " + intAchievementRate);
-
-            // 달성률에 맞는 노리개 등급 조회
-            Integer awardedTierId = challengeMapper.findTierIdByAchievementRate(intAchievementRate);
-            System.out.println("DEBUG: awardedTierId = " + awardedTierId); 
+            // 4. 노리개 지급 (시나리오 1)
+            // 총 달성 일수와 챌린지 총 기간을 가져와 달성률 계산
+            int totalAttendedDays = challengeMapper.countAttendedDays(challengeId, userId);
+            int totalChallengeDays = challengeMapper.findChallengeTotalDays(challengeId);
             
-            if (awardedTierId != null) {
-                System.out.println("DEBUG: awardedTierId가 null이 아님. 노리개 지급 로직 계속 진행.");
-                // 현재 사용자가 획득한 노리개 등급이 있는지 확인
-                Integer existingTierId = challengeMapper.findUserNorigaeTierId(userId, challengeId);
-                System.out.println("DEBUG: 기존 노리개 등급 ID (existingTierId) = " + existingTierId);
+            System.out.println("DEBUG: totalAttendedDays = " + totalAttendedDays);
+            System.out.println("DEBUG: totalChallengeDays = " + totalChallengeDays);
+
+            if (totalChallengeDays > 0) {
+                System.out.println("DEBUG: totalChallengeDays > 0 조건 만족.");
+                // 달성률 계산
+                double achievementRate = (double) totalAttendedDays / totalChallengeDays * 100;
+                // 달성률을 정수형으로 변환 (소수점 버림)
+                int intAchievementRate = (int) achievementRate;
+                System.out.println("DEBUG: achievementRate = " + achievementRate + ", intAchievementRate = " + intAchievementRate);
+
+                // 달성률에 맞는 노리개 등급 조회
+                Integer awardedTierId = challengeMapper.findTierIdByAchievementRate(intAchievementRate);
+                System.out.println("DEBUG: awardedTierId = " + awardedTierId); 
                 
-                if (existingTierId == null) {
-                    // 획득한 등급이 없다면 새로 지급
-                    challengeMapper.insertUserNorigae(userId, challengeId, awardedTierId);
-                    System.out.println("INFO: 새로운 노리개 등급(" + awardedTierId + ")이 지급되었습니다! (INSERT)");
-                } else if (awardedTierId > existingTierId) {
-                    // 기존 등급보다 더 높은 등급을 달성했다면 업데이트
-                    challengeMapper.updateUserNorigae(userId, challengeId, awardedTierId);
-                    System.out.println("INFO: 노리개 등급이 " + existingTierId + "에서 " + awardedTierId + "로 업데이트되었습니다! (UPDATE)");
+                if (awardedTierId != null) {
+                    System.out.println("DEBUG: awardedTierId가 null이 아님. 노리개 지급 로직 계속 진행.");
+                    // 현재 사용자가 획득한 노리개 등급이 있는지 확인
+                    Integer existingTierId = challengeMapper.findUserNorigaeTierId(userId, challengeId);
+                    System.out.println("DEBUG: 기존 노리개 등급 ID (existingTierId) = " + existingTierId);
+                    
+                    if (existingTierId == null) {
+                        // 획득한 등급이 없다면 새로 지급
+                        challengeMapper.insertUserNorigae(userId, challengeId, awardedTierId);
+                        System.out.println("INFO: 새로운 노리개 등급(" + awardedTierId + ")이 지급되었습니다! (INSERT)");
+                    } else if (awardedTierId > existingTierId) {
+                        // 기존 등급보다 더 높은 등급을 달성했다면 업데이트
+                        challengeMapper.updateUserNorigae(userId, challengeId, awardedTierId);
+                        System.out.println("INFO: 노리개 등급이 " + existingTierId + "에서 " + awardedTierId + "로 업데이트되었습니다! (UPDATE)");
+                    } else {
+                        System.out.println("INFO: 현재 등급보다 높은 등급이 아니므로 변경 없음.");
+                    }
                 } else {
-                    System.out.println("INFO: 현재 등급보다 높은 등급이 아니므로 변경 없음.");
+                    System.out.println("DEBUG: awardedTierId가 null임. 노리개 지급 로직 중단.");
                 }
             } else {
-                System.out.println("DEBUG: awardedTierId가 null임. 노리개 지급 로직 중단.");
+                System.out.println("DEBUG: totalChallengeDays가 0 이하임. 노리개 지급 로직 실행 안됨.");
             }
-        } else {
-            System.out.println("DEBUG: totalChallengeDays가 0 이하임. 노리개 지급 로직 실행 안됨.");
+
+        } catch (IOException e) {
+            System.err.println("ERROR: 사진 파일 업로드 실패: " + e.getMessage());
+            throw new RuntimeException("사진 파일 업로드 실패", e);
         }
-
-    } catch (IOException e) {
-        System.err.println("ERROR: 사진 파일 업로드 실패: " + e.getMessage());
-        throw new RuntimeException("사진 파일 업로드 실패", e);
     }
-}
 
 
+
+
+
+    
 }
