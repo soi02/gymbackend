@@ -126,16 +126,23 @@ public interface ChallengeMapper {
     public int findChallengeTotalDays(@Param("challengeId") int challengeId);
     
     // 달성률에 맞는 노리개 등급 ID 조회 (가장 높은 등급부터 조회)
-    Integer findTierIdByAchievementRate(@Param("rate") double rate);
+    public Integer findTierIdByAchievementRate(@Param("rate") double rate);
 
     // 사용자가 현재 챌린지에서 획득한 노리개 등급 ID 조회
-    Integer findUserNorigaeTierId(@Param("userId") int userId, @Param("challengeId") int challengeId);
+    public Integer findUserNorigaeTierId(@Param("userId") int userId, @Param("challengeId") int challengeId);
 
     // 사용자에게 노리개 등급 지급 (INSERT)
-    void insertUserNorigae(@Param("userId") int userId, @Param("challengeId") int challengeId, @Param("tierId") int tierId);
+    public void insertUserNorigae(@Param("userId") int userId, @Param("challengeId") int challengeId, @Param("tierId") int tierId);
 
     // 사용자의 노리개 등급 업데이트 (UPDATE)
-    void updateUserNorigae(@Param("userId") int userId, @Param("challengeId") int challengeId, @Param("tierId") int tierId);
+    public void updateUserNorigae(@Param("userId") int userId, @Param("challengeId") int challengeId, @Param("tierId") int tierId);
+
+
+
+
+
+    // 키워드에 따른 챌린지 추천
+    public List<ChallengeCreateRequest> findRecommendedChallengeList(@Param("keywordIds") List<Integer> keywordIds);
 }
 
 

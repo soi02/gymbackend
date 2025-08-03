@@ -41,8 +41,8 @@ public class ChallengeController {
         System.out.println("받은 챌린지 데이터: " + challengeCreateRequest);
 
         // 로그인 사용자 확인 로직
-        int creatorId = challengeCreateRequest.getChallengeCreator();
-        if (creatorId <= 0) {
+        String creatorName = challengeCreateRequest.getChallengeCreator();
+        if (creatorName == null || creatorName.isEmpty()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 사용자만 챌린지를 생성할 수 있습니다.");
         }
 
@@ -228,6 +228,22 @@ public class ChallengeController {
 
 
 
+
+
+    // 키워드에 따른 챌린지 추천
+    @GetMapping("/getRecommendedChallengeListProcess")
+    public ResponseEntity<List<ChallengeCreateRequest>> getRecommendedChallengeListProcess(
+        @RequestParam("keywordIds") List<Integer> keywordIds
+    ) {
+        System.out.println("[추천 챌린지 조회] keywordIds: " + keywordIds);
+        try {
+            List<ChallengeCreateRequest> recommendations = challengeService.getRecommendedChallengeList(keywordIds);
+            return ResponseEntity.ok(recommendations);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
 
 
 

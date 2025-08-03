@@ -422,4 +422,10 @@ public class ChallengeServiceImpl {
 
 
 
+    // 키워드에 따른 챌린지 추천
+    public List<ChallengeCreateRequest> getRecommendedChallengeList(List<Integer> keywordIds) {
+        return challengeMapper.findRecommendedChallengeList(keywordIds);
+    }
+
+
 }

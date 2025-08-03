@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ChallengeCreateRequest {
     private int challengeId;
-    private int challengeCreator;
+    private String challengeCreator;
     private String challengeTitle;
     private String challengeDescription;
     private int challengeMaxMembers;

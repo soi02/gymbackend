@@ -122,9 +122,9 @@
     
         FROM
             challenge c
-        INNER JOIN
+        LEFT JOIN
             challenge_keyword ck ON c.challenge_id = ck.challenge_id
-        INNER JOIN
+        LEFT JOIN
             keyword k ON ck.keyword_id = k.keyword_id
         WHERE
             c.challenge_id = #{challengeId}
@@ -359,6 +359,29 @@
         WHERE user_id = #{userId} AND challenge_id = #{challengeId}
     </update>
 
+
+
+
+
+    <!-- 키워드에 따른 챌린지 추천 -->
+    <select id="findRecommendedChallengeList" resultType="com.ca.gymbackend.challenge.dto.ChallengeCreateRequest">
+        SELECT
+            c.challenge_id, c.challenge_title, c.challenge_creator, c.challenge_description,
+            c.challenge_recruit_start_date, c.challenge_recruit_end_date, c.challenge_duration_days,
+            c.challenge_thumbnail_path, c.challenge_participant_count, c.created_at
+        FROM
+            challenge c
+        JOIN
+            challenge_keyword ck ON c.challenge_id = ck.challenge_id
+        WHERE
+            ck.keyword_id IN
+            <foreach item="item" index="index" collection="keywordIds" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        GROUP BY c.challenge_id
+        ORDER BY RAND()
+        LIMIT 5
+    </select>
 
 
 </mapper>
