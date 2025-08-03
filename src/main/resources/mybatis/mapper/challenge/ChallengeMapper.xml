@@ -66,6 +66,17 @@
     </select>
 
 
+
+
+    <select id="findAllKeywordCategories" resultType="com.ca.gymbackend.challenge.dto.ChallengeKeywordCategory">
+        SELECT
+            keyword_category_id AS keywordCategoryId,
+            keyword_category_name AS keywordCategoryName
+        FROM
+            keyword_category
+    </select>
+
+
     <!-- 챌린지 목록 가져오기 (카테고리별 필터 적용) -->
     <select id="findChallengesByCategoryId" parameterType="int" resultType="com.ca.gymbackend.challenge.dto.ChallengeCreateRequest">
         SELECT

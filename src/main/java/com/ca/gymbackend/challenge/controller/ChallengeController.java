@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.ca.gymbackend.challenge.dto.ChallengeCreateRequest;
 import com.ca.gymbackend.challenge.dto.ChallengeDetailResponse;
+import com.ca.gymbackend.challenge.dto.ChallengeKeywordCategory;
 import com.ca.gymbackend.challenge.dto.ChallengeMyRecordDetailResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeMyRecordsResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeProgressResponse;
@@ -32,6 +33,7 @@ public class ChallengeController {
     
     private final ChallengeServiceImpl challengeService;
 
+    // 챌린지 생성
     @PostMapping("/registerChallengeProcess")
     public ResponseEntity<String> registerChallengeProcess(@ModelAttribute ChallengeCreateRequest challengeCreateRequest) {
         
@@ -57,55 +59,6 @@ public class ChallengeController {
 
 
 
-    // // 챌린지 생성
-    // @PostMapping("/registerChallengeProcess")
-    // public ResponseEntity<String> registerChallengeProcess(
-    //         @ModelAttribute ChallengeCreateRequest challengeCreateRequest,
-    //         @RequestParam(value = "challengeKeywordIds", required = false) List<Integer> challengeKeywordIds,
-    //         @RequestPart(value = "challengeThumbnailImage", required = false) MultipartFile challengeThumbnailImage) {
-    
-    //     System.out.println("컨트롤러 진입");
-    //     System.out.println("받은 챌린지 데이터: " + challengeCreateRequest);
-    //     System.out.println("받은 키워드: " + challengeKeywordIds);
-    //     System.out.println("받은 썸네일 파일 이름: " + (challengeThumbnailImage != null ? challengeThumbnailImage.getOriginalFilename() : "없음"));
-
-    //     int creatorId = challengeCreateRequest.getChallengeCreator();
-    //     if (creatorId <= 0) { // int 타입의 경우 0보다 큰 값인지 확인
-    //         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 사용자만 챌린지를 생성할 수 있습니다.");
-    //     }
-
-    //     try {
-    //         // 1. 이미지 저장
-    //         if (challengeThumbnailImage != null && !challengeThumbnailImage.isEmpty()) {
-    //             System.out.println("이미지 업로드 시작: " + challengeThumbnailImage.getOriginalFilename());
-    //             String imagePath = challengeService.saveChallengeThumbnailImage(
-    //                 challengeThumbnailImage.getBytes(),
-    //                 challengeThumbnailImage.getOriginalFilename());
-
-    //             if (imagePath == null) {
-    //                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("이미지 저장 중 오류 발생");
-    //             }
-
-    //             challengeCreateRequest.setChallengeThumbnailPath(imagePath);
-    //         }
-
-    //         // 2. 챌린지 정보 DB에 저장
-    //         challengeService.saveChallengeData(challengeCreateRequest);
-
-    //         // 3. 방금 생성된 챌린지 ID 가져오기
-    //         int generatedChallengeId = challengeCreateRequest.getChallengeId();
-
-    //         // 4. 챌린지 - 키워드 연결 매핑
-    //         challengeService.saveChallengeKeywordMapping(generatedChallengeId, challengeKeywordIds);
-
-    //         return ResponseEntity.status(HttpStatus.CREATED).body("챌린지 생성 완료");
-
-    //     } catch (Exception e) {
-    //         e.printStackTrace();
-    //         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("챌린지 생성 실패: " + e.getMessage());
-    //     }
-    // }
-
 
     // 챌린지 리스트 가져오기
     @GetMapping("/getAllChallengeListProcess")
@@ -115,6 +68,14 @@ public class ChallengeController {
         return ResponseEntity.ok(challengeCreateRequestList);
     }
 
+
+    // 모든 키워드 카테고리 목록을 가져오는 API
+    @GetMapping("/getAllCategories")
+    public ResponseEntity<List<ChallengeKeywordCategory>> getAllCategories() {
+        System.out.println("[모든 카테고리 목록 응답]");
+        List<ChallengeKeywordCategory> categories = challengeService.getAllKeywordCategories();
+        return ResponseEntity.ok(categories);
+    }
 
     // 카테고리별 챌린지 목록 조회
     @GetMapping("/getChallengesByCategoryId/{categoryId}")

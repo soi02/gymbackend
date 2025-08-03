@@ -5,9 +5,9 @@ import com.ca.gymbackend.challenge.dto.ChallengeAttendanceStatus;
 import com.ca.gymbackend.challenge.dto.ChallengeCreateRequest;
 import com.ca.gymbackend.challenge.dto.ChallengeDetailResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeInfo;
+import com.ca.gymbackend.challenge.dto.ChallengeKeywordCategory;
 import com.ca.gymbackend.challenge.dto.ChallengeMyRecordDetailResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeMyRecordsResponse;
-import com.ca.gymbackend.challenge.dto.ChallengeNorigaeInfo;
 import com.ca.gymbackend.challenge.dto.ChallengeProgressResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeRecordInfo;
 import com.ca.gymbackend.challenge.dto.ChallengeUserInfo;
@@ -15,12 +15,10 @@ import com.ca.gymbackend.challenge.mapper.ChallengeMapper;
 import lombok.RequiredArgsConstructor;
 import net.coobird.thumbnailator.Thumbnails;
 
-import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-// import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
@@ -117,6 +115,11 @@ public class ChallengeServiceImpl {
     // 챌린지 전체 목록 조회
     public List<ChallengeCreateRequest> getAllChallengeList() {
         return challengeMapper.findAllChallengeList();
+    }
+
+
+    public List<ChallengeKeywordCategory> getAllKeywordCategories() {
+        return challengeMapper.findAllKeywordCategories();
     }
 
     // 카테고리 ID로 챌린지 목록 조회
@@ -418,5 +421,5 @@ public class ChallengeServiceImpl {
 
 
 
-    
+
 }

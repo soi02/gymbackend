@@ -10,8 +10,8 @@ import com.ca.gymbackend.challenge.dto.ChallengeAttendanceRecord;
 import com.ca.gymbackend.challenge.dto.ChallengeCreateRequest;
 import com.ca.gymbackend.challenge.dto.ChallengeDetailResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeInfo;
+import com.ca.gymbackend.challenge.dto.ChallengeKeywordCategory;
 import com.ca.gymbackend.challenge.dto.ChallengeMyRecordsResponse;
-import com.ca.gymbackend.challenge.dto.ChallengeNorigaeInfo;
 import com.ca.gymbackend.challenge.dto.ChallengeProgressResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeRecordInfo;
 import com.ca.gymbackend.challenge.dto.ChallengeUserInfo;
@@ -34,7 +34,12 @@ public interface ChallengeMapper {
     public List<ChallengeCreateRequest> findAllChallengeList();
 
     // 챌린지 ID를 기준으로 키워드 ID 목록 조회
-    List<Integer> findKeywordIdsByChallengeId(int challengeId);
+    public List<Integer> findKeywordIdsByChallengeId(int challengeId);
+
+
+
+    public List<ChallengeKeywordCategory> findAllKeywordCategories();
+
 
     // 카테고리별 챌린지 목록 조회
     public List<ChallengeCreateRequest> findChallengesByCategoryId(@Param("categoryId") Integer categoryId);
