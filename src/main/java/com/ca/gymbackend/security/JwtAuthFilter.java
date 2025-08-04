@@ -24,6 +24,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private JwtUtil jwtUtil;
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        // 웹소켓 핸드셰이크 요청은 필터링하지 않습니다.
+        // URL이 /ws/chat으로 시작하면 필터를 통과시킵니다.
+        return request.getRequestURI().startsWith("/ws/chat");
+    }
+
+
+    @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 

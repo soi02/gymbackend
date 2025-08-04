@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,7 +32,8 @@ public class BuddyController {
     private JwtUtil jwtUtil;
     @Autowired
     private ChatWebSocketController buddyChatController;
-
+    @Autowired
+    private SimpMessageSendingOperations messagingTemplate;
     // @PostMapping("/register")
     // public String registerBuddy(@RequestBody BuddyDto buddyDto) {
     // buddyService.registerBuddy(buddyDto);
@@ -78,41 +80,21 @@ public class BuddyController {
         }
     }
 
-    // @PostMapping("/response")
-    // public ResponseEntity<?> respondToMatching(@RequestBody MatchingDto dto) {
-    // try {
-    // buddyService.respondToMatching(dto.getId(), dto.getStatus(),
-    // dto.getSendBuddyId());
-    // return ResponseEntity.ok("응답 처리 완료");
-    // } catch (Exception e) {
-    // return ResponseEntity.status(500).body("응답 실패: " + e.getMessage());
-    // }
-    // }
-    // @PostMapping("/response")
-    // public ResponseEntity<?> respondToMatching(@RequestBody MatchingDto dto) {
-    // try {
-    // buddyService.respondToMatching(dto.getId(), dto.getStatus(),
-    // dto.getSendBuddyId());
-
-    // // 매칭 수락 후 채팅 시작 메시지 삽입
-    // if ("수락".equals(dto.getStatus())) {
-    // // matching_id와 sendBuddyId를 넘김
-    // buddyService.insertInitialChat(dto.getId(), dto.getSendBuddyId());
-    // }
-
-    // return ResponseEntity.ok("응답 처리 완료");
-    // } catch (Exception e) {
-    // return ResponseEntity.status(500).body("응답 실패: " + e.getMessage());
-    // }
-    // }
-    @PostMapping("/response")
+   @PostMapping("/response")
     public ResponseEntity<?> respondToMatching(@RequestBody MatchingDto dto) {
         try {
             buddyService.respondToMatching(dto.getId(), dto.getStatus(), dto.getSendBuddyId());
 
             if ("수락".equals(dto.getStatus())) {
-                // DB와 WebSocket 동시에 처리
-                buddyChatController.sendInitialChatViaWebSocket(dto.getId(), dto.getSendBuddyId());
+                buddyService.insertInitialChat(dto.getId(), dto.getSendBuddyId());
+
+                // 웹소켓으로 초기 메시지 전송
+                ChatDto initialChat = new ChatDto();
+                initialChat.setMatchingId(dto.getId());
+                initialChat.setSendBuddyId(dto.getSendBuddyId()); 
+                initialChat.setMessage("버디 매칭이 완료되었습니다! 첫 인사를 나눠보세요.");
+                
+                messagingTemplate.convertAndSend("/topic/" + dto.getId(), initialChat);
             }
 
             return ResponseEntity.ok("응답 처리 완료");

@@ -149,6 +149,15 @@
     WHERE aw.workout_id = #{workoutId}
     ORDER BY awd.detail_id, aws.set_id
 </select>
+<select id="findWorkoutResultByDate" resultType="com.ca.gymbackend.routine.response.ActualWorkoutResultResponse">
+  SELECT *
+  FROM actual_workout aw
+  INNER JOIN actual_workout_detail awd ON aw.workout_id = awd.workout_id
+  INNER JOIN actual_workout_set aws ON awd.detail_id = aws.detail_id
+  INNER JOIN workout_element we ON awd.element_id = we.element_id
+  WHERE aw.user_id = #{userId}
+    AND DATE(aw.created_at) = #{date}
+</select>
 
 
 </mapper>

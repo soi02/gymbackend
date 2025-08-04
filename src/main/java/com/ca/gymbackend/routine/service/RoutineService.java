@@ -161,12 +161,11 @@ public class RoutineService {
         // 칼로리계산
         UserDto user = routineSqlMapper.findUserById(request.getUserId());
         double mets = 3.5;
-        double weight = user.getWeight(); // 회원의 체중 (68 이런 값)
+        double weight = user.getWeight(); // 회원의 체중 
         double hours = (double) minutes / 60.0;
         int calories = (int) (mets * weight * hours);
         log.setCalories(calories);
 
-        // 💥 칼로리 계산 로직은 나중에!
         routineSqlMapper.insertWorkoutLog(log);
 
         return workoutId;
@@ -175,6 +174,10 @@ public class RoutineService {
 
     public List<ActualWorkoutResultResponse> getWorkoutResult(int workoutId) {
         return routineSqlMapper.findWorkoutResultByWorkoutId(workoutId);
+    }
+
+    public List<ActualWorkoutResultResponse> getWorkoutByDate(int userId, String date) {
+        return routineSqlMapper.findWorkoutResultByDate(userId, date);
     }
 
 }

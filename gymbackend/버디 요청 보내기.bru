@@ -6,8 +6,15 @@ meta {
 
 post {
   url: http://localhost:8080/api/buddy/request
-  body: none
+  body: json
   auth: inherit
+}
+
+body:json {
+  {
+    "sendBuddyId": 3,
+    "receiverBuddyId": 1
+  }
 }
 
 settings {
