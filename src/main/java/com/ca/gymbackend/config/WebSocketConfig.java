@@ -11,6 +11,7 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 // import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
@@ -41,7 +42,16 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws/chat")
                 .setAllowedOriginPatterns("http://localhost:5173")
+                // .setAllowedOrigins("*")
                 .withSockJS();
+    }
+
+    // @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+                .allowedOriginPatterns("http://localhost:5173")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH")
+                .allowCredentials(true);
     }
 
     @Override
@@ -51,37 +61,32 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
             public Message<?> preSend(Message<?> message, MessageChannel channel) {
                 StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
-                logger.info("STOMP 명령: {}", accessor.getCommand());
+                // STOMP CONNECT 명령에만 인증 로직을 적용
+                if (StompCommand.CONNECT.equals(accessor.getCommand())) {
+                    String authorizationHeader = accessor.getFirstNativeHeader("Authorization");
 
-                // CONNECT 명령일 때만 토큰 검증
-                // if (StompCommand.CONNECT.equals(accessor.getCommand())) {
+                    logger.info("STOMP CONNECT 헤더: {}", authorizationHeader);
 
-                //     String jwtToken = accessor.getFirstNativeHeader("Authorization");
-                //     logger.info("STOMP Authorization 헤더: {}", jwtToken);
+                    if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+                        String token = authorizationHeader.substring(7);
+                        try {
+                            // 여기를 jwtUtil.getUserId(token)으로 변경합니다.
+                            Integer userId = jwtUtil.getUserId(token);
 
-                //     if (jwtToken == null || !jwtToken.startsWith("Bearer ")) {
-                //         logger.error("JWT 토큰이 누락되었거나 형식이 잘못되었습니다. 연결을 거부합니다.");
-                //         // NullPointerException 방지를 위해 명시적으로 null을 반환하여 연결을 끊습니다.
-                //         return null;
-                //     }
+                            // 토큰에서 사용자 ID를 추출하여 세션에 저장
+                            // (String으로 변환하여 사용)
+                            accessor.setUser(() -> String.valueOf(userId));
 
-                //     String token = jwtToken.substring(7);
-                //     logger.info("추출된 JWT 토큰: {}", token);
-
-                //     try {
-                //         boolean isValid = jwtUtil.validateToken(token); // 토큰 검증 결과를 변수에 저장
-                //         logger.info("jwtUtil.validateToken({}) 결과: {}", token, isValid); // 검증 결과를 로그로 출력
-
-                //         if (!isValid) {
-                //             logger.error("토큰이 유효하지 않습니다. 연결을 거부합니다.");
-                //             return null;
-                //         }
-                //         logger.info("JWT 토큰이 성공적으로 검증되었습니다. 연결을 허용합니다.");
-                //     } catch (Exception e) {
-                //         logger.error("토큰 검증 중 예외 발생: {}", e.getMessage());
-                //         return null;
-                //     }
-                // }
+                            logger.info("✅ STOMP 연결 인증 성공. 사용자 ID: {}", userId);
+                        } catch (Exception e) {
+                            logger.error("❌ STOMP 연결 토큰 인증 실패: {}", e.getMessage());
+                            throw new IllegalArgumentException("토큰이 유효하지 않습니다.");
+                        }
+                    } else {
+                        logger.error("❌ STOMP CONNECT 헤더에 토큰이 없습니다.");
+                        throw new IllegalArgumentException("토큰이 필요합니다.");
+                    }
+                }
                 return message;
             }
         });
