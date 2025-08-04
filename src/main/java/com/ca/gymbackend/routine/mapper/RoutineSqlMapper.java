@@ -14,6 +14,7 @@ import com.ca.gymbackend.routine.dto.RoutineDetailDto;
 import com.ca.gymbackend.routine.dto.RoutineSetDto;
 import com.ca.gymbackend.routine.dto.WorkoutLogDto;
 import com.ca.gymbackend.routine.response.ActualWorkoutResultResponse;
+import com.ca.gymbackend.routine.response.CalendarSummaryResponse;
 import com.ca.gymbackend.routine.response.EveryWorkoutList;
 import com.ca.gymbackend.routine.response.RoutineByUserId;
 import com.ca.gymbackend.routine.response.RoutineDetailResponseDto;
@@ -36,6 +37,7 @@ public interface RoutineSqlMapper {
     public void insertWorkoutLog(WorkoutLogDto log);
     public UserDto findUserById(@Param("id") int id);
     public List<ActualWorkoutResultResponse> findWorkoutResultByWorkoutId(int workoutId);
-    public List<ActualWorkoutResultResponse> findWorkoutResultByDate(@Param("userId") int userId, @Param("date") String date);
+    public List<CalendarSummaryResponse> findWorkoutResultByDate(@Param("userId") int userId, @Param("date") String date);
+    public List<String> findWorkoutDatesBetween(@Param("userId") int userId, @Param("startDate") String startDate, @Param("endDate") String endDate);
 
 }

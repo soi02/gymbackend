@@ -22,6 +22,7 @@ import com.ca.gymbackend.routine.request.RoutineSaveDetailDto;
 import com.ca.gymbackend.routine.request.RoutineSaveRequest;
 import com.ca.gymbackend.routine.request.RoutineSaveSetDto;
 import com.ca.gymbackend.routine.response.ActualWorkoutResultResponse;
+import com.ca.gymbackend.routine.response.CalendarSummaryResponse;
 import com.ca.gymbackend.routine.response.EveryWorkoutList;
 import com.ca.gymbackend.routine.response.RoutineByUserId;
 import com.ca.gymbackend.routine.response.RoutineDetailResponse;
@@ -160,11 +161,27 @@ public class RoutineService {
 
         // 칼로리계산
         UserDto user = routineSqlMapper.findUserById(request.getUserId());
-        double mets = 3.5;
-        double weight = user.getWeight(); // 회원의 체중 
+
+        double weight = user.getWeight();       // 체중 (kg)
+        double height = user.getHeight();       // 키 (cm)
+        double muscleMass = user.getMuscleMass(); // 골격근량 (kg)
+        String gender = user.getGender();       // "M" or "F"
         double hours = (double) minutes / 60.0;
-        int calories = (int) (mets * weight * hours);
+
+        // 1️⃣ BMR 계산 (나이 없이)
+        double bmr = gender.equals("M")
+            ? 10 * weight + 6.25 * height + 5
+            : 10 * weight + 6.25 * height - 161;
+
+        // 2️⃣ METs 보정 (골격근량 비율로 조정)
+        double muscleRatio = muscleMass / weight;
+        double mets = 3.5 + muscleRatio * 1.5; // 기준 METs: 3.5 + 근육비율 보정
+
+        // 3️⃣ 총 칼로리 계산
+        int calories = (int)((bmr / 24.0) * mets * hours);
+
         log.setCalories(calories);
+
 
         routineSqlMapper.insertWorkoutLog(log);
 
@@ -176,8 +193,12 @@ public class RoutineService {
         return routineSqlMapper.findWorkoutResultByWorkoutId(workoutId);
     }
 
-    public List<ActualWorkoutResultResponse> getWorkoutByDate(int userId, String date) {
+    public List<CalendarSummaryResponse> getWorkoutByDate(int userId, String date) {
         return routineSqlMapper.findWorkoutResultByDate(userId, date);
+    }
+
+    public List<String> getWorkoutDatesBetween(int userId, String startDate, String endDate) {
+        return routineSqlMapper.findWorkoutDatesBetween(userId, startDate, endDate);
     }
 
 }

@@ -2,4 +2,145 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ca.gymbackend.market.mapper.MarketMapper">
 
+    <select id = "selectMarketUserInfo" resultType = "com.ca.gymbackend.market.dto.MarketUserInfoDto">
+    
+        SELECT * FROM market_user_info WHERE user_id = #{userId};
+    
+    </select>
+
+    <insert id = "insertMarketArticle">
+    
+        INSERT INTO market_article (market_user_id, image_link, main_image_id, title, content, product_cost_option, product_cost)
+        VALUES (#{marketUserId}, null, 1, #{title}, #{content}, #{productCostOption}, #{productCost});
+    
+    </insert>
+    
+    <select id = "selectMarketArticle" resultType = "com.ca.gymbackend.market.dto.MarketArticleDto">
+    
+        SELECT * FROM market_article WHERE id = #{id};
+    
+    </select>
+    
+    <update id = "updateMarketArticle">
+    
+        UPDATE market_article ma SET image_link = null, main_image_id = 2, title = #{title}, content = #{content}, 
+        product_cost_option = #{productCostOption}, product_cost = #{productCost}, sell_ended = #{sellEnded}, updated_at = NOW()
+        WHERE id = #{id};
+    
+    </update>
+    
+    <delete id = "deleteMarketArticle">
+    
+        DELETE FROM market_article WHERE id = #{id};
+    
+    </delete>
+    
+    <insert id = "insertMarketCommentOnArticle">
+    
+        INSERT INTO market_comment_on_article (article_id, market_user_id, content)
+        VALUES (#{articleId}, #{marketUserId}, #{content});
+    
+    </insert>
+    
+    <select id = "selectMarketCommentOnArticle" resultType = "com.ca.gymbackend.market.dto.MarketCommentOnArticleDto">
+    
+        SELECT * FROM market_comment_on_article WHERE article_id = #{articleId};
+    
+    </select>
+    
+    <update id = "updateMarketCommentOnArticle">
+    
+        UPDATE market_comment_on_article mc_oa SET content = 'Bird My Dragon', updated_at = NOW()
+        WHERE id = 1;
+    
+    </update>
+    
+    <delete id = "deleteMarketCommentOnArticle">
+    
+        DELETE FROM market_comment_on_article WHERE id = #{id};
+    
+    </delete>
+    
+    <insert id = "insertMarketProductInterestedLog">
+    
+        INSERT INTO market_product_interested_log (market_user_id, specific_article_id)
+        VALUES (#{marketUserId}, #{specificArticleId})
+    
+    </insert>
+    
+    <select id = "selectMarketProductInterestedLogWhenUserInfo" resultType = "com.ca.gymbackend.market.dto.MarketProductInterestedLogDto">
+    
+        SELECT * FROM market_product_interested_log WHERE market_user_id = #{marketUserId};
+    
+    </select>
+    
+    <select id = "selectMarketProductInterestedLogWhenArticleInfo" resultType = "com.ca.gymbackend.market.dto.MarketProductInterestedLogDto">
+    
+        SELECT * FROM market_product_interested_log WHERE specific_article_id = #{specificArticleId};
+    
+    </select>
+    
+    <delete id = "deleteMarketProductInterestedLog">
+    
+        DELETE FROM market_product_interested_log WHERE specific_article_id = #{specificArticleId};
+    
+    </delete>
+    
+    <insert id = "insertMarketDealedLog">
+    
+        INSERT INTO market_dealed_log (seller_id, buyer_id, specific_article_id)
+        VALUES (#{sellerId}, #{buyerId}, #{specificArticleId});
+    
+    </insert>
+    
+    <select id = "selectMarketDealedLogWhenBuyer" resultType = "com.ca.gymbackend.market.dto.MarketDealedLogDto">
+    
+        SELECT * FROM market_dealed_log WHERE buyer_id = #{buyerId};
+    
+    </select>
+    
+    <select id = "selectMarketDealedLogWhenSeller" resultType = "com.ca.gymbackend.market.dto.MarketDealedLogDto">
+    
+        SELECT * FROM market_dealed_log WHERE seller_id = #{sellerId};
+    
+    </select>
+    
+    <insert id = "insertMarketReviewToUser">
+    
+        INSERT INTO market_review_on_user (writer_id, evaluated_user_id, content)
+        VALUES (#{writerId}, #{evaluatedUserId}, #{content});
+    
+    </insert>
+    
+    <select id = "selectMarketReviewToUser" resultType = "com.ca.gymbackend.market.dto.MarketReviewOnUserDto">
+    
+        SELECT * FROM market_review_on_user WHERE evaluated_user_id = #{evaluatedUserId};
+    
+    </select>
+    
+    <update id = "updateMarketReviewToUser">
+    
+        UPDATE market_review_on_user SET content = #{content}, updated_at = NOW()
+        WHERE evaluated_user_id = #{evaluatedUserId};
+    
+    </update>
+    
+    <delete id = "deleteMarketReviewToUser">
+    
+        DELETE FROM market_review_on_user WHERE evaluated_user_id = #{evaluatedUserId};
+    
+    </delete>
+    
+    <select id = "selectMarketArticleByTitleSearchWord" resultType = "com.ca.gymbackend.market.dto.MarketArticleDto">
+    
+        SELECT * FROM market_article ma WHERE ma.title LIKE CONCAT('%', #{searchWord}, '%');
+    
+    </select>
+    
+    <select id = "selectMarketArticleByContentSearchWord" resultType = "com.ca.gymbackend.market.dto.MarketArticleDto">
+    
+        SELECT * FROM market_article ma WHERE ma.content LIKE CONCAT('%', #{searchWord}, '%');
+    
+    </select>
+
 </mapper>
