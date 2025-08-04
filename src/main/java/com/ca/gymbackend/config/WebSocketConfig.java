@@ -1,6 +1,8 @@
 package com.ca.gymbackend.config;
 
 import com.ca.gymbackend.security.JwtUtil;
+
+import org.springframework.beans.factory.annotation.Autowired;
 // import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
@@ -26,11 +28,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private static final Logger logger = LoggerFactory.getLogger(WebSocketConfig.class);
 
-    private final JwtUtil jwtUtil;
-
-    public WebSocketConfig(JwtUtil jwtUtil) {
-        this.jwtUtil = jwtUtil;
-    }
+    @Autowired // ✅ @Autowired 추가
+    private JwtUtil jwtUtil;
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {

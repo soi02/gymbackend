@@ -25,27 +25,28 @@ public class SecurityConfig {
     }
 
     // @Bean
-    // public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    //     http
-    //             .csrf(csrf -> csrf.disable())
-    //             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-    //             .authorizeHttpRequests(auth -> auth
-    //                     .requestMatchers("/ws-buddy/**").permitAll() // ✅ WebSocket 경로 허용
-    //                     .requestMatchers(HttpMethod.POST, "/api/article").authenticated()
-    //                     .requestMatchers(HttpMethod.PUT, "/api/article/*").authenticated()
-    //                     .requestMatchers(HttpMethod.DELETE, "/api/article/*").authenticated()
-    //                     .anyRequest().permitAll())
-    //             .formLogin(form -> form.disable())
-    //             .httpBasic(basic -> basic.disable())
-    //             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-    //             .exceptionHandling(ex -> ex
-    //                     .authenticationEntryPoint((request, response, authException) -> {
-    //                         response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
-    //                     }));
+    // public SecurityFilterChain securityFilterChain(HttpSecurity http) throws
+    // Exception {
+    // http
+    // .csrf(csrf -> csrf.disable())
+    // .sessionManagement(session ->
+    // session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+    // .authorizeHttpRequests(auth -> auth
+    // .requestMatchers("/ws-buddy/**").permitAll() // ✅ WebSocket 경로 허용
+    // .requestMatchers(HttpMethod.POST, "/api/article").authenticated()
+    // .requestMatchers(HttpMethod.PUT, "/api/article/*").authenticated()
+    // .requestMatchers(HttpMethod.DELETE, "/api/article/*").authenticated()
+    // .anyRequest().permitAll())
+    // .formLogin(form -> form.disable())
+    // .httpBasic(basic -> basic.disable())
+    // .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+    // .exceptionHandling(ex -> ex
+    // .authenticationEntryPoint((request, response, authException) -> {
+    // response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+    // }));
 
-    //     return http.build();
+    // return http.build();
     // }
-
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -55,11 +56,14 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
 
-                        .requestMatchers("/ws-buddy/**").permitAll()
+                        // ✅ 이 부분을 클라이언트의 URL과 동일하게 수정하세요.
+                        .requestMatchers("/ws/chat/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/user/login").permitAll()
                         .requestMatchers("/api/user/verify-token").permitAll() // 토큰 유효성 검증은 permilAll
                         .requestMatchers("/api/challenge/tendency-test/status").authenticated() // 성향 테스트 상태 조회는 인증 필요
-                        .requestMatchers(HttpMethod.GET, "/api/routine/getRoutinesByUserId/**").authenticated() // 루틴 조회는 인증 필요
+                        .requestMatchers(HttpMethod.GET, "/api/routine/getRoutinesByUserId/**").authenticated() // 루틴
+                                                                                                                // 조회는
+                                                                                                                // 인증 필요
                         .anyRequest().permitAll()) // 그 외 모든 요청은 허용
 
                 .formLogin(form -> form.disable())
