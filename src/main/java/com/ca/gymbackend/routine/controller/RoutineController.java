@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ca.gymbackend.routine.request.ActualWorkoutSaveRequest;
 import com.ca.gymbackend.routine.request.RoutineSaveRequest;
 import com.ca.gymbackend.routine.response.ActualWorkoutResultResponse;
+import com.ca.gymbackend.routine.response.CalendarSummaryResponse;
 import com.ca.gymbackend.routine.response.RoutineDetailResponse;
 import com.ca.gymbackend.routine.service.RoutineService;
 
@@ -105,7 +106,7 @@ public class RoutineController {
         @RequestParam("date") String date
     ) {
         try {
-            List<ActualWorkoutResultResponse> result = routineService.getWorkoutByDate(userId, date);
+            List<CalendarSummaryResponse> result = routineService.getWorkoutByDate(userId, date);
             return ResponseEntity.ok(result);
 
         } catch(Exception e) {
@@ -114,6 +115,23 @@ public class RoutineController {
                                 .body("결과 조회 실패: " + e.getMessage());
         }
 
+    }
+
+    @GetMapping("/getWorkoutDatesBetween")
+    public ResponseEntity<?> getWorkoutDatesBetween(
+        @RequestParam("userId") int userId,
+        @RequestParam("startDate") String startDate,
+        @RequestParam("endDate") String endDate
+    ) {
+        try {
+            List<String> result = routineService.getWorkoutDatesBetween(userId, startDate, endDate);
+            return ResponseEntity.ok(result);
+
+        } catch(Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .body("결과 조회 실패: " + e.getMessage());
+        }
     }
 
 
