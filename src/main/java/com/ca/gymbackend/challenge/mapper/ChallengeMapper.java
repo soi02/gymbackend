@@ -9,11 +9,13 @@ import org.apache.ibatis.annotations.Param;
 import com.ca.gymbackend.challenge.dto.ChallengeAttendanceRecord;
 import com.ca.gymbackend.challenge.dto.ChallengeCreateRequest;
 import com.ca.gymbackend.challenge.dto.ChallengeDetailResponse;
+import com.ca.gymbackend.challenge.dto.ChallengeFinalTestResult;
 import com.ca.gymbackend.challenge.dto.ChallengeInfo;
 import com.ca.gymbackend.challenge.dto.ChallengeKeywordCategory;
 import com.ca.gymbackend.challenge.dto.ChallengeMyRecordsResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeProgressResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeRecordInfo;
+import com.ca.gymbackend.challenge.dto.ChallengeTestScore;
 import com.ca.gymbackend.challenge.dto.ChallengeUserInfo;
 
 @Mapper
@@ -143,6 +145,21 @@ public interface ChallengeMapper {
 
     // 키워드에 따른 챌린지 추천
     public List<ChallengeCreateRequest> findRecommendedChallengeList(@Param("keywordIds") List<Integer> keywordIds);
+
+
+
+
+
+
+    // 성향 테스트 결과 저장
+    // 사용자의 최종 성향 테스트 결과 저장
+    public void insertTestScore(ChallengeTestScore challengeTestScore);
+
+    public void insertFinalTestResult(ChallengeFinalTestResult challengeFinalTestResult);
+
+
+    // 특정 사용자의 가장 최근 성향 테스트 결과 조회
+    public ChallengeFinalTestResult findTestResultByUserId(@Param("userId") int userId);
 }
 
 

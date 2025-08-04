@@ -14,8 +14,11 @@
             challenge_recruit_start_date,
             challenge_recruit_end_date,
             challenge_duration_days,
-            challenge_thumbnail_path, created_at,
-            challenge_participant_count
+            challenge_thumbnail_path,
+            created_at,
+            challenge_participant_count,
+            
+            challenge_tendency_id 
         ) VALUES (
             #{challengeCreator},
             #{challengeTitle},
@@ -24,14 +27,12 @@
             #{challengeRecruitStartDate},
             #{challengeRecruitEndDate},
             #{challengeDurationDays},
-            #{challengeThumbnailPath}, NOW(),
-            0
+            #{challengeThumbnailPath},
+            NOW(),
+            0,
+            
+            #{challengeTendencyId}
         );
-    </insert>
-
-    <insert id="createChallengeKeyword">
-        INSERT INTO challenge_keyword (challenge_id, keyword_id)
-        VALUES (#{param1}, #{param2});
     </insert>
 
 
@@ -109,10 +110,10 @@
         SELECT
             c.challenge_id AS challengeId,
             c.challenge_creator AS challengeCreator, 
-            c.challenge_title AS challengeTitle, 
+            c.challenge_title AS challengeTitle,
             c.challenge_description AS challengeDescription, 
             c.challenge_max_members AS challengeMaxMembers, 
-            c.challenge_participant_count AS participantCount, 
+            c.challenge_participant_count AS participantCount,
             c.challenge_recruit_start_date AS challengeRecruitStartDate, 
             c.challenge_recruit_end_date AS challengeRecruitEndDate,     
             c.challenge_duration_days AS challengeDurationDays, 
@@ -384,4 +385,57 @@
     </select>
 
 
+
+
+
+
+<!-- 성향 테스트 결과 저장 -->
+    <!-- test_score 테이블에 점수들을 저장 -->
+    <insert id="insertTestScore" useGeneratedKeys="true" keyProperty="testScoreId">
+        INSERT INTO test_score (
+            user_id,
+            goal_oriented,
+            relationship_oriented,
+            recovery_oriented,
+            learning_oriented,
+            balanced,
+            created_at
+        ) VALUES (
+            #{userId},
+            #{goalOriented},
+            #{relationshipOriented},
+            #{recoveryOriented},
+            #{learningOriented},
+            #{balanced},
+            NOW()
+        );
+    </insert>
+
+    <!-- final_test_result 테이블에 최종 결과를 저장 -->
+    <insert id="insertFinalTestResult">
+        INSERT INTO final_test_result (
+            test_score_id,
+            user_id,
+            top_type_1,
+            top_score_1,
+            top_type_2,
+            top_score_2,
+            test_text,
+            created_at
+        ) VALUES (
+            #{testScoreId},
+            #{userId},
+            #{topType1},
+            #{topScore1},
+            #{topType2},
+            #{topScore2},
+            #{testText},
+            NOW()
+        );
+    </insert>
+
+    <!-- 사용자의 성향 테스트 결과 조회 -->
+    <select id="findTestResultByUserId" resultType="com.ca.gymbackend.challenge.dto.ChallengeFinalTestResult">
+        SELECT * FROM final_test_result WHERE user_id = #{userId} ORDER BY created_at DESC LIMIT 1
+    </select>
 </mapper>

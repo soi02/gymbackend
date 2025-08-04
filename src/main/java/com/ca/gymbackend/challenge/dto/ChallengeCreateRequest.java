@@ -25,7 +25,7 @@ public class ChallengeCreateRequest {
     private int challengeDurationDays; // 진행 기간
     private List<Integer> challengeKeywordIds;
 
-        // ★ 키워드 리스트 필드 추가
+    // 키워드 리스트 필드 추가
     // private List<String> challengeKeywordNameList;
 
 
@@ -35,4 +35,6 @@ public class ChallengeCreateRequest {
    
     private String challengeThumbnailPath;
     
+
+    private Integer challengeTendencyId;
 }
