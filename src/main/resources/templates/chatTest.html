@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<body>
+    <h1>WebSocket 연결 테스트</h1>
+    <p id="status">연결 시도 중...</p>
+
+    <script>
+        // SockJS를 사용하여 웹소켓 엔드포인트에 연결
+        var socket = new SockJS('http://localhost:8080/ws-buddy');
+        var stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, function (frame) {
+            console.log('연결 성공: ' + frame);
+            document.getElementById('status').innerText = '연결 성공!';
+        }, function (error) {
+            console.error('연결 실패: ' + error);
+            document.getElementById('status').innerText = '연결 실패!';
+        });
+    </script>
+</body>
+</html>
