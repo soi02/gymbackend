@@ -4,17 +4,20 @@ import com.ca.gymbackend.challenge.dto.ChallengeAttendanceRecord;
 import com.ca.gymbackend.challenge.dto.ChallengeAttendanceStatus;
 import com.ca.gymbackend.challenge.dto.ChallengeCreateRequest;
 import com.ca.gymbackend.challenge.dto.ChallengeDetailResponse;
+import com.ca.gymbackend.challenge.dto.ChallengeFinalTestResult;
 import com.ca.gymbackend.challenge.dto.ChallengeInfo;
 import com.ca.gymbackend.challenge.dto.ChallengeKeywordCategory;
 import com.ca.gymbackend.challenge.dto.ChallengeMyRecordDetailResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeMyRecordsResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeProgressResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeRecordInfo;
+import com.ca.gymbackend.challenge.dto.ChallengeTestScore;
 import com.ca.gymbackend.challenge.dto.ChallengeUserInfo;
 import com.ca.gymbackend.challenge.mapper.ChallengeMapper;
 import lombok.RequiredArgsConstructor;
 import net.coobird.thumbnailator.Thumbnails;
 
+import org.mybatis.logging.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -28,10 +31,13 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @Service
@@ -61,16 +67,19 @@ public class ChallengeServiceImpl {
             }
         }
 
+        // 사용자가 선택한 키워드 ID 목록을 기반으로 챌린지 성향 ID를 분류
+        List<Integer> selectedKeywordIds = challengeCreateRequest.getChallengeKeywordIds();
+        Integer predictedTendencyId = classifyTendency(selectedKeywordIds);
+        challengeCreateRequest.setChallengeTendencyId(predictedTendencyId);
+        System.out.println("DEBUG: 챌린지 성향 ID 자동 분류 완료 - " + predictedTendencyId);
+        
+
         // 2. 챌린지 정보 DB에 저장
-        // MyBatis의 useGeneratedKeys를 사용하기 위해 DTO에 이미지 경로를 수동으로 설정합니다.
         challengeCreateRequest.setChallengeThumbnailPath(imagePath);
         challengeMapper.createChallenge(challengeCreateRequest);
 
         // 3. 챌린지-키워드 매핑
-        // createChallenge 호출 후, DTO의 challengeId 필드에 DB에서 생성된 ID가 자동으로 채워집니다.
         int generatedChallengeId = challengeCreateRequest.getChallengeId();
-        List<Integer> selectedKeywordIds = challengeCreateRequest.getChallengeKeywordIds();
-
         if (selectedKeywordIds != null && !selectedKeywordIds.isEmpty()) {
             for (Integer keywordId : selectedKeywordIds) {
                 if (keywordId != null) {
@@ -79,6 +88,72 @@ public class ChallengeServiceImpl {
             }
         }
     }
+
+    // 사용자가 선택한 키워드 ID를 기반으로 챌린지 성향 ID를 분류
+    private Integer classifyTendency(List<Integer> selectedKeywordIds) {
+        if (selectedKeywordIds == null || selectedKeywordIds.isEmpty()) {
+            return 5; // 선택된 키워드가 없으면 균형형으로 분류
+        }
+
+        // 각 성향별 키워드 ID 매핑 정의
+        // 이 부분을 DB에서 가져와 캐싱하는 방식으로 구현하면 더 좋습니다.
+        Map<String, List<Integer>> tendencyKeywordMap = new HashMap<>();
+        tendencyKeywordMap.put("goal", List.of(1, 2, 3, 4, 5, 23, 24, 25, 26, 27, 28, 29, 30));
+        tendencyKeywordMap.put("relationship", List.of(11, 12, 13, 14, 15, 34, 35, 36, 37));
+        tendencyKeywordMap.put("recovery", List.of(6, 7, 8, 9, 10));
+        tendencyKeywordMap.put("learning", List.of(16, 17, 18, 19, 20, 31, 32));
+        tendencyKeywordMap.put("habit", List.of(21, 22, 23, 24, 25)); // 키워드 DB에 '습관'은 21~24, 동기부여와 자기관리는 25~30
+        
+        // 키워드 카테고리 정보가 없는 경우를 대비하여 ID 직접 매핑 (제공된 키워드 정보 기반)
+        Map<String, List<Integer>> tendencyMap = new HashMap<>();
+        tendencyMap.put("goal", List.of(1, 2, 3, 4, 5, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35));
+        tendencyMap.put("relationship", List.of(11, 12, 13, 14, 15, 38, 39, 40, 41, 42));
+        tendencyMap.put("recovery", List.of(6, 7, 8, 9, 10));
+        tendencyMap.put("learning", List.of(16, 17, 18, 19, 20, 31, 32, 33, 34, 35));
+        tendencyMap.put("habit", List.of(21, 22, 23, 24));
+
+
+        Map<String, Integer> keywordCounts = new HashMap<>();
+        tendencyMap.keySet().forEach(key -> keywordCounts.put(key, 0));
+
+        // 선택된 키워드 ID를 순회하며 점수 계산
+        for (Integer keywordId : selectedKeywordIds) {
+            for (Map.Entry<String, List<Integer>> entry : tendencyMap.entrySet()) {
+                if (entry.getValue().contains(keywordId)) {
+                    keywordCounts.put(entry.getKey(), keywordCounts.get(entry.getKey()) + 1);
+                }
+            }
+        }
+        
+        String topTendency = "balanced";
+        int maxCount = 0;
+        
+        for (Map.Entry<String, Integer> entry : keywordCounts.entrySet()) {
+            if (entry.getValue() > maxCount) {
+                maxCount = entry.getValue();
+                topTendency = entry.getKey();
+            }
+        }
+        
+        if (maxCount == 0) {
+            return 5; // 균형형 ID
+        } else if ("goal".equals(topTendency)) {
+            return 1; // 목표지향형 ID
+        } else if ("relationship".equals(topTendency)) {
+            return 2; // 관계지향형 ID
+        } else if ("recovery".equals(topTendency)) {
+            return 3; // 회복지향형 ID
+        } else if ("learning".equals(topTendency)) {
+            return 4; // 학습지향형 ID
+        } else {
+            return 5; // 균형형 ID
+        }
+    }
+
+
+
+
+
 
     public String saveChallengeThumbnailImage(byte[] buffer, String originalFilename) {
         try {
@@ -428,4 +503,121 @@ public class ChallengeServiceImpl {
     }
 
 
+
+
+
+
+    // 성향 테스트 결과 저장
+    @Transactional
+    public void tendencyTestComplete(Integer userId, List<Integer> selectedKeywordIds) {
+        try {
+            System.out.println("tendencyTestComplete 메서드 시작. userId: " + userId);
+
+            // 1. 키워드 ID 리스트를 기반으로 각 성향별 점수를 계산합니다.
+            Map<String, Integer> scores = calculateTendencyScores(selectedKeywordIds);
+            System.out.println("계산된 성향 점수: " + scores);
+
+            // 2. test_score 테이블에 점수들을 저장합니다.
+            ChallengeTestScore testScoreDto = new ChallengeTestScore();
+            testScoreDto.setUserId(userId);
+            testScoreDto.setGoalOriented(scores.getOrDefault("goal", 0));
+            testScoreDto.setRelationshipOriented(scores.getOrDefault("relationship", 0));
+            testScoreDto.setRecoveryOriented(scores.getOrDefault("recovery", 0));
+            testScoreDto.setLearningOriented(scores.getOrDefault("learning", 0));
+            testScoreDto.setBalanced(scores.getOrDefault("habit", 0));
+            
+            System.out.println("test_score 저장 시도...");
+            challengeMapper.insertTestScore(testScoreDto);
+            System.out.println("test_score 저장 성공. 생성된 test_score_id: " + testScoreDto.getTestScoreId());
+
+            // 3. 점수 맵을 분석하여 최종 성향 결과를 결정합니다.
+            List<Map.Entry<String, Integer>> sortedScores = scores.entrySet().stream()
+                    .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                    .collect(Collectors.toList());
+
+            String topType1 = "balanced";
+            Integer topScore1 = 0;
+            String topType2 = "balanced";
+            Integer topScore2 = 0;
+            String testText = "균형 잡힌 성향입니다.";
+
+            if (!sortedScores.isEmpty()) {
+                topType1 = sortedScores.get(0).getKey();
+                topScore1 = sortedScores.get(0).getValue();
+                if (sortedScores.size() > 1) {
+                    topType2 = sortedScores.get(1).getKey();
+                    topScore2 = sortedScores.get(1).getValue();
+                }
+                testText = getTestResultText(topType1);
+            }
+            System.out.println("최종 성향 결과: top1=" + topType1 + ", top2=" + topType2);
+
+            // 4. final_test_result 테이블에 최종 결과를 저장합니다.
+            ChallengeFinalTestResult finalResultDto = new ChallengeFinalTestResult();
+            finalResultDto.setUserId(userId);
+            finalResultDto.setTestScoreId(testScoreDto.getTestScoreId());
+            finalResultDto.setTopType1(topType1);
+            finalResultDto.setTopScore1(topScore1);
+            finalResultDto.setTopType2(topType2);
+            finalResultDto.setTopScore2(topScore2);
+            finalResultDto.setTestText(testText);
+            
+            System.out.println("final_test_result 저장 시도...");
+            challengeMapper.insertFinalTestResult(finalResultDto);
+            System.out.println("final_test_result 저장 성공.");
+            
+        } catch (Exception e) {
+            System.err.println("성향 테스트 결과 저장 중 오류 발생: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("성향 테스트 결과 저장 중 오류가 발생했습니다.", e);
+        }
+    }
+    
+    // 이전에 생성했던 calculateTendencyScores, getTestResultText, hasUserCompletedTendencyTest 메서드는 동일
+    private Map<String, Integer> calculateTendencyScores(List<Integer> selectedKeywordIds) {
+        Map<String, List<Integer>> tendencyMap = new HashMap<>();
+        tendencyMap.put("goal", List.of(1, 2, 3, 4, 5, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35));
+        tendencyMap.put("relationship", List.of(11, 12, 13, 14, 15, 38, 39, 40, 41, 42));
+        tendencyMap.put("recovery", List.of(6, 7, 8, 9, 10));
+        tendencyMap.put("learning", List.of(16, 17, 18, 19, 20, 31, 32, 33, 34, 35));
+        tendencyMap.put("habit", List.of(21, 22, 23, 24));
+        
+        Map<String, Integer> scores = new HashMap<>();
+        tendencyMap.keySet().forEach(key -> scores.put(key, 0));
+
+        for (Integer keywordId : selectedKeywordIds) {
+            for (Map.Entry<String, List<Integer>> entry : tendencyMap.entrySet()) {
+                if (entry.getValue().contains(keywordId)) {
+                    scores.put(entry.getKey(), scores.get(entry.getKey()) + 1);
+                }
+            }
+        }
+        return scores;
+    }
+
+    private String getTestResultText(String topType) {
+        switch (topType) {
+            case "goal":
+                return "당신은 목표지향형입니다. 뚜렷한 목표를 향해 나아가는 것을 좋아해요!";
+            case "relationship":
+                return "당신은 관계지향형입니다. 함께하는 사람들과 소통하며 운동하는 것을 즐겨요!";
+            case "recovery":
+                return "당신은 회복지향형입니다. 몸과 마음의 휴식을 중요하게 생각해요!";
+            case "learning":
+                return "당신은 학습지향형입니다. 운동의 원리를 이해하고 배우는 것을 즐겨요!";
+            case "habit":
+                return "당신은 습관지향형입니다. 꾸준히 운동하는 습관을 들이는 것을 좋아해요!";
+            default:
+                return "균형 잡힌 성향입니다.";
+        }
+    }
+
+    public boolean hasUserCompletedTendencyTest(Integer userId) {
+        ChallengeFinalTestResult result = challengeMapper.findTestResultByUserId(userId);
+        return result != null;
+    }
+
+    public ChallengeFinalTestResult findTestResult(int userId) {
+ return challengeMapper.findTestResultByUserId(userId);
+ }
 }

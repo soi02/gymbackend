@@ -36,7 +36,6 @@ public interface RoutineSqlMapper {
     public void insertWorkoutLog(WorkoutLogDto log);
     public UserDto findUserById(@Param("id") int id);
     public List<ActualWorkoutResultResponse> findWorkoutResultByWorkoutId(int workoutId);
-
-
+    public List<ActualWorkoutResultResponse> findWorkoutResultByDate(@Param("userId") int userId, @Param("date") String date);
 
 }

@@ -17,11 +17,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.ca.gymbackend.challenge.dto.ChallengeCreateRequest;
 import com.ca.gymbackend.challenge.dto.ChallengeDetailResponse;
+import com.ca.gymbackend.challenge.dto.ChallengeFinalTestResult;
 import com.ca.gymbackend.challenge.dto.ChallengeKeywordCategory;
 import com.ca.gymbackend.challenge.dto.ChallengeMyRecordDetailResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeMyRecordsResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeProgressResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeStartRequest;
+import com.ca.gymbackend.challenge.dto.ChallengeTendencyTestRequest;
 import com.ca.gymbackend.challenge.service.ChallengeServiceImpl;
 
 import lombok.RequiredArgsConstructor;
@@ -248,5 +250,47 @@ public class ChallengeController {
 
 
 
+
+    // 성향 테스트 결과 저장
+    @PostMapping("/tendency-test/complete")
+    public ResponseEntity<String> completeTendencyTest(@RequestBody ChallengeTendencyTestRequest request) {
+        try {
+            challengeService.tendencyTestComplete(request.getUserId(), request.getKeywordIds());
+            return ResponseEntity.ok("성향 테스트 결과가 성공적으로 저장되었습니다.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                 .body("성향 테스트 결과 저장 중 오류가 발생했습니다: " + e.getMessage());
+        }
+    }
+
+
+
+    // 사용자의 성향 테스트 완료 여부 확인 (바텀바에서 처음 수련장 탭했을 때 어디로 보낼지 결정)
+    @GetMapping("/tendency-test/status")
+    public ResponseEntity<Boolean> getTendencyTestStatus(@RequestParam("userId") int userId) {
+            System.out.println("[DEBUG] getTendencyTestStatus 메서드 호출됨."); // ✅ 진입점 로그
+    System.out.println("[DEBUG] 전달받은 userId: " + userId); // ✅ 파라미터 로그
+        
+    try {
+        boolean hasCompleted = challengeService.hasUserCompletedTendencyTest(userId);
+        System.out.println("[DEBUG] 성향 테스트 완료 여부: " + hasCompleted); // ✅ 서비스 결과 로그
+        return ResponseEntity.ok(hasCompleted);
+    } catch (Exception e) {
+        System.out.println("[ERROR] getTendencyTestStatus 처리 중 에러 발생: " + e.getMessage()); // ✅ 예외 로그
+        return ResponseEntity.status(500).build();
+    }
+    }
+
+
+    // 사용자의 성향 테스트 결과를 조회 (나의 수련기록 페이지에 성향 테스트 결과를 보여주기 위해 사용)
+    @GetMapping("/tendency-test/result")
+    public ResponseEntity<ChallengeFinalTestResult> getTendencyTestResult(@RequestParam("userId") int userId) {
+        ChallengeFinalTestResult result = challengeService.findTestResult(userId);
+        if (result != null) {
+            return ResponseEntity.ok(result);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
 
 }
