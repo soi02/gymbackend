@@ -10,8 +10,8 @@ import com.ca.gymbackend.challenge.dto.ChallengeAttendanceRecord;
 import com.ca.gymbackend.challenge.dto.ChallengeCreateRequest;
 import com.ca.gymbackend.challenge.dto.ChallengeDetailResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeInfo;
+import com.ca.gymbackend.challenge.dto.ChallengeKeywordCategory;
 import com.ca.gymbackend.challenge.dto.ChallengeMyRecordsResponse;
-import com.ca.gymbackend.challenge.dto.ChallengeNorigaeInfo;
 import com.ca.gymbackend.challenge.dto.ChallengeProgressResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeRecordInfo;
 import com.ca.gymbackend.challenge.dto.ChallengeUserInfo;
@@ -24,13 +24,7 @@ public interface ChallengeMapper {
     // 생성 순서 1. 챌린지 정보를 DB 에 저장
     public void createChallenge(ChallengeCreateRequest challengeCreateRequest);
 
-    // 생성 순서 2. 방금 DB 에 insert 된 챌린지의 프라이머리키 값(AutoIncrement)을 가져오기
-    public int findLastInsertedChallengeId(); // AutoIncrement된 challenge_id 조회
-
-    // 키워드 이름으로 키워드 ID 조회
-    public Integer findKeywordIdByKeywordName(@Param("keywordName") String keywordName);
-
-    // 생성 순서 3. 챌린지와 키워드 연결 (다대다 관계 처리)
+    // 생성 순서 2. 챌린지와 키워드 연결 (다대다 관계 처리)
     public void createChallengeKeyword(@Param("challengeId") int challengeId, @Param("keywordId") int keywordId);
 
 
@@ -38,6 +32,17 @@ public interface ChallengeMapper {
 
     // 챌린지 가져오기 (목록)
     public List<ChallengeCreateRequest> findAllChallengeList();
+
+    // 챌린지 ID를 기준으로 키워드 ID 목록 조회
+    public List<Integer> findKeywordIdsByChallengeId(int challengeId);
+
+
+
+    public List<ChallengeKeywordCategory> findAllKeywordCategories();
+
+
+    // 카테고리별 챌린지 목록 조회
+    public List<ChallengeCreateRequest> findChallengesByCategoryId(@Param("categoryId") Integer categoryId);
 
 
 
@@ -90,19 +95,14 @@ public interface ChallengeMapper {
 
 
     // 노리개
-
-     // 사용자의 특정 챌린지 참여 정보(시작/종료일) 조회
+    // 사용자의 특정 챌린지 참여 정보(시작/종료일) 조회
     public ChallengeUserInfo findUserChallengeInfoByUserIdAndChallengeId(@Param("userId") int userId, @Param("challengeId") int challengeId);
 
+    // 챌린지 상세 진행 상황 조회 (노리개 등급 정보 포함)
+    ChallengeProgressResponse findChallengeProgressInfo(@Param("challengeId") int challengeId, @Param("userId") int userId);
 
-    // 챌린지 기본 정보 및 노리개 정보 조회
-    // public ChallengeProgressResponse findChallengeProgressInfo(@Param("challengeId") int challengeId, @Param("userId") int userId);
 
-    // 챌린지 기본 정보 조회
-    public ChallengeProgressResponse findChallengeBasicInfo(@Param("challengeId") int challengeId, @Param("userId") int userId);
 
-    // 노리개 정보 조회
-    public ChallengeNorigaeInfo findChallengeNorigaeInfo(@Param("challengeId") int challengeId);
 
 
     // 사용자의 출석 기록 조회
@@ -122,20 +122,27 @@ public interface ChallengeMapper {
 
 
     // 노리개 지급 로직 관련 추가 메서드
-    
     // 챌린지의 총 기간 조회
     public int findChallengeTotalDays(@Param("challengeId") int challengeId);
     
-    // 해당 챌린지의 노리개 조건 조회 (노리개ID와 달성률)
-    public ChallengeNorigaeInfo findNorigaeCondition(@Param("challengeId") int challengeId);
-    
-    // 챌린지에 노리개가 이미 지급되었는지 확인
-    public int checkIfNorigaeAwarded(@Param("challengeId") int challengeId);
-     
-    // 챌린지에 노리개를 지급 (challenge_norigae 테이블에 삽입)
-    public void awardNorigaeToChallenge(@Param("challengeId") int challengeId, 
-                                 @Param("norigaeId") int norigaeId,
-                                 @Param("norigaeConditionRate") double norigaeConditionRate);
+    // 달성률에 맞는 노리개 등급 ID 조회 (가장 높은 등급부터 조회)
+    public Integer findTierIdByAchievementRate(@Param("rate") double rate);
+
+    // 사용자가 현재 챌린지에서 획득한 노리개 등급 ID 조회
+    public Integer findUserNorigaeTierId(@Param("userId") int userId, @Param("challengeId") int challengeId);
+
+    // 사용자에게 노리개 등급 지급 (INSERT)
+    public void insertUserNorigae(@Param("userId") int userId, @Param("challengeId") int challengeId, @Param("tierId") int tierId);
+
+    // 사용자의 노리개 등급 업데이트 (UPDATE)
+    public void updateUserNorigae(@Param("userId") int userId, @Param("challengeId") int challengeId, @Param("tierId") int tierId);
+
+
+
+
+
+    // 키워드에 따른 챌린지 추천
+    public List<ChallengeCreateRequest> findRecommendedChallengeList(@Param("keywordIds") List<Integer> keywordIds);
 }
 
 
