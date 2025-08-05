@@ -131,11 +131,31 @@
         VALUES(#{matchingId}, #{sendBuddyId}, #{message}, #{isRead}, #{sentAt})
     </insert>
 
-    <select id="selectChatsByMatchingId" parameterType="int">
+    <!-- <select id="selectChatsByMatchingId" parameterType="int">
         SELECT id, matching_id, send_buddy_id, message, is_read, sent_at
         FROM chat
         WHERE matching_id = #{matchingId}
         ORDER BY sent_at ASC
+    </select> -->
+
+    <!-- 이름,사진 추가 수정버전 -->
+    <select id="selectChatsByMatchingId" parameterType="int">
+         SELECT
+            c.id,
+            c.matching_id,
+            c.send_buddy_id,
+            c.message,
+            c.is_read,
+            c.sent_at,
+            u.name AS senderName,
+            u.profile_image AS senderProfileImageUrl            
+        FROM chat c
+        JOIN buddy b
+        ON c.send_buddy_id = b.id
+        JOIN user u
+        ON b.user_id = u.id
+        WHERE c.matching_id = #{matchingId}
+        ORDER BY c.sent_at ASC
     </select>
 
     <!-- <update id="updateChatReadStatus" parameterType="int">

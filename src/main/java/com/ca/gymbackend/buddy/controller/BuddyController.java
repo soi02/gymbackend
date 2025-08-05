@@ -60,7 +60,7 @@ public class BuddyController {
     }
     // 채팅룸 리스트 나열
     @GetMapping("/rooms/{buddyId}")
-    public List<ChatRoomDto> getChatRooms(@PathVariable int buddyId) {
+    public List<ChatRoomDto> getChatRooms(@PathVariable("buddyId") int buddyId) {
         return buddyService.findChatRoomsByBuddyId(buddyId);
     }
 
@@ -104,7 +104,7 @@ public class BuddyController {
     }
 
     @GetMapping("/matching-notifications/{buddyId}")
-    public List<Map<String, Object>> getMatchingNotifications(@PathVariable int buddyId) {
+    public List<Map<String, Object>> getMatchingNotifications(@PathVariable("buddyId") int buddyId) {
         return buddyService.getMatchingNotifications(buddyId);
     }
 
@@ -121,7 +121,7 @@ public class BuddyController {
 
     // 특정 매칭 채팅 목록 조회
     @GetMapping("/list/{matchingId}")
-    public ResponseEntity<List<ChatDto>> getChatsByMatchingId(@PathVariable int matchingId) {
+    public ResponseEntity<List<ChatDto>> getChatsByMatchingId(@PathVariable(value = "matchingId") int matchingId) {
         List<ChatDto> chats = buddyService.getChatsByMatchingId(matchingId);
         return ResponseEntity.ok(chats);
     }
@@ -138,7 +138,7 @@ public class BuddyController {
     // }
     // ✅ 수정된 엔드포인트: matchingId를 받아 해당 채팅방의 메시지를 읽음 처리
    @PostMapping("/read/{matchingId}")
-    public ResponseEntity<?> markChatAsRead(@PathVariable int matchingId, HttpServletRequest request) {
+    public ResponseEntity<?> markChatAsRead(@PathVariable(value = "matchingId") int matchingId, HttpServletRequest request) {
         try {
             String authHeader = request.getHeader("Authorization");
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
