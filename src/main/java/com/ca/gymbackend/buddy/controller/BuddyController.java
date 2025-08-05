@@ -6,6 +6,8 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,7 +33,7 @@ public class BuddyController {
     private BuddyServiceImpl buddyService;
     @Autowired
     private JwtUtil jwtUtil;
-    
+
     @Autowired
     private SimpMessageSendingOperations messagingTemplate;
 
@@ -58,9 +60,10 @@ public class BuddyController {
         List<Map<String, Object>> result = buddyService.getBuddyUserList();
         return ResponseEntity.ok(result);
     }
+
     // 채팅룸 리스트 나열
     @GetMapping("/rooms/{buddyId}")
-    public List<ChatRoomDto> getChatRooms(@PathVariable int buddyId) {
+    public List<ChatRoomDto> getChatRooms(@PathVariable("buddyId") int buddyId) {
         return buddyService.findChatRoomsByBuddyId(buddyId);
     }
 
@@ -80,7 +83,7 @@ public class BuddyController {
         }
     }
 
-   @PostMapping("/response")
+    @PostMapping("/response")
     public ResponseEntity<?> respondToMatching(@RequestBody MatchingDto dto) {
         try {
             buddyService.respondToMatching(dto.getId(), dto.getStatus(), dto.getSendBuddyId());
@@ -91,9 +94,9 @@ public class BuddyController {
                 // 웹소켓으로 초기 메시지 전송
                 ChatDto initialChat = new ChatDto();
                 initialChat.setMatchingId(dto.getId());
-                initialChat.setSendBuddyId(dto.getSendBuddyId()); 
+                initialChat.setSendBuddyId(dto.getSendBuddyId());
                 initialChat.setMessage("버디 매칭이 완료되었습니다! 첫 인사를 나눠보세요.");
-                
+
                 messagingTemplate.convertAndSend("/topic/" + dto.getId(), initialChat);
             }
 
@@ -104,7 +107,7 @@ public class BuddyController {
     }
 
     @GetMapping("/matching-notifications/{buddyId}")
-    public List<Map<String, Object>> getMatchingNotifications(@PathVariable int buddyId) {
+    public List<Map<String, Object>> getMatchingNotifications(@PathVariable("buddyId") int buddyId) {
         return buddyService.getMatchingNotifications(buddyId);
     }
 
@@ -121,7 +124,7 @@ public class BuddyController {
 
     // 특정 매칭 채팅 목록 조회
     @GetMapping("/list/{matchingId}")
-    public ResponseEntity<List<ChatDto>> getChatsByMatchingId(@PathVariable int matchingId) {
+    public ResponseEntity<List<ChatDto>> getChatsByMatchingId(@PathVariable(value = "matchingId") int matchingId) {
         List<ChatDto> chats = buddyService.getChatsByMatchingId(matchingId);
         return ResponseEntity.ok(chats);
     }
@@ -129,34 +132,22 @@ public class BuddyController {
     // 메시지 읽음 처리 (옵션)
     // @PostMapping("/read/{id}")
     // public ResponseEntity<?> markChatAsRead(@PathVariable int id) {
-    //     try {
-    //         buddyService.markChatAsRead(id);
-    //         return ResponseEntity.ok("읽음 처리 완료");
-    //     } catch (Exception e) {
-    //         return ResponseEntity.status(500).body("읽음 처리 실패: " + e.getMessage());
-    //     }
+    // try {
+    // buddyService.markChatAsRead(id);
+    // return ResponseEntity.ok("읽음 처리 완료");
+    // } catch (Exception e) {
+    // return ResponseEntity.status(500).body("읽음 처리 실패: " + e.getMessage());
+    // }
     // }
     // ✅ 수정된 엔드포인트: matchingId를 받아 해당 채팅방의 메시지를 읽음 처리
-   @PostMapping("/read/{matchingId}")
-    public ResponseEntity<?> markChatAsRead(@PathVariable int matchingId, HttpServletRequest request) {
-        try {
-            String authHeader = request.getHeader("Authorization");
-            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                return ResponseEntity.status(401).body("토큰이 Authorization 헤더에 없습니다.");
-            }
-            
-            String token = authHeader.substring(7); // "Bearer " 제거
-            Integer currentUserId = jwtUtil.getUserId(token); // JwtUtil을 사용하여 ID 추출
+    // 채팅방 입장 시 메시지를 읽음 처리
+    @PostMapping("/chat/read/{matchingId}")
+    public ResponseEntity<Void> markChatsAsRead(@PathVariable(value = "matchingId") int matchingId) {
+        // 현재 로그인한 사용자 정보 가져오기 (buddy_id)
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        int readerBuddyId = (int) authentication.getPrincipal(); // 예시: user_id가 principal에 저장되어 있다고 가정
 
-            if (currentUserId == null) {
-                return ResponseEntity.status(401).body("인증된 사용자 정보를 찾을 수 없습니다.");
-            }
-            
-            buddyService.markChatAsRead(matchingId, currentUserId);
-            return ResponseEntity.ok("읽음 처리 완료");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500).body("읽음 처리 실패: " + e.getMessage());
-        }
+        buddyService.markMessagesAsRead(matchingId, readerBuddyId);
+        return ResponseEntity.ok().build();
     }
 }

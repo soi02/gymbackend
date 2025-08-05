@@ -12,4 +12,7 @@ public class ChatDto {
     private String message;
     private boolean isRead;
     private LocalDateTime sentAt;
+    // 상대방정보 담을 필드 추가
+    private String senderName;
+    private String senderProfileImageUrl;
 }
