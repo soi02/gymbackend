@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ca.gymbackend.buddy.dto.BuddyDto;
 import com.ca.gymbackend.buddy.dto.ChatDto;
+import com.ca.gymbackend.buddy.dto.ChatRoomDto;
 import com.ca.gymbackend.buddy.dto.MatchingDto;
 import com.ca.gymbackend.buddy.service.BuddyServiceImpl;
 import com.ca.gymbackend.security.JwtUtil;
@@ -30,17 +31,11 @@ public class BuddyController {
     private BuddyServiceImpl buddyService;
     @Autowired
     private JwtUtil jwtUtil;
-    @Autowired
-    private ChatWebSocketController buddyChatController;
+    
     @Autowired
     private SimpMessageSendingOperations messagingTemplate;
-    // @PostMapping("/register")
-    // public String registerBuddy(@RequestBody BuddyDto buddyDto) {
-    // buddyService.registerBuddy(buddyDto);
-    // System.out.println("넘어온 buddyDto: " + buddyDto);
-    // System.out.println("buddyAgeList: " + buddyDto.getBuddyAgeList());
-    // return "버디 등록 완료";
-    // }
+
+    // 버디 등록
     @PostMapping("/register")
     public String registerBuddy(@RequestBody BuddyDto buddyDto, HttpServletRequest request) {
         String token = request.getHeader("Authorization").substring(7); // "Bearer " 제거
@@ -62,6 +57,11 @@ public class BuddyController {
     public ResponseEntity<List<Map<String, Object>>> getBuddyUserList() {
         List<Map<String, Object>> result = buddyService.getBuddyUserList();
         return ResponseEntity.ok(result);
+    }
+    // 채팅룸 리스트 나열
+    @GetMapping("/rooms/{buddyId}")
+    public List<ChatRoomDto> getChatRooms(@PathVariable int buddyId) {
+        return buddyService.findChatRoomsByBuddyId(buddyId);
     }
 
     // 매칭 요청 보내기 (하트 누르기)
@@ -127,12 +127,35 @@ public class BuddyController {
     }
 
     // 메시지 읽음 처리 (옵션)
-    @PostMapping("/read/{chatId}")
-    public ResponseEntity<?> markChatAsRead(@PathVariable int chatId) {
+    // @PostMapping("/read/{id}")
+    // public ResponseEntity<?> markChatAsRead(@PathVariable int id) {
+    //     try {
+    //         buddyService.markChatAsRead(id);
+    //         return ResponseEntity.ok("읽음 처리 완료");
+    //     } catch (Exception e) {
+    //         return ResponseEntity.status(500).body("읽음 처리 실패: " + e.getMessage());
+    //     }
+    // }
+    // ✅ 수정된 엔드포인트: matchingId를 받아 해당 채팅방의 메시지를 읽음 처리
+   @PostMapping("/read/{matchingId}")
+    public ResponseEntity<?> markChatAsRead(@PathVariable int matchingId, HttpServletRequest request) {
         try {
-            buddyService.markChatAsRead(chatId);
+            String authHeader = request.getHeader("Authorization");
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return ResponseEntity.status(401).body("토큰이 Authorization 헤더에 없습니다.");
+            }
+            
+            String token = authHeader.substring(7); // "Bearer " 제거
+            Integer currentUserId = jwtUtil.getUserId(token); // JwtUtil을 사용하여 ID 추출
+
+            if (currentUserId == null) {
+                return ResponseEntity.status(401).body("인증된 사용자 정보를 찾을 수 없습니다.");
+            }
+            
+            buddyService.markChatAsRead(matchingId, currentUserId);
             return ResponseEntity.ok("읽음 처리 완료");
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(500).body("읽음 처리 실패: " + e.getMessage());
         }
     }
