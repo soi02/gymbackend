@@ -162,11 +162,11 @@
         UPDATE chat SET is_read = true WHERE id = #{id}
     </update> -->
 
-    <update id="updateChatReadStatus" parameterType="map">
-        UPDATE chat 
-        SET is_read = true 
-        WHERE matching_id = #{matchingId} 
-        AND send_buddy_id != #{currentUserId}
-        AND is_read = false
+    <update id="markMessagesAsRead" parameterType="map">
+        UPDATE chat
+        SET is_read = TRUE
+        WHERE matching_id = #{matchingId}
+        AND send_buddy_id != #{readerBuddyId}
+        AND is_read = FALSE
     </update>
 </mapper>

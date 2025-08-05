@@ -65,8 +65,8 @@ public class BuddyServiceImpl {
         buddyMapper.updateMatchingStatus(id, status);
 
         // if ("수락".equals(status)) {
-        //     // 수락한 경우만 채팅 시작
-        //     buddyMapper.insertInitialChat(id, sendBuddyId);
+        // // 수락한 경우만 채팅 시작
+        // buddyMapper.insertInitialChat(id, sendBuddyId);
         // }
     }
 
@@ -74,7 +74,7 @@ public class BuddyServiceImpl {
         return buddyMapper.selectMatchingNotifications(buddyId);
     }
 
-    //채팅방리스트
+    // 채팅방리스트
     public List<ChatRoomDto> findChatRoomsByBuddyId(int buddyId) {
         return buddyMapper.getChatRoomsByBuddyId(buddyId);
     }
@@ -95,13 +95,13 @@ public class BuddyServiceImpl {
         buddyMapper.insertChat(chatDto);
     }
 
-    
     public List<ChatDto> getChatsByMatchingId(int matchingId) {
         return buddyMapper.selectChatsByMatchingId(matchingId);
     }
 
-    
-     public void markChatAsRead(int matchingId, int currentUserId) {
-        buddyMapper.updateChatReadStatus(matchingId, currentUserId);
+    // 메시지 읽음 처리
+    @Transactional
+    public void markMessagesAsRead(int matchingId, int readerBuddyId) {
+        buddyMapper.markMessagesAsRead(matchingId, readerBuddyId);
     }
 }

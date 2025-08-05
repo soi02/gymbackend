@@ -38,6 +38,6 @@ public interface BuddySqlMapper {
     public void insertInitialChat(Map<String, Object> params);
     public void insertChat(ChatDto chatDto);
     public List<ChatDto> selectChatsByMatchingId(int matchingId);
-    public void updateChatReadStatus(@Param("matchingId") int matchingId, @Param("currentUserId") int currentUserId);
+    public void markMessagesAsRead(@Param("matchingId") int matchingId, @Param("readerBuddyId") int readerBuddyId);
 
 }
