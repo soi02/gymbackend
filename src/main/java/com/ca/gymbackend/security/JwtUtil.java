@@ -17,6 +17,10 @@ public class JwtUtil {
     private long expiration;
 
     public String generateToken(Integer userId) {
+            System.out.println("JWT Secret: " + secret);
+    System.out.println("JWT Expiration (ms): " + expiration);
+    Date expiryDate = new Date(System.currentTimeMillis() + expiration);
+    System.out.println("Expiry Date: " + expiryDate);
         SecretKey key = Keys.hmacShaKeyFor(secret.getBytes());
         return Jwts.builder()
                 .subject(String.valueOf(userId))

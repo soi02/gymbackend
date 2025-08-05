@@ -27,7 +27,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         // 웹소켓 핸드셰이크 요청은 필터링하지 않습니다.
         // URL이 /ws/chat으로 시작하면 필터를 통과시킵니다.
         String path = request.getRequestURI();
-        boolean isWebSocketRequest = path.startsWith("/ws/chat");
+        boolean isWebSocketRequest = path.startsWith("/ws/chat") || path.startsWith("/ws/group-chat"); // 그룹 채팅 엔드포인트 추가
         System.out.println("[DEBUG] shouldNotFilter URL: " + path + ", Result: " + isWebSocketRequest);
         return isWebSocketRequest;
     }
