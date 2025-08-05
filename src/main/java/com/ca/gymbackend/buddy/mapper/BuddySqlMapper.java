@@ -8,6 +8,7 @@ import java.util.Map;
 
 import com.ca.gymbackend.buddy.dto.BuddyDto;
 import com.ca.gymbackend.buddy.dto.ChatDto;
+import com.ca.gymbackend.buddy.dto.ChatRoomDto;
 // import com.ca.gymbackend.buddy.dto.MatchingDto;
 // import com.ca.gymbackend.portal.dto.UserDto;
 import com.ca.gymbackend.buddy.dto.AgeDto;
@@ -30,6 +31,7 @@ public interface BuddySqlMapper {
 
     public List<Map<String, Object>> selectMatchingNotifications(@Param("buddyId") int buddyId);
 
+    public List<ChatRoomDto> getChatRoomsByBuddyId(@Param("buddyId") int buddyId);
 
     //채팅
     // void insertInitialChat(@Param("matchingId") int matchingId, @Param("sendBuddyId") int sendBuddyId);

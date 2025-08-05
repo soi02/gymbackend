@@ -75,10 +75,47 @@
         ORDER BY m.id DESC
     </select>
 
+    <!-- 채팅룸 나열 -->
+    <select id="getChatRoomsByBuddyId">
+        SELECT 
+            m.id AS matchingId,
+            CASE 
+                WHEN m.send_buddy_id = #{buddyId} THEN u2.name
+                ELSE u1.name
+            END AS opponentName,
+            CASE 
+                WHEN m.send_buddy_id = #{buddyId} THEN u2.profile_image
+                ELSE u1.profile_image
+            END AS opponentProfileImage,
+            CASE 
+                WHEN m.send_buddy_id = #{buddyId} THEN b2.intro
+                ELSE b1.intro
+            END AS opponentIntro,
+            ch.message AS lastMessage,
+            ch.sent_at AS lastSentAt
+
+        FROM matching m
+        JOIN buddy b1 ON m.send_buddy_id = b1.id
+        JOIN user u1 ON b1.user_id = u1.id
+        JOIN buddy b2 ON m.receiver_buddy_id = b2.id
+        JOIN user u2 ON b2.user_id = u2.id
+        LEFT JOIN chat ch ON ch.id = (
+            SELECT id FROM chat 
+            WHERE matching_id = m.id 
+            ORDER BY sent_at DESC 
+            LIMIT 1
+        )
+        WHERE m.status = '수락'
+          AND (m.send_buddy_id = #{buddyId} OR m.receiver_buddy_id = #{buddyId})
+        ORDER BY ch.sent_at DESC
+    </select>
+
+
+
     <!-- // 채팅 -->
     <insert id="insertInitialChat" parameterType="map">
         INSERT INTO chat (matching_id, send_buddy_id, message, sent_at, is_read)
-        VALUES (#{matchingId}, #{sendBuddyId}, '채팅이 시작되었습니다.', NOW(), false)
+        VALUES (#{matchingId}, #{sendBuddyId}, '안녕하세요.', NOW(), false)
     </insert>
 
 

@@ -1,0 +1,15 @@
+meta {
+  name: 채팅룸 나열
+  type: http
+  seq: 8
+}
+
+get {
+  url: http://localhost:8080/api/buddy/rooms/2
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+}

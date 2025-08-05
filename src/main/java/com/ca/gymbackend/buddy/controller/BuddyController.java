@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ca.gymbackend.buddy.dto.BuddyDto;
 import com.ca.gymbackend.buddy.dto.ChatDto;
+import com.ca.gymbackend.buddy.dto.ChatRoomDto;
 import com.ca.gymbackend.buddy.dto.MatchingDto;
 import com.ca.gymbackend.buddy.service.BuddyServiceImpl;
 import com.ca.gymbackend.security.JwtUtil;
@@ -30,17 +31,11 @@ public class BuddyController {
     private BuddyServiceImpl buddyService;
     @Autowired
     private JwtUtil jwtUtil;
-    @Autowired
-    private ChatWebSocketController buddyChatController;
+    
     @Autowired
     private SimpMessageSendingOperations messagingTemplate;
-    // @PostMapping("/register")
-    // public String registerBuddy(@RequestBody BuddyDto buddyDto) {
-    // buddyService.registerBuddy(buddyDto);
-    // System.out.println("넘어온 buddyDto: " + buddyDto);
-    // System.out.println("buddyAgeList: " + buddyDto.getBuddyAgeList());
-    // return "버디 등록 완료";
-    // }
+
+    // 버디 등록
     @PostMapping("/register")
     public String registerBuddy(@RequestBody BuddyDto buddyDto, HttpServletRequest request) {
         String token = request.getHeader("Authorization").substring(7); // "Bearer " 제거
@@ -62,6 +57,11 @@ public class BuddyController {
     public ResponseEntity<List<Map<String, Object>>> getBuddyUserList() {
         List<Map<String, Object>> result = buddyService.getBuddyUserList();
         return ResponseEntity.ok(result);
+    }
+    // 채팅룸 리스트 나열
+    @GetMapping("/rooms/{buddyId}")
+    public List<ChatRoomDto> getChatRooms(@PathVariable int buddyId) {
+        return buddyService.findChatRoomsByBuddyId(buddyId);
     }
 
     // 매칭 요청 보내기 (하트 누르기)

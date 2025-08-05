@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.ca.gymbackend.buddy.dto.AgeDto;
 import com.ca.gymbackend.buddy.dto.BuddyDto;
 import com.ca.gymbackend.buddy.dto.ChatDto;
+import com.ca.gymbackend.buddy.dto.ChatRoomDto;
 import com.ca.gymbackend.buddy.mapper.BuddySqlMapper;
 
 @Service
@@ -73,6 +74,10 @@ public class BuddyServiceImpl {
         return buddyMapper.selectMatchingNotifications(buddyId);
     }
 
+    //채팅방리스트
+    public List<ChatRoomDto> findChatRoomsByBuddyId(int buddyId) {
+        return buddyMapper.getChatRoomsByBuddyId(buddyId);
+    }
 
     // 채팅
     public void insertInitialChat(int matchingId, int sendBuddyId) {
