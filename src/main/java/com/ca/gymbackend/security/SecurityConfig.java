@@ -58,6 +58,7 @@ public class SecurityConfig {
 
                         // ✅ 이 부분을 클라이언트의 URL과 동일하게 수정하세요.
                         .requestMatchers("/ws/chat/**").permitAll()
+                        .requestMatchers("/ws/group-chat/**").permitAll()// ✅ 그룹 채팅 웹소켓 경로 추가
                         .requestMatchers(HttpMethod.POST, "/api/user/login").permitAll()
                         .requestMatchers("/api/user/verify-token").permitAll() // 토큰 유효성 검증은 permilAll
                         .requestMatchers("/api/challenge/tendency-test/status").authenticated() // 성향 테스트 상태 조회는 인증 필요
@@ -87,6 +88,7 @@ public class SecurityConfig {
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Auth-Token")); // 클라이언트에서 보낼
                                                                                                          // 헤더를 명시하는 것이
                                                                                                          // 좋습니다.
+        configuration.setAllowedHeaders(List.of("*")); // ✅ 이 코드를 추가해 보세요.                                                                                                 
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
