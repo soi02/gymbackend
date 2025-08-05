@@ -101,7 +101,7 @@ public class BuddyServiceImpl {
     }
 
     
-    public void markChatAsRead(int chatId) {
-        buddyMapper.updateChatReadStatus(chatId);
+     public void markChatAsRead(int matchingId, int currentUserId) {
+        buddyMapper.updateChatReadStatus(matchingId, currentUserId);
     }
 }

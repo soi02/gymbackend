@@ -12,4 +12,6 @@ public class ChatRoomDto {
     private String opponentIntro;
     private String lastMessage;
     private LocalDateTime lastSentAt;
+    // ✅ 이 필드를 추가해 주세요.
+    private int unreadCount;
 }

@@ -77,23 +77,30 @@
 
     <!-- 채팅룸 나열 -->
     <select id="getChatRoomsByBuddyId">
-        SELECT 
-            m.id AS matchingId,
-            CASE 
-                WHEN m.send_buddy_id = #{buddyId} THEN u2.name
-                ELSE u1.name
-            END AS opponentName,
-            CASE 
-                WHEN m.send_buddy_id = #{buddyId} THEN u2.profile_image
-                ELSE u1.profile_image
-            END AS opponentProfileImage,
-            CASE 
-                WHEN m.send_buddy_id = #{buddyId} THEN b2.intro
-                ELSE b1.intro
-            END AS opponentIntro,
-            ch.message AS lastMessage,
-            ch.sent_at AS lastSentAt
-
+         SELECT 
+        m.id AS matchingId,
+        CASE 
+            WHEN m.send_buddy_id = #{buddyId} THEN u2.name
+            ELSE u1.name
+        END AS opponentName,
+        CASE 
+            WHEN m.send_buddy_id = #{buddyId} THEN u2.profile_image
+            ELSE u1.profile_image
+        END AS opponentProfileImage,
+        CASE 
+            WHEN m.send_buddy_id = #{buddyId} THEN b2.intro
+            ELSE b1.intro
+        END AS opponentIntro,
+        ch.message AS lastMessage,
+        ch.sent_at AS lastSentAt,
+        <!-- ✅ 추가된 부분: 안 읽은 메시지 수를 계산하는 서브쿼리 -->
+        (
+            SELECT COUNT(*)
+            FROM chat
+            WHERE matching_id = m.id
+              AND is_read = FALSE
+              AND send_buddy_id != #{buddyId}
+        ) AS unreadCount
         FROM matching m
         JOIN buddy b1 ON m.send_buddy_id = b1.id
         JOIN user u1 ON b1.user_id = u1.id
@@ -106,7 +113,7 @@
             LIMIT 1
         )
         WHERE m.status = '수락'
-          AND (m.send_buddy_id = #{buddyId} OR m.receiver_buddy_id = #{buddyId})
+        AND (m.send_buddy_id = #{buddyId} OR m.receiver_buddy_id = #{buddyId})
         ORDER BY ch.sent_at DESC
     </select>
 
@@ -131,8 +138,15 @@
         ORDER BY sent_at ASC
     </select>
 
-    <update id="updateChatReadStatus" parameterType="int">
+    <!-- <update id="updateChatReadStatus" parameterType="int">
         UPDATE chat SET is_read = true WHERE id = #{id}
-    </update>
+    </update> -->
 
+    <update id="updateChatReadStatus" parameterType="map">
+        UPDATE chat 
+        SET is_read = true 
+        WHERE matching_id = #{matchingId} 
+        AND send_buddy_id != #{currentUserId}
+        AND is_read = false
+    </update>
 </mapper>
