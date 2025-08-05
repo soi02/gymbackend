@@ -24,7 +24,9 @@ import com.ca.gymbackend.challenge.dto.ChallengeMyRecordsResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeProgressResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeStartRequest;
 import com.ca.gymbackend.challenge.dto.ChallengeTendencyTestRequest;
+import com.ca.gymbackend.challenge.dto.payment.PaymentReadyResponse;
 import com.ca.gymbackend.challenge.service.ChallengeServiceImpl;
+import com.ca.gymbackend.challenge.service.PaymentServiceImpl;
 
 import lombok.RequiredArgsConstructor;
 
@@ -34,13 +36,16 @@ import lombok.RequiredArgsConstructor;
 public class ChallengeController {
     
     private final ChallengeServiceImpl challengeService;
+    private final PaymentServiceImpl paymentService;
 
     // 챌린지 생성
     @PostMapping("/registerChallengeProcess")
     public ResponseEntity<String> registerChallengeProcess(@ModelAttribute ChallengeCreateRequest challengeCreateRequest) {
         
-        System.out.println("컨트롤러 진입");
-        System.out.println("받은 챌린지 데이터: " + challengeCreateRequest);
+    // ★★★ 이 부분을 추가해주세요 ★★★
+    System.out.println("백엔드에서 수신한 챌린지 생성 요청 데이터: " + challengeCreateRequest);
+    System.out.println("보증금: " + challengeCreateRequest.getChallengeDepositAmount());
+    // ★★★ 여기까지 추가 ★★★
 
         // 로그인 사용자 확인 로직
         String creatorName = challengeCreateRequest.getChallengeCreator();
@@ -290,6 +295,49 @@ public class ChallengeController {
             return ResponseEntity.ok(result);
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+
+
+
+
+    
+
+    // 결제
+    @PostMapping("/join/payment")
+    public ResponseEntity<PaymentReadyResponse> startChallengeWithPayment(
+            @RequestParam("userId") int userId,
+            @RequestParam("challengeId") int challengeId) {
+        try {
+            PaymentReadyResponse response = challengeService.startChallengeWithPayment(userId, challengeId);
+            return ResponseEntity.ok(response);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+    
+    @GetMapping("/join/payment/success")
+    public ResponseEntity<String> kakaoPaySuccess(
+            @RequestParam("pg_token") String pgToken,
+            @RequestParam("challengeId") int challengeId,
+            @RequestParam("userId") int userId) {
+        
+        String tid = paymentService.getReadyTid(userId, challengeId);
+
+        if (tid == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("결제 정보가 유효하지 않습니다.");
+        }
+        
+        // 결제 승인 로직 실행
+        boolean paymentSuccess = paymentService.kakaoPayApprove(tid, challengeId, userId, pgToken);
+        
+        if (paymentSuccess) {
+            // 결제 승인 후 챌린지 참가 최종 처리
+            challengeService.finalizeChallengeJoin(userId, challengeId, tid, pgToken);
+            return ResponseEntity.ok("결제 및 챌린지 참가 성공");
+        } else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("결제 승인 실패");
         }
     }
 

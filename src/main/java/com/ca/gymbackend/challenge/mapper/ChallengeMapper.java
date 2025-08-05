@@ -17,6 +17,8 @@ import com.ca.gymbackend.challenge.dto.ChallengeProgressResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeRecordInfo;
 import com.ca.gymbackend.challenge.dto.ChallengeTestScore;
 import com.ca.gymbackend.challenge.dto.ChallengeUserInfo;
+import com.ca.gymbackend.challenge.dto.payment.ChallengePayment;
+import com.ca.gymbackend.challenge.dto.payment.ChallengeRaffleTicket;
 
 @Mapper
 public interface ChallengeMapper {
@@ -160,6 +162,22 @@ public interface ChallengeMapper {
 
     // 특정 사용자의 가장 최근 성향 테스트 결과 조회
     public ChallengeFinalTestResult findTestResultByUserId(@Param("userId") int userId);
+
+
+
+
+    // 결제 관련
+    public Integer findChallengeDepositAmount(@Param("challengeId") int challengeId);
+    public String findChallengeTitleById(@Param("challengeId") int challengeId);
+    public void insertPayment(ChallengePayment challengePayment);
+    public void updatePaymentStatus(@Param("tid") String tid, @Param("status") String status, @Param("pgToken") String pgToken);
+    public ChallengePayment findPaymentByTid(@Param("tid") String tid);
+    public String findReadyTidByUserIdAndChallengeId(@Param("userId") int userId, @Param("challengeId") int challengeId);
+    
+    // 추첨권 관련
+    public void insertRaffleTicket(ChallengeRaffleTicket challengeRaffleTicket);
+
+
 }
 
 

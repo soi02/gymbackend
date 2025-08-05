@@ -32,4 +32,6 @@ public class ChallengeDetailResponse {
 
 
     private boolean userParticipating;
+
+    private int challengeDepositAmount;
 }

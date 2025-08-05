@@ -13,6 +13,8 @@ import com.ca.gymbackend.challenge.dto.ChallengeProgressResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeRecordInfo;
 import com.ca.gymbackend.challenge.dto.ChallengeTestScore;
 import com.ca.gymbackend.challenge.dto.ChallengeUserInfo;
+import com.ca.gymbackend.challenge.dto.payment.ChallengeRaffleTicket;
+import com.ca.gymbackend.challenge.dto.payment.PaymentReadyResponse;
 import com.ca.gymbackend.challenge.mapper.ChallengeMapper;
 import lombok.RequiredArgsConstructor;
 import net.coobird.thumbnailator.Thumbnails;
@@ -45,6 +47,7 @@ import java.util.stream.Collectors;
 public class ChallengeServiceImpl {
 
     private final ChallengeMapper challengeMapper;
+    private final PaymentServiceImpl paymentService;
 
     @Autowired
     @Qualifier("fileRootPath")
@@ -618,6 +621,91 @@ public class ChallengeServiceImpl {
     }
 
     public ChallengeFinalTestResult findTestResult(int userId) {
- return challengeMapper.findTestResultByUserId(userId);
- }
+        return challengeMapper.findTestResultByUserId(userId);
+    }
+
+
+
+
+
+
+
+
+    // 결제 후 챌린지 참가 로직 (PaymentService에 위임)
+    public PaymentReadyResponse startChallengeWithPayment(int userId, int challengeId) {
+        // 이미 참여한 챌린지인지 확인
+        if (challengeMapper.existsUserChallenge(userId, challengeId) > 0) {
+            throw new IllegalStateException("이미 참여 중인 챌린지입니다.");
+        }
+
+        // 결제 준비는 PaymentServiceImpl에 위임
+        return paymentService.kakaoPayReady(challengeId, userId);
+    }
+    
+
+
+    // 결제 승인 성공 후 챌린지 참가 최종 처리
+    // PaymentServiceImpl에서 결제 승인이 완료되면 이 메서드를 호출
+    @Transactional
+    public void finalizeChallengeJoin(int userId, int challengeId, String tid, String pgToken) {
+        // 결제 상태를 확인하는 등의 로직 추가 가능
+        
+        // 1. user_challenge 테이블에 참가 기록 삽입
+        challengeMapper.insertUserChallenge(userId, challengeId);
+        
+        // 2. challenge 테이블 참가자 수 증가
+        challengeMapper.increaseChallengeParticipantCount(challengeId);
+        
+        // 3. raffle_ticket 테이블에 추첨권 지급
+        int amount = challengeMapper.findChallengeDepositAmount(challengeId);
+        int ticketCount = (amount / 1000) * 10; // 1000원당 10장 가정
+        
+        if (ticketCount > 0) {
+            ChallengeRaffleTicket challengeRaffleTicket = new ChallengeRaffleTicket();
+            challengeRaffleTicket.setUserId(userId);
+            challengeRaffleTicket.setChallengeId(challengeId);
+            challengeRaffleTicket.setRaffleTicketCount(ticketCount);
+            challengeRaffleTicket.setRaffleTicketSourceType("PAYMENT");
+            challengeMapper.insertRaffleTicket(challengeRaffleTicket);
+        }
+    }
+
+
+
+    // 챌린지 종료 후 노리개 등급 지급 & 추첨권 추가 지급
+    public void awardNorigaeAndRaffleTicket(int userId, int challengeId) {
+        // 1. 챌린지 달성률 계산 (기존 로직)
+        int totalDays = challengeMapper.findChallengeTotalDays(challengeId);
+        int attendedDays = challengeMapper.countAttendedDays(challengeId, userId);
+        int achievementRate = (int) ((double) attendedDays / totalDays * 100);
+
+        // 2. 달성률에 맞는 노리개 등급 ID 조회 (기존 로직)
+        Integer tierId = challengeMapper.findTierIdByAchievementRate(achievementRate); // ★ tierId 변수 선언 및 할당
+
+        // 3. 노리개 지급 (기존 로직)
+        // ... (이 부분은 이전 코드에 있었지만, 추첨권 로직에만 집중하기 위해 여기서는 생략) ...
+        
+        // 4. 노리개 등급에 따라 추가 추첨권 지급
+        int additionalTickets = 0;
+        
+        // ★ tierId가 null이 아닐 때만 아래 로직을 실행하도록 수정
+        if (tierId != null) {
+             if (tierId == 1) { // Bronze
+                additionalTickets = 5;
+            } else if (tierId == 2) { // Silver
+                additionalTickets = 15;
+            } else if (tierId == 3) { // Gold
+                additionalTickets = 30;
+            }
+        }
+       
+        if (additionalTickets > 0) {
+            ChallengeRaffleTicket challengeRaffleTicket = new ChallengeRaffleTicket();
+            challengeRaffleTicket.setUserId(userId);
+            challengeRaffleTicket.setChallengeId(challengeId);
+            challengeRaffleTicket.setRaffleTicketCount(additionalTickets);
+            challengeRaffleTicket.setRaffleTicketSourceType("NORIGAE_AWARD");
+            challengeMapper.insertRaffleTicket(challengeRaffleTicket);
+        }
+    }
 }

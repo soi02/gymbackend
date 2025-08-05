@@ -37,4 +37,6 @@ public class ChallengeCreateRequest {
     
 
     private Integer challengeTendencyId;
+
+    private int challengeDepositAmount;
 }
