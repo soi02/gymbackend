@@ -1,5 +1,7 @@
 package com.ca.gymbackend.routine.controller;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 
@@ -123,9 +125,13 @@ public class RoutineController {
         @RequestParam("startDate") String startDate,
         @RequestParam("endDate") String endDate
     ) {
+        System.out.println("🕒 서버 현재 시간: " + LocalDateTime.now());
+System.out.println("🕒 시스템 타임존: " + ZoneId.systemDefault());
+
         try {
             List<String> result = routineService.getWorkoutDatesBetween(userId, startDate, endDate);
             return ResponseEntity.ok(result);
+            
 
         } catch(Exception e) {
             e.printStackTrace();
