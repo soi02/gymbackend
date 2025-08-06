@@ -1,10 +1,15 @@
 package com.ca.gymbackend.market.controller;
 
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ca.gymbackend.market.dto.MarketArticleDto;
@@ -30,7 +35,15 @@ public class MarketController {
         marketService.insertMarketArticle(marketArticleDto);
     }
     
-    // @GetMapping("/selectMarketArticle")
+    @GetMapping("/selectMarketArticle") // ok
+    public List<Map<String, Object>> selectMarketArticle() {
+        return marketService.selectMarketArticle();
+    }
+    
+    @GetMapping("/selectSpecificMarketArticle") // ok
+    public MarketArticleDto selectSpecificMarketArticle(@RequestBody MarketArticleDto marketArticleDto) {
+        return marketService.selectSpecificMarketArticle(marketArticleDto.getId());
+    }
     
     @PostMapping("/updateMarketArticle") // ok
     public void updateMarketArticle(@RequestBody MarketArticleDto marketArticleDto) {
@@ -47,7 +60,10 @@ public class MarketController {
         marketService.insertMarketCommentOnArticle(marketCommentOnArticleDto);
     }
     
-    // @GetMapping("/selectMarketCommentOnArticle")
+    @GetMapping("/selectMarketCommentOnArticle") // ok
+    public List<Map<String, Object>> selectMarketCommentOnArticle(@RequestParam("articleId") Integer articleId) {
+        return marketService.selectMarketCommentOnArticle(articleId);
+    }
     
     @PostMapping("/updateMarketCommentOnArticle") // ok
     public void updateMarketCommentOnArticle(@RequestBody MarketCommentOnArticleDto marketCommentOnArticleDto) {
@@ -64,25 +80,40 @@ public class MarketController {
         marketService.insertMarketProductInterestedLog(marketProductInterestedLogDto);
     }
     
-    // @GetMapping("/selectMarketProductInterestedLogWhenUserInfo")
-
-    // @GetMapping("/selectMarketProductInterestedLogWhenArticleInfo")
+    @GetMapping("/selectMarketProductInterestedLogWhenUserInfo") // ok
+    public List<Map<String, Object>> selectMarketProductInterestedLogWhenUserInfo(@RequestParam("marketUserId") Integer marketUserId) {
+        return marketService.selectMarketProductInterestedLogWhenUserInfo(marketUserId);
+    }
+    
+    @GetMapping("/selectMarketProductInterestedLogWhenArticleInfo") // ok
+    public List<Map<String, Object>> selectMarketProductInterestedLogWhenArticleInfo(@RequestParam("specificArticleId") Integer specificArticleId) {
+        return marketService.selectMarketProductInterestedLogWhenArticleInfo(specificArticleId);
+    }
     
     @PostMapping("/insertMarketDealedLog") // ok
     public void insertMarketDealedLog(@RequestBody MarketDealedLogDto marketDealedLogDto) {
         marketService.insertMarketDealedLog(marketDealedLogDto);
     }
     
-    // @GetMapping("/selectMarketDealedLogWhenBuyer")
+    @GetMapping("/selectMarketDealedLogWhenBuyer") // ok
+    public List<Map<String, Object>> selectMarketDealedLogWhenBuyer(@RequestParam("buyerId") Integer buyerId) {
+        return marketService.selectMarketDealedLogWhenBuyer(buyerId);
+    }
     
-    // @GetMapping("/selectMarketDealedLogWhenSeller")
+    @GetMapping("/selectMarketDealedLogWhenSeller") // ok
+    public List<Map<String, Object>> selectMarketDealedLogWhenSeller(@RequestParam("sellerId") Integer sellerId) {
+        return marketService.selectMarketDealedLogWhenSeller(sellerId);
+    }
     
     @PostMapping("/insertMarketReviewToUser") // ok
     public void insertMarketReviewToUser(@RequestBody MarketReviewOnUserDto marketReviewOnUserDto) {
         marketService.insertMarketReviewToUser(marketReviewOnUserDto);
     }
     
-    // @GetMapping("/selectMarketReviewToUser")
+    @GetMapping("/selectMarketReviewToUser") // ok
+    public List<Map<String, Object>> selectMarketReviewToUser(@RequestParam("evaluatedUserId") Integer evaluatedUserId) {
+        return marketService.selectMarketReviewToUser(evaluatedUserId);
+    }
     
     @PostMapping("/updateMarketReviewToUser") // ok
     public void updateMarketReviewToUser(@RequestBody MarketReviewOnUserDto marketReviewOnUserDto) {

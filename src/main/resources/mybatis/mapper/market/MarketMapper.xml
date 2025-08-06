@@ -17,6 +17,12 @@
     
     <select id = "selectMarketArticle" resultType = "com.ca.gymbackend.market.dto.MarketArticleDto">
     
+        SELECT * FROM market_article;
+    
+    </select>
+    
+    <select id = "selectSpecificMarketArticle" resultType = "com.ca.gymbackend.market.dto.MarketArticleDto">
+    
         SELECT * FROM market_article WHERE id = #{id};
     
     </select>
