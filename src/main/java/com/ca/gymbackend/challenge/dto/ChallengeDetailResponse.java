@@ -33,5 +33,5 @@ public class ChallengeDetailResponse {
 
     private boolean userParticipating;
 
-    private int challengeDepositAmount;
+    private Integer challengeDepositAmount;
 }

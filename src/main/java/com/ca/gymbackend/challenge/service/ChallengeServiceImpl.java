@@ -631,45 +631,45 @@ public class ChallengeServiceImpl {
 
 
 
-    // 결제 후 챌린지 참가 로직 (PaymentService에 위임)
+    // 결제 준비 로직
     public PaymentReadyResponse startChallengeWithPayment(int userId, int challengeId) {
-        // 이미 참여한 챌린지인지 확인
-        if (challengeMapper.existsUserChallenge(userId, challengeId) > 0) {
-            throw new IllegalStateException("이미 참여 중인 챌린지입니다.");
-        }
+        // 챌린지 보증금과 제목 조회 (Mybatis XML에 있는 SQL ID 사용)
+        int totalAmount = challengeMapper.findChallengeDepositAmount(challengeId);
+        String challengeTitle = challengeMapper.findChallengeTitleById(challengeId);
 
-        // 결제 준비는 PaymentServiceImpl에 위임
-        return paymentService.kakaoPayReady(challengeId, userId);
+        // PaymentService에 결제 준비 요청 위임
+        return paymentService.kakaoPayReady(
+                Long.valueOf(challengeId),
+                userId,
+                challengeTitle,
+                totalAmount
+        );
     }
     
-
-
-    // 결제 승인 성공 후 챌린지 참가 최종 처리
-    // PaymentServiceImpl에서 결제 승인이 완료되면 이 메서드를 호출
-    @Transactional
-    public void finalizeChallengeJoin(int userId, int challengeId, String tid, String pgToken) {
-        // 결제 상태를 확인하는 등의 로직 추가 가능
+    // 결제 승인 성공 후 최종 처리
+    public void finalizeChallengeJoin(int userId, int challengeId) {
+        // 챌린지 참여자 수 증가
+        challengeMapper.increaseChallengeParticipantCountInfo(challengeId);
         
-        // 1. user_challenge 테이블에 참가 기록 삽입
-        challengeMapper.insertUserChallenge(userId, challengeId);
+        // 추첨권 지급 로직
+        int depositAmount = challengeMapper.findChallengeDepositAmount(challengeId);
+        int raffleTicketCount = depositAmount / 1000;
         
-        // 2. challenge 테이블 참가자 수 증가
-        challengeMapper.increaseChallengeParticipantCount(challengeId);
-        
-        // 3. raffle_ticket 테이블에 추첨권 지급
-        int amount = challengeMapper.findChallengeDepositAmount(challengeId);
-        int ticketCount = (amount / 1000) * 10; // 1000원당 10장 가정
-        
-        if (ticketCount > 0) {
-            ChallengeRaffleTicket challengeRaffleTicket = new ChallengeRaffleTicket();
-            challengeRaffleTicket.setUserId(userId);
-            challengeRaffleTicket.setChallengeId(challengeId);
-            challengeRaffleTicket.setRaffleTicketCount(ticketCount);
-            challengeRaffleTicket.setRaffleTicketSourceType("PAYMENT");
-            challengeMapper.insertRaffleTicket(challengeRaffleTicket);
+        if (raffleTicketCount > 0) {
+            // 추첨권 정보 저장
+            // 수정된 부분: DTO 대신 개별 필드 값을 전달
+            challengeMapper.insertRaffleTicket(
+                userId, 
+                challengeId, 
+                raffleTicketCount, 
+                "PAYMENT"
+            );
         }
+        
+        // user_challenge 테이블에 사용자 챌린지 정보 삽입
+        challengeMapper.insertUserChallengeInfo(userId, challengeId);
     }
-
+    
 
 
     // 챌린지 종료 후 노리개 등급 지급 & 추첨권 추가 지급
@@ -699,13 +699,20 @@ public class ChallengeServiceImpl {
             }
         }
        
-        if (additionalTickets > 0) {
-            ChallengeRaffleTicket challengeRaffleTicket = new ChallengeRaffleTicket();
-            challengeRaffleTicket.setUserId(userId);
-            challengeRaffleTicket.setChallengeId(challengeId);
-            challengeRaffleTicket.setRaffleTicketCount(additionalTickets);
-            challengeRaffleTicket.setRaffleTicketSourceType("NORIGAE_AWARD");
-            challengeMapper.insertRaffleTicket(challengeRaffleTicket);
-        }
+if (additionalTickets > 0) {
+    ChallengeRaffleTicket challengeRaffleTicket = new ChallengeRaffleTicket();
+    challengeRaffleTicket.setUserId(userId);
+    challengeRaffleTicket.setChallengeId(challengeId);
+    challengeRaffleTicket.setRaffleTicketCount(additionalTickets);
+    challengeRaffleTicket.setRaffleTicketSourceType("NORIGAE_AWARD");
+    
+    // DTO 객체 대신 개별 필드 값을 전달하도록 수정
+    challengeMapper.insertRaffleTicket(
+        challengeRaffleTicket.getUserId(),
+        challengeRaffleTicket.getChallengeId(),
+        challengeRaffleTicket.getRaffleTicketCount(),
+        challengeRaffleTicket.getRaffleTicketSourceType()
+    );
+}
     }
 }

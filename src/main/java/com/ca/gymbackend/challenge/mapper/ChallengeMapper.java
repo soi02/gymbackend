@@ -166,16 +166,23 @@ public interface ChallengeMapper {
 
 
 
-    // 결제 관련
-    public Integer findChallengeDepositAmount(@Param("challengeId") int challengeId);
-    public String findChallengeTitleById(@Param("challengeId") int challengeId);
-    public void insertPayment(ChallengePayment challengePayment);
-    public void updatePaymentStatus(@Param("tid") String tid, @Param("status") String status, @Param("pgToken") String pgToken);
-    public ChallengePayment findPaymentByTid(@Param("tid") String tid);
-    public String findReadyTidByUserIdAndChallengeId(@Param("userId") int userId, @Param("challengeId") int challengeId);
+    // 결제 준비
+    int findChallengeDepositAmount(@Param("challengeId") int challengeId);
+    String findChallengeTitleById(@Param("challengeId") int challengeId);
+    void insertPayment(ChallengePayment payment);
+    
+    // 결제 승인
+    String findReadyTidByUserIdAndChallengeId(@Param("userId") int userId, @Param("challengeId") int challengeId);
+    void updatePaymentStatus(@Param("tid") String tid, @Param("status") String status, @Param("pgToken") String pgToken);
+    
+    // 결제 성공 후 최종 처리
+    void increaseChallengeParticipantCountInfo(int challengeId);
+    void insertRaffleTicket(@Param("userId") int userId, @Param("challengeId") int challengeId, @Param("raffleTicketCount") int raffleTicketCount, @Param("raffleTicketSourceType") String raffleTicketSourceType);
+    void insertUserChallengeInfo(@Param("userId") int userId, @Param("challengeId") int challengeId);
+
     
     // 추첨권 관련
-    public void insertRaffleTicket(ChallengeRaffleTicket challengeRaffleTicket);
+    // public void insertRaffleTicket(ChallengeRaffleTicket challengeRaffleTicket);
 
 
 }
