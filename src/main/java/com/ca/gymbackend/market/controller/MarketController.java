@@ -41,8 +41,8 @@ public class MarketController {
     }
     
     @GetMapping("/selectSpecificMarketArticle") // ok
-    public MarketArticleDto selectSpecificMarketArticle(@RequestBody MarketArticleDto marketArticleDto) {
-        return marketService.selectSpecificMarketArticle(marketArticleDto.getId());
+    public MarketArticleDto selectSpecificMarketArticle(@RequestParam("id") Integer id) {
+        return marketService.selectSpecificMarketArticle(id);
     }
     
     @PostMapping("/updateMarketArticle") // ok
@@ -51,8 +51,8 @@ public class MarketController {
     }
     
     @PostMapping("/deleteMarketArticle") // ok
-    public void deleteMarketArticle(@RequestBody MarketArticleDto marketArticleDto) {
-        marketService.deleteMarketArticle(marketArticleDto.getId());
+    public void deleteMarketArticle(@RequestParam("id") Integer id) {
+        marketService.deleteMarketArticle(id);
     }
     
     @PostMapping("/insertMarketCommentOnArticle") // ok
@@ -71,8 +71,8 @@ public class MarketController {
     }
     
     @PostMapping("/deleteMarketCommentOnArticle") // ok
-    public void deleteMarketCommentOnArticle(@RequestBody MarketCommentOnArticleDto marketCommentOnArticleDto) {
-        marketService.deleteMarketCommentOnArticle(marketCommentOnArticleDto.getId());
+    public void deleteMarketCommentOnArticle(@RequestParam("id") Integer id) {
+        marketService.deleteMarketCommentOnArticle(id);
     }
     
     @PostMapping("/insertMarketProductInterestedLog") // ok
@@ -121,8 +121,8 @@ public class MarketController {
     }
     
     @PostMapping("/deleteMarketReviewToUser") // ok
-    public void deleteMarketReviewToUser(@RequestBody MarketReviewOnUserDto marketReviewOnUserDto) {
-        marketService.deleteMarketReviewToUser(marketReviewOnUserDto.getEvaluatedUserId());
+    public void deleteMarketReviewToUser(@RequestParam("evaluatedUserId") Integer evaluatedUserId) {
+        marketService.deleteMarketReviewToUser(evaluatedUserId);
     }
     
     // [ additional crud ]
