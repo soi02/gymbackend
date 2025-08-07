@@ -21,6 +21,10 @@ public class MarketService {
     
     @Autowired
     private MarketMapper marketMapper;
+
+    public MarketUserInfoDto selectMarketUserInfo(Integer userId) {
+        return marketMapper.selectMarketUserInfo(userId);
+    }
     
     public void insertMarketArticle(MarketArticleDto marketArticleDto) {
         marketMapper.insertMarketArticle(marketArticleDto);

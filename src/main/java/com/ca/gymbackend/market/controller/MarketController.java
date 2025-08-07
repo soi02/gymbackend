@@ -17,6 +17,7 @@ import com.ca.gymbackend.market.dto.MarketCommentOnArticleDto;
 import com.ca.gymbackend.market.dto.MarketDealedLogDto;
 import com.ca.gymbackend.market.dto.MarketProductInterestedLogDto;
 import com.ca.gymbackend.market.dto.MarketReviewOnUserDto;
+import com.ca.gymbackend.market.dto.MarketUserInfoDto;
 import com.ca.gymbackend.market.service.MarketService;
 import com.ca.gymbackend.security.JwtUtil;
 
@@ -29,6 +30,12 @@ public class MarketController {
     
     @Autowired
     private JwtUtil jwtUtil;
+    
+    @GetMapping("/selectMarketUserInfo") // ok 
+    public MarketUserInfoDto selectMarketUserInfo(@RequestParam("userId") Integer userId) {
+        return marketService.selectMarketUserInfo(userId);
+    } 
+    // temporary test code
     
     @PostMapping("/insertMarketArticle") // ok
     public void insertMarketArticle(@RequestBody MarketArticleDto marketArticleDto) {
