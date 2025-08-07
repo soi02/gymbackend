@@ -8,7 +8,7 @@
     
     </select>
 
-    <insert id = "insertMarketArticle">
+    <insert id = "insertMarketArticle" parameterType="com.ca.gymbackend.market.dto.MarketArticleDto">
     
         INSERT INTO market_article (market_user_id, image_link, main_image_id, title, content, product_cost_option, product_cost)
         VALUES (#{marketUserId}, null, 1, #{title}, #{content}, #{productCostOption}, #{productCost});
@@ -17,19 +17,25 @@
     
     <select id = "selectMarketArticle" resultType = "com.ca.gymbackend.market.dto.MarketArticleDto">
     
+        SELECT * FROM market_article;
+    
+    </select>
+    
+    <select id = "selectSpecificMarketArticle" resultType = "com.ca.gymbackend.market.dto.MarketArticleDto">
+    
         SELECT * FROM market_article WHERE id = #{id};
     
     </select>
     
-    <update id = "updateMarketArticle">
+    <update id = "updateMarketArticle" parameterType="com.ca.gymbackend.market.dto.MarketArticleDto">
     
-        UPDATE market_article ma SET image_link = null, main_image_id = 2, title = #{title}, content = #{content}, 
+        UPDATE market_article ma SET image_link = #{imageLink}, main_image_id = #{mainImageId}, title = #{title}, content = #{content}, 
         product_cost_option = #{productCostOption}, product_cost = #{productCost}, sell_ended = #{sellEnded}, updated_at = NOW()
         WHERE id = #{id};
     
     </update>
     
-    <delete id = "deleteMarketArticle">
+    <delete id = "deleteMarketArticle" parameterType="int">
     
         DELETE FROM market_article WHERE id = #{id};
     
@@ -51,7 +57,7 @@
     <update id = "updateMarketCommentOnArticle">
     
         UPDATE market_comment_on_article mc_oa SET content = 'Bird My Dragon', updated_at = NOW()
-        WHERE id = 1;
+        WHERE id = #{id};
     
     </update>
     
