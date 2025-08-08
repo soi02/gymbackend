@@ -1,7 +1,9 @@
 package com.ca.gymbackend.challenge.controller;
 
+import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus; // ★ 추가
 import org.springframework.http.ResponseEntity; // ★ 추가
 import org.springframework.web.bind.annotation.GetMapping;
@@ -124,39 +126,6 @@ public class ChallengeController {
         return ResponseEntity.ok(challengeDetailResponse);
     }
     
-    // 챌린지 도전 시작
-    @PostMapping("/startChallengeProcess")
-    public ResponseEntity<String> startChallengeProcess(
-        @RequestBody ChallengeStartRequest challengeStartRequest) {
-            if (challengeStartRequest.getUserId() <= 0 || challengeStartRequest.getChallengeId() <= 0) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("UserId와 ChallengeId는 유효해야 합니다.");
-            }
-
-            try {
-                // 1. 중복 참여 여부 확인
-                challengeService.checkExistsUserChallenge(
-                    challengeStartRequest.getUserId(), 
-                    challengeStartRequest.getChallengeId()
-                );
-                
-                // 2. user_challenge 테이블에 사용자 챌린지 정보를 삽입
-                challengeService.insertUserChallengeInfo(
-                    challengeStartRequest.getUserId(), 
-                    challengeStartRequest.getChallengeId()
-                );
-
-                // 3. challenge 테이블의 participant_count를 1 증가시키기
-                challengeService.increaseChallengeParticipantCountInfo(
-                    challengeStartRequest.getChallengeId()
-                );
-
-                return ResponseEntity.ok("챌린지 도전 시작 성공");
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("에러: 챌린지 도전 시작 실패 " + e.getMessage());
-            }
-        }
         
     // 나의 수련기록 조회
     @GetMapping("/getAllMyChallengeListProcess")
@@ -216,7 +185,8 @@ public class ChallengeController {
     public ResponseEntity<String> attendChallengeProcess(
             @RequestParam("userId") int userId,
             @RequestParam("challengeId") int challengeId,
-            @RequestPart("photo") MultipartFile photo) {
+            @RequestPart("photo") MultipartFile photo,
+            @RequestParam(value = "testDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate testDate) {
         
         if (userId <= 0 || challengeId <= 0 || photo == null || photo.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("필수 요청 파라미터가 누락되었습니다.");
@@ -231,6 +201,16 @@ public class ChallengeController {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("인증 처리 중 오류 발생");
         }
+    // try { (테스트용입니다)
+    //     // testDate 파라미터를 서비스 메서드로 전달
+    //     challengeService.attendChallenge(userId, challengeId, photo, testDate);
+    //     return ResponseEntity.ok("챌린지 인증 완료!");
+    // } catch (IllegalStateException e) {
+    //     return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+    // } catch (Exception e) {
+    //     e.printStackTrace();
+    //     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("인증 처리 중 오류 발생");
+    // }
     }
 
 

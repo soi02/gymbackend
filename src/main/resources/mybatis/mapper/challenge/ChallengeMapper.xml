@@ -181,8 +181,9 @@
             c.challenge_title AS challengeTitle,
             c.challenge_thumbnail_path AS challengeThumbnailPath,
             c.challenge_duration_days AS challengeDurationDays,
-            uc.personal_join_date AS personalJoinDate  FROM user_challenge uc         
-
+            uc.personal_join_date AS personalJoinDate  
+            
+        FROM user_challenge uc         
         JOIN challenge c ON uc.challenge_id = c.challenge_id
         WHERE uc.user_id = #{userId}
         ORDER BY uc.personal_join_date DESC
@@ -308,6 +309,13 @@
         FROM attendance_record
         WHERE user_id = #{userId} AND challenge_id = #{challengeId} AND attendance_date = #{today}
     </select>
+
+    <!-- 테스트용
+    <select id="countTodayAttendance" resultType="int">
+        SELECT COUNT(*)
+        FROM attendance_record
+        WHERE user_id = #{userId} AND challenge_id = #{challengeId} AND attendance_date = #{testDate}
+    </select> -->
 
     <!-- 출석 기록 삽입 -->
     <insert id="insertAttendanceRecord">
@@ -500,7 +508,7 @@
         WHERE challenge_id = #{challengeId}
     </update>
     
-    <insert id="insertRaffleTicket">
+    <!-- <insert id="insertRaffleTicket">
         INSERT INTO raffle_ticket (
             user_id, 
             challenge_id, 
@@ -514,22 +522,22 @@
             #{raffleTicketSourceType}, 
             NOW()
         )
-    </insert>
+    </insert> -->
     
 <insert id="insertUserChallengeInfo">
-    INSERT INTO user_challenge (
-        user_id, 
-        challenge_id, 
-        personal_join_date,
-        personal_end_date,
-        challenge_completed
-    ) VALUES (
-        #{userId},
-        #{challengeId},
-        NOW(),
-        DATE_ADD(NOW(), INTERVAL (SELECT challenge_duration_days FROM challenge WHERE challenge_id = #{challengeId}) DAY),
-        '0'
-    )
+    INSERT INTO user_challenge (
+        user_id,
+        challenge_id,
+        personal_join_date,
+        personal_end_date,
+        challenge_completed
+    ) VALUES (
+        #{userId},
+        #{challengeId},
+        NOW(),
+        DATE_ADD(NOW(), INTERVAL (SELECT challenge_duration_days FROM challenge WHERE challenge_id = #{challengeId}) DAY),
+        '0'
+    )
 </insert>
 
 
@@ -552,4 +560,27 @@
     </insert>
      -->
         
+
+
+    <insert id="createChallengeKeyword">
+        INSERT INTO challenge_keyword (challenge_id, keyword_id) VALUES (#{challengeId}, #{keywordId})
+    </insert>
+
+    <select id="hasAwardedNorigae" resultType="int">
+        SELECT COUNT(*) FROM user_challenge_norigae
+        WHERE user_id = #{userId} AND challenge_id = #{challengeId} AND awarded_tier_id = #{tierId}
+    </select>
+
+    <select id="findUserRaffleTicketCount" resultType="Integer">
+        SELECT raffle_ticket_count FROM user_raffle_ticket WHERE user_id = #{userId}
+    </select>
+    
+    <insert id="insertUserRaffleTicket">
+        INSERT INTO user_raffle_ticket (user_id, raffle_ticket_count, updated_at) VALUES (#{userId}, #{count}, NOW())
+    </insert>
+
+    <update id="updateUserRaffleTicket">
+        UPDATE user_raffle_ticket SET raffle_ticket_count = #{count}, updated_at = NOW() WHERE user_id = #{userId}
+    </update>
+
 </mapper>

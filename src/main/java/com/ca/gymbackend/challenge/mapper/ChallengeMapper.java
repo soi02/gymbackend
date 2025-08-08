@@ -117,6 +117,7 @@ public interface ChallengeMapper {
     
     // 오늘 날짜로 이미 인증 기록이 있는지 확인
     public int countTodayAttendance(@Param("userId") int userId, @Param("challengeId") int challengeId, @Param("today") LocalDate today);
+    // public int countTodayAttendance(@Param("userId") int userId, @Param("challengeId") int challengeId, @Param("testDate") LocalDate testDate); // 테스트용
 
     // 출석 기록 삽입
     public void insertAttendanceRecord(@Param("userId") int userId, @Param("challengeId") int challengeId, 
@@ -178,13 +179,25 @@ public interface ChallengeMapper {
     // 결제 성공 후 최종 처리
     void increaseChallengeParticipantCountInfo(int challengeId);
     void insertRaffleTicket(@Param("userId") int userId, @Param("challengeId") int challengeId, @Param("raffleTicketCount") int raffleTicketCount, @Param("raffleTicketSourceType") String raffleTicketSourceType);
-    void insertUserChallengeInfo(@Param("userId") int userId, @Param("challengeId") int challengeId);
+    // void insertUserChallengeInfo(@Param("userId") int userId, @Param("challengeId") int challengeId);
 
     
     // 추첨권 관련
     // public void insertRaffleTicket(ChallengeRaffleTicket challengeRaffleTicket);
 
 
+
+
+    // 새롭게 추가된 추첨권 관련 메서드
+    Integer findUserRaffleTicketCount(int userId); // 사용자의 현재 추첨권 수 조회
+    void insertUserRaffleTicket(@Param("userId") int userId, @Param("count") int count); // 추첨권 정보가 없을 경우 새로 삽입
+    void updateUserRaffleTicket(@Param("userId") int userId, @Param("count") int count); // 추첨권 수 업데이트
+    
+    // 결제 후 챌린지 시작 시 사용자 챌린지 정보 삽입
+    void insertUserChallengeInfo(@Param("userId") int userId, @Param("challengeId") int challengeId);
+
+    // 노리개 획득 여부를 확인하는 새로운 메서드
+    int hasAwardedNorigae(@Param("userId") int userId, @Param("challengeId") int challengeId, @Param("tierId") int tierId);
 }
 
 

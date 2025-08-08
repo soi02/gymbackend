@@ -424,74 +424,55 @@ public class ChallengeServiceImpl {
 
 
 
-    // 일일 인증 기록을 저장하는 메서드
+    // 일일 인증 기록을 저장하는 메서드 (추첨권 로직 수정)
     @Transactional
     public void attendChallenge(int userId, int challengeId, MultipartFile photo) {
         LocalDate today = LocalDate.now();
 
         try {
-            // 1. 오늘 날짜로 이미 인증했는지 확인
             int existingRecordCount = challengeMapper.countTodayAttendance(userId, challengeId, today);
             if (existingRecordCount > 0) {
-                System.out.println("DEBUG: 이미 오늘 날짜로 인증했으므로 로직 중단.");
                 throw new IllegalStateException("오늘 이미 인증했습니다.");
             }
 
-            // 2. 사진 파일 업로드
-            String photoUrl = saveAttendancePhoto(photo); 
-            System.out.println("DEBUG: 사진 파일 업로드 성공. URL: " + photoUrl);
-
-            // 3. DB에 출석 기록 저장
+            String photoUrl = saveAttendancePhoto(photo);
             challengeMapper.insertAttendanceRecord(userId, challengeId, today, photoUrl);
-            System.out.println("DEBUG: 출석 기록 DB 저장 성공.");
 
-            // 4. 노리개 지급 (시나리오 1)
-            // 총 달성 일수와 챌린지 총 기간을 가져와 달성률 계산
+            // 노리개 지급 및 추첨권 지급 로직
             int totalAttendedDays = challengeMapper.countAttendedDays(challengeId, userId);
             int totalChallengeDays = challengeMapper.findChallengeTotalDays(challengeId);
-            
-            System.out.println("DEBUG: totalAttendedDays = " + totalAttendedDays);
-            System.out.println("DEBUG: totalChallengeDays = " + totalChallengeDays);
 
             if (totalChallengeDays > 0) {
-                System.out.println("DEBUG: totalChallengeDays > 0 조건 만족.");
-                // 달성률 계산
                 double achievementRate = (double) totalAttendedDays / totalChallengeDays * 100;
-                // 달성률을 정수형으로 변환 (소수점 버림)
                 int intAchievementRate = (int) achievementRate;
-                System.out.println("DEBUG: achievementRate = " + achievementRate + ", intAchievementRate = " + intAchievementRate);
-
-                // 달성률에 맞는 노리개 등급 조회
-                Integer awardedTierId = challengeMapper.findTierIdByAchievementRate(intAchievementRate);
-                System.out.println("DEBUG: awardedTierId = " + awardedTierId); 
                 
-                if (awardedTierId != null) {
-                    System.out.println("DEBUG: awardedTierId가 null이 아님. 노리개 지급 로직 계속 진행.");
-                    // 현재 사용자가 획득한 노리개 등급이 있는지 확인
-                    Integer existingTierId = challengeMapper.findUserNorigaeTierId(userId, challengeId);
-                    System.out.println("DEBUG: 기존 노리개 등급 ID (existingTierId) = " + existingTierId);
-                    
-                    if (existingTierId == null) {
-                        // 획득한 등급이 없다면 새로 지급
-                        challengeMapper.insertUserNorigae(userId, challengeId, awardedTierId);
-                        System.out.println("INFO: 새로운 노리개 등급(" + awardedTierId + ")이 지급되었습니다! (INSERT)");
-                    } else if (awardedTierId > existingTierId) {
-                        // 기존 등급보다 더 높은 등급을 달성했다면 업데이트
-                        challengeMapper.updateUserNorigae(userId, challengeId, awardedTierId);
-                        System.out.println("INFO: 노리개 등급이 " + existingTierId + "에서 " + awardedTierId + "로 업데이트되었습니다! (UPDATE)");
-                    } else {
-                        System.out.println("INFO: 현재 등급보다 높은 등급이 아니므로 변경 없음.");
-                    }
-                } else {
-                    System.out.println("DEBUG: awardedTierId가 null임. 노리개 지급 로직 중단.");
-                }
-            } else {
-                System.out.println("DEBUG: totalChallengeDays가 0 이하임. 노리개 지급 로직 실행 안됨.");
+                // 노리개 등급별 획득 조건 및 추첨권 지급
+                checkAndAwardNorigaeAndRaffleTicket(userId, challengeId, intAchievementRate, 3, 100); // Gold (100%)
+                checkAndAwardNorigaeAndRaffleTicket(userId, challengeId, intAchievementRate, 2, 80);  // Silver (80%)
+                checkAndAwardNorigaeAndRaffleTicket(userId, challengeId, intAchievementRate, 1, 50);  // Bronze (50%)
             }
 
         } catch (IOException e) {
-            System.err.println("ERROR: 사진 파일 업로드 실패: " + e.getMessage());
             throw new RuntimeException("사진 파일 업로드 실패", e);
+        }
+    }
+
+    // 노리개 등급 및 추첨권 지급을 확인하고 처리하는 보조 메서드
+    private void checkAndAwardNorigaeAndRaffleTicket(int userId, int challengeId, int achievementRate, int tierId, int requiredRate) {
+        if (achievementRate >= requiredRate) {
+            if (challengeMapper.hasAwardedNorigae(userId, challengeId, tierId) == 0) {
+                // 아직 해당 등급의 노리개를 획득하지 않았다면 지급
+                challengeMapper.insertUserNorigae(userId, challengeId, tierId);
+
+                // 노리개 획득 시 추첨권 1장 지급
+                Integer currentTickets = challengeMapper.findUserRaffleTicketCount(userId);
+                if (currentTickets == null) {
+                    challengeMapper.insertUserRaffleTicket(userId, 1);
+                } else {
+                    challengeMapper.updateUserRaffleTicket(userId, currentTickets + 1);
+                }
+                System.out.println("INFO: 노리개 등급 " + tierId + " 획득 및 추첨권 1장 지급!");
+            }
         }
     }
 
@@ -646,73 +627,10 @@ public class ChallengeServiceImpl {
         );
     }
     
-    // 결제 승인 성공 후 최종 처리
+    // 결제 승인 성공 후 최종 처리 (추첨권 지급 로직 제거)
     public void finalizeChallengeJoin(int userId, int challengeId) {
-        // 챌린지 참여자 수 증가
         challengeMapper.increaseChallengeParticipantCountInfo(challengeId);
-        
-        // 추첨권 지급 로직
-        int depositAmount = challengeMapper.findChallengeDepositAmount(challengeId);
-        int raffleTicketCount = depositAmount / 1000;
-        
-        if (raffleTicketCount > 0) {
-            // 추첨권 정보 저장
-            // 수정된 부분: DTO 대신 개별 필드 값을 전달
-            challengeMapper.insertRaffleTicket(
-                userId, 
-                challengeId, 
-                raffleTicketCount, 
-                "PAYMENT"
-            );
-        }
-        
-        // user_challenge 테이블에 사용자 챌린지 정보 삽입
         challengeMapper.insertUserChallengeInfo(userId, challengeId);
     }
-    
 
-
-    // 챌린지 종료 후 노리개 등급 지급 & 추첨권 추가 지급
-    public void awardNorigaeAndRaffleTicket(int userId, int challengeId) {
-        // 1. 챌린지 달성률 계산 (기존 로직)
-        int totalDays = challengeMapper.findChallengeTotalDays(challengeId);
-        int attendedDays = challengeMapper.countAttendedDays(challengeId, userId);
-        int achievementRate = (int) ((double) attendedDays / totalDays * 100);
-
-        // 2. 달성률에 맞는 노리개 등급 ID 조회 (기존 로직)
-        Integer tierId = challengeMapper.findTierIdByAchievementRate(achievementRate); // ★ tierId 변수 선언 및 할당
-
-        // 3. 노리개 지급 (기존 로직)
-        // ... (이 부분은 이전 코드에 있었지만, 추첨권 로직에만 집중하기 위해 여기서는 생략) ...
-        
-        // 4. 노리개 등급에 따라 추가 추첨권 지급
-        int additionalTickets = 0;
-        
-        // ★ tierId가 null이 아닐 때만 아래 로직을 실행하도록 수정
-        if (tierId != null) {
-             if (tierId == 1) { // Bronze
-                additionalTickets = 5;
-            } else if (tierId == 2) { // Silver
-                additionalTickets = 15;
-            } else if (tierId == 3) { // Gold
-                additionalTickets = 30;
-            }
-        }
-       
-if (additionalTickets > 0) {
-    ChallengeRaffleTicket challengeRaffleTicket = new ChallengeRaffleTicket();
-    challengeRaffleTicket.setUserId(userId);
-    challengeRaffleTicket.setChallengeId(challengeId);
-    challengeRaffleTicket.setRaffleTicketCount(additionalTickets);
-    challengeRaffleTicket.setRaffleTicketSourceType("NORIGAE_AWARD");
-    
-    // DTO 객체 대신 개별 필드 값을 전달하도록 수정
-    challengeMapper.insertRaffleTicket(
-        challengeRaffleTicket.getUserId(),
-        challengeRaffleTicket.getChallengeId(),
-        challengeRaffleTicket.getRaffleTicketCount(),
-        challengeRaffleTicket.getRaffleTicketSourceType()
-    );
-}
-    }
 }
