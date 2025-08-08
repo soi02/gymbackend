@@ -68,6 +68,15 @@
 
 </select>
 
+    <delete id="deleteMemoByElementId">
+    DELETE FROM workout_memo WHERE element_id = #{elementId}
+    </delete>
+
+    <insert id="insertMemo">
+    INSERT INTO workout_memo (element_id, memo_content)
+    VALUES (#{elementId}, #{memoContent})
+    </insert>
+
 
 
 
