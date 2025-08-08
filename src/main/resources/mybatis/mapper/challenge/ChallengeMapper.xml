@@ -259,24 +259,43 @@
     </select>
 
     <!-- 챌린지 상세 진행 상황 조회 (노리개 등급 정보 포함) -->
-    <select id="findChallengeProgressInfo" resultType="com.ca.gymbackend.challenge.dto.ChallengeProgressResponse">
-        SELECT
-            c.challenge_title,
-            c.challenge_duration_days AS totalPeriod,
-            ucn.awarded_tier_id,
-            nt.norigae_tier_name AS awardedNorigaeName,
-            nt.norigae_tier_icon_path AS awardedNorigaeIconPath
-        FROM
-            challenge c
-        INNER JOIN
-            user_challenge uc ON c.challenge_id = uc.challenge_id
-        LEFT JOIN
-            user_challenge_norigae ucn ON uc.user_id = ucn.user_id AND uc.challenge_id = ucn.challenge_id
-        LEFT JOIN
-            norigae_tier nt ON ucn.awarded_tier_id = nt.norigae_tier_id  WHERE
-            c.challenge_id = #{challengeId} AND uc.user_id = #{userId}
-    </select>
+<select id="findChallengeProgressInfo" resultType="com.ca.gymbackend.challenge.dto.ChallengeProgressResponse">
+    SELECT
+        c.challenge_title,
+        c.challenge_duration_days AS totalPeriod,
+        -- 가장 높은 노리개 등급 ID를 가져옴
+        MAX(ucn.awarded_tier_id) AS awarded_tier_id,
+        MAX(nt.norigae_tier_name) AS awardedNorigaeName,
+        MAX(nt.norigae_tier_icon_path) AS awardedNorigaeIconPath
+    FROM
+        challenge c
+    INNER JOIN
+        user_challenge uc ON c.challenge_id = uc.challenge_id
+    LEFT JOIN
+        user_challenge_norigae ucn ON uc.user_id = ucn.user_id AND uc.challenge_id = ucn.challenge_id
+    LEFT JOIN
+        norigae_tier nt ON ucn.awarded_tier_id = nt.norigae_tier_id 
+    WHERE
+        c.challenge_id = #{challengeId} AND uc.user_id = #{userId}
+    GROUP BY
+        c.challenge_id
+</select>
 
+<!-- user_challenge_norigae 테이블에서 획득한 모든 노리개 목록을 조회 -->
+<select id="findAwardedNorigaeList" resultType="com.ca.gymbackend.challenge.dto.ChallengeNorigaeAwardInfo">
+    SELECT
+        nt.norigae_tier_id AS tierId,
+        nt.norigae_tier_name AS name,
+        nt.norigae_tier_icon_path AS iconPath
+    FROM
+        user_challenge_norigae ucn
+    JOIN
+        norigae_tier nt ON ucn.awarded_tier_id = nt.norigae_tier_id
+    WHERE
+        ucn.user_id = #{userId} AND ucn.challenge_id = #{challengeId}
+    ORDER BY
+        nt.norigae_tier_required_rate DESC
+</select>
 
 
 
@@ -582,5 +601,20 @@
     <update id="updateUserRaffleTicket">
         UPDATE user_raffle_ticket SET raffle_ticket_count = #{count}, updated_at = NOW() WHERE user_id = #{userId}
     </update>
+
+
+
+
+
+    <!-- test -->
+    <delete id="deleteAttendanceRecords">
+        DELETE FROM attendance_record
+        WHERE user_id = #{userId} AND challenge_id = #{challengeId}
+    </delete>
+
+    <delete id="deleteUserChallengeNorigae">
+        DELETE FROM user_challenge_norigae
+        WHERE user_id = #{userId} AND challenge_id = #{challengeId}
+    </delete>
 
 </mapper>

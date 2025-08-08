@@ -140,6 +140,7 @@ public class ChallengeController {
         return ResponseEntity.ok(challengeMyRecordsResponseList);
     }
 
+
     // 특정 사용자의 특정 챌린지 상세 정보 & 인증 기록 조회
     @GetMapping("/getMyRecordDetailProcess")
     public ResponseEntity<ChallengeMyRecordDetailResponse> getMyRecordDetailProcess(
@@ -154,11 +155,6 @@ public class ChallengeController {
             }
             return ResponseEntity.ok(challengeMyRecordDetailResponse);
     }
-
-
-
-
-
 
 
 
@@ -182,25 +178,35 @@ public class ChallengeController {
 
     // 새로운 API 2: 일일 인증 사진 업로드
     @PostMapping("/attendChallengeProcess")
-    public ResponseEntity<String> attendChallengeProcess(
+    public ResponseEntity<ChallengeProgressResponse> attendChallengeProcess(
             @RequestParam("userId") int userId,
             @RequestParam("challengeId") int challengeId,
-            @RequestPart("photo") MultipartFile photo,
-            @RequestParam(value = "testDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate testDate) {
+            @RequestPart("photo") MultipartFile photo) {
         
-        if (userId <= 0 || challengeId <= 0 || photo == null || photo.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("필수 요청 파라미터가 누락되었습니다.");
+    if (userId <= 0 || challengeId <= 0 || photo == null || photo.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // 수정: DTO 반환
+    }
+    
+        
+    try {
+        int newlyAwardedNorigaeTierId = challengeService.attendChallenge(userId, challengeId, photo);
+        
+        // 인증 후 새로 갱신된 진행 상황 정보를 다시 조회
+        ChallengeProgressResponse response = challengeService.getChallengeProgressInfo(challengeId, userId);
+
+        // 새로 획득한 노리개 정보 추가
+        if (newlyAwardedNorigaeTierId > 0) {
+             response.setNewlyAwardedNorigaeTierId(newlyAwardedNorigaeTierId);
         }
         
-        try {
-            challengeService.attendChallenge(userId, challengeId, photo);
-            return ResponseEntity.ok("챌린지 인증 완료!");
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("인증 처리 중 오류 발생");
-        }
+        return ResponseEntity.ok(response);
+    } catch (IllegalStateException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+    }
+}
     // try { (테스트용입니다)
     //     // testDate 파라미터를 서비스 메서드로 전달
     //     challengeService.attendChallenge(userId, challengeId, photo, testDate);
@@ -211,7 +217,7 @@ public class ChallengeController {
     //     e.printStackTrace();
     //     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("인증 처리 중 오류 발생");
     // }
-    }
+    
 
 
 

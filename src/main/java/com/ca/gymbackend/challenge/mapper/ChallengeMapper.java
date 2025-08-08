@@ -13,6 +13,7 @@ import com.ca.gymbackend.challenge.dto.ChallengeFinalTestResult;
 import com.ca.gymbackend.challenge.dto.ChallengeInfo;
 import com.ca.gymbackend.challenge.dto.ChallengeKeywordCategory;
 import com.ca.gymbackend.challenge.dto.ChallengeMyRecordsResponse;
+import com.ca.gymbackend.challenge.dto.ChallengeNorigaeAwardInfo;
 import com.ca.gymbackend.challenge.dto.ChallengeProgressResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeRecordInfo;
 import com.ca.gymbackend.challenge.dto.ChallengeTestScore;
@@ -143,6 +144,8 @@ public interface ChallengeMapper {
     public void updateUserNorigae(@Param("userId") int userId, @Param("challengeId") int challengeId, @Param("tierId") int tierId);
 
 
+// user_challenge_norigae 테이블에서 획득한 모든 노리개 목록을 조회
+public List<ChallengeNorigaeAwardInfo> findAwardedNorigaeList(@Param("userId") int userId, @Param("challengeId") int challengeId);
 
 
 
@@ -198,6 +201,15 @@ public interface ChallengeMapper {
 
     // 노리개 획득 여부를 확인하는 새로운 메서드
     int hasAwardedNorigae(@Param("userId") int userId, @Param("challengeId") int challengeId, @Param("tierId") int tierId);
+
+
+
+
+
+    // test
+    void deleteAttendanceRecords(@Param("userId") int userId, @Param("challengeId") int challengeId);
+    void deleteUserChallengeNorigae(@Param("userId") int userId, @Param("challengeId") int challengeId);
+
 }
 
 

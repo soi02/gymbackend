@@ -15,7 +15,13 @@ public class ChallengeProgressResponse {
 
     private List<ChallengeAttendanceStatus> challengeAttendanceStatus;
 
-    // 노리개 등급 관련 필드 추가
-    private String awardedNorigaeName;  // 획득한 노리개 등급 이름 (예: Silver)
-    private String awardedNorigaeIconPath; // 획득한 노리개 등급 이미지 경로
+    // 이미 획득한 노리개 중 가장 높은 등급의 정보
+    private String awardedNorigaeName;
+    private String awardedNorigaeIconPath;
+
+    // 이번 출석으로 새로 획득한 노리개 등급 ID
+    private Integer newlyAwardedNorigaeTierId;
+
+    // 새로 추가할 필드: 획득한 모든 노리개 목록**
+    private List<ChallengeNorigaeAwardInfo> awardedNorigaeList; 
 }
