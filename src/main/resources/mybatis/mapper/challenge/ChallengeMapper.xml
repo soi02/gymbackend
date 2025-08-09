@@ -70,7 +70,7 @@
 
 
 
-
+    <!-- 모든 카테고리 -->
     <select id="findAllKeywordCategories" resultType="com.ca.gymbackend.challenge.dto.ChallengeKeywordCategory">
         SELECT
             keyword_category_id AS keywordCategoryId,
@@ -78,6 +78,32 @@
         FROM
             keyword_category
     </select>
+
+<!-- 모든 키워드(카테고리까지) -->
+<select id="findAllKeywords"
+        resultType="com.ca.gymbackend.challenge.dto.KeywordItem">
+  SELECT
+    k.keyword_id        AS keywordId,
+    k.keyword_category_id AS keywordCategoryId,
+    k.keyword_name      AS keywordName
+  FROM keyword k
+  ORDER BY k.keyword_category_id, k.keyword_id
+</select>
+
+<!-- (옵션) 카테고리별 키워드 -->
+<select id="findKeywordsByCategoryId"
+        parameterType="int"
+        resultType="com.ca.gymbackend.challenge.dto.KeywordItem">
+  SELECT
+    k.keyword_id        AS keywordId,
+    k.keyword_category_id AS keywordCategoryId,
+    k.keyword_name      AS keywordName
+  FROM keyword k
+  WHERE k.keyword_category_id = #{categoryId}
+  ORDER BY k.keyword_id
+</select>
+
+
 
 
     <!-- 챌린지 목록 가져오기 (카테고리별 필터 적용) -->

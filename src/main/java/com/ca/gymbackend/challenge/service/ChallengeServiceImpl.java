@@ -15,6 +15,8 @@ import com.ca.gymbackend.challenge.dto.ChallengeProgressResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeRecordInfo;
 import com.ca.gymbackend.challenge.dto.ChallengeTestScore;
 import com.ca.gymbackend.challenge.dto.ChallengeUserInfo;
+import com.ca.gymbackend.challenge.dto.KeywordCategoryTree;
+import com.ca.gymbackend.challenge.dto.KeywordItem;
 import com.ca.gymbackend.challenge.dto.payment.ChallengeRaffleTicket;
 import com.ca.gymbackend.challenge.dto.payment.PaymentReadyResponse;
 import com.ca.gymbackend.challenge.mapper.ChallengeMapper;
@@ -35,6 +37,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -223,6 +226,25 @@ public class ChallengeServiceImpl {
     public List<ChallengeKeywordCategory> getAllKeywordCategories() {
         return challengeMapper.findAllKeywordCategories();
     }
+
+    
+public List<KeywordCategoryTree> getKeywordTree() {
+    List<ChallengeKeywordCategory> cats = challengeMapper.findAllKeywordCategories();
+    List<KeywordItem> all = challengeMapper.findAllKeywords();
+
+    Map<Integer, List<KeywordItem>> byCat = all.stream()
+        .collect(Collectors.groupingBy(KeywordItem::getKeywordCategoryId));
+
+    List<KeywordCategoryTree> tree = new ArrayList<>();
+    for (ChallengeKeywordCategory c : cats) {
+        KeywordCategoryTree node = new KeywordCategoryTree();
+        node.setKeywordCategoryId(c.getKeywordCategoryId());
+        node.setKeywordCategoryName(c.getKeywordCategoryName());
+        node.setKeywords(byCat.getOrDefault(c.getKeywordCategoryId(), Collections.emptyList()));
+        tree.add(node);
+    }
+    return tree;
+}
 
     // // 카테고리 ID로 챌린지 목록 조회
     // public List<ChallengeCreateRequest> getChallengesByCategoryId(Integer categoryId) {

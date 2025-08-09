@@ -27,6 +27,7 @@ import com.ca.gymbackend.challenge.dto.ChallengeMyRecordsResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeProgressResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeStartRequest;
 import com.ca.gymbackend.challenge.dto.ChallengeTendencyTestRequest;
+import com.ca.gymbackend.challenge.dto.KeywordCategoryTree;
 import com.ca.gymbackend.challenge.dto.payment.PaymentReadyResponse;
 import com.ca.gymbackend.challenge.service.ChallengeServiceImpl;
 import com.ca.gymbackend.challenge.service.PaymentServiceImpl;
@@ -46,7 +47,8 @@ public class ChallengeController {
     public ResponseEntity<String> registerChallengeProcess(@ModelAttribute ChallengeCreateRequest challengeCreateRequest) {
         
     System.out.println("백엔드에서 수신한 챌린지 생성 요청 데이터: " + challengeCreateRequest);
-    System.out.println("보증금: " + challengeCreateRequest.getChallengeDepositAmount());
+    System.out.println(">>> 생성요청: " + challengeCreateRequest);
+    System.out.println(">>> keywordIds: " + challengeCreateRequest.getKeywordIds()); // ✅ 추가
 
         // 로그인 사용자 확인 로직
         String creatorName = challengeCreateRequest.getChallengeCreator();
@@ -84,6 +86,11 @@ public class ChallengeController {
         List<ChallengeKeywordCategory> categories = challengeService.getAllKeywordCategories();
         return ResponseEntity.ok(categories);
     }
+
+    @GetMapping("/keywords/tree")
+public ResponseEntity<List<KeywordCategoryTree>> getKeywordTree() {
+    return ResponseEntity.ok(challengeService.getKeywordTree());
+}
 
     // 카테고리별 챌린지 목록 조회
     @GetMapping("/getChallengesByCategoryId/{categoryId}")

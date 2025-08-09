@@ -19,6 +19,7 @@ import com.ca.gymbackend.challenge.dto.ChallengeProgressResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeRecordInfo;
 import com.ca.gymbackend.challenge.dto.ChallengeTestScore;
 import com.ca.gymbackend.challenge.dto.ChallengeUserInfo;
+import com.ca.gymbackend.challenge.dto.KeywordItem;
 import com.ca.gymbackend.challenge.dto.payment.ChallengePayment;
 import com.ca.gymbackend.challenge.dto.payment.ChallengeRaffleTicket;
 
@@ -45,6 +46,12 @@ public interface ChallengeMapper {
 
 
     public List<ChallengeKeywordCategory> findAllKeywordCategories();
+
+    // 모든 키워드 일괄 조회 (카테고리 ID 포함)
+    List<KeywordItem> findAllKeywords();
+
+    // (선택) 특정 카테고리의 키워드만 조회하고 싶을 때
+    List<KeywordItem> findKeywordsByCategoryId(@Param("categoryId") int categoryId);
 
 
     // 카테고리별 챌린지 목록 조회
