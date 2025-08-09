@@ -40,17 +40,21 @@
     <!-- 챌린지 가져오기 (목록) -->
     <select id="findAllChallengeList" resultType="com.ca.gymbackend.challenge.dto.ChallengeCreateRequest">
         SELECT
-            challenge_id AS challengeId,
-            challenge_creator AS challengeCreator,
-            challenge_title AS challengeTitle,
-            challenge_description AS challengeDescription,
-            challenge_max_members AS challengeMaxMembers,
-            challenge_participant_count AS challengeParticipantCount,
-            challenge_recruit_start_date AS challengeRecruitStartDate,
-            challenge_recruit_end_date AS challengeRecruitEndDate,
-            challenge_duration_days AS challengeDurationDays,
-            challenge_thumbnail_path AS challengeThumbnailPath
-        FROM challenge
+            c.challenge_id AS challengeId,
+            c.challenge_creator AS challengeCreator,
+            c.challenge_title AS challengeTitle,
+            c.challenge_description AS challengeDescription,
+            c.challenge_max_members AS challengeMaxMembers,
+            c.challenge_participant_count AS challengeParticipantCount,
+            c.challenge_recruit_start_date AS challengeRecruitStartDate,
+            c.challenge_recruit_end_date AS challengeRecruitEndDate,
+            c.challenge_duration_days AS challengeDurationDays,
+            c.challenge_thumbnail_path AS challengeThumbnailPath,
+            GROUP_CONCAT(k.keyword_name ORDER BY k.keyword_name ASC SEPARATOR ',') AS keywordNames
+        FROM challenge c
+        LEFT JOIN challenge_keyword ck ON c.challenge_id = ck.challenge_id
+        LEFT JOIN keyword k ON ck.keyword_id = k.keyword_id
+        GROUP BY c.challenge_id
     </select>
 
 
@@ -77,29 +81,23 @@
 
 
     <!-- 챌린지 목록 가져오기 (카테고리별 필터 적용) -->
-    <select id="findChallengesByCategoryId" parameterType="int" resultType="com.ca.gymbackend.challenge.dto.ChallengeCreateRequest">
-        SELECT
-            c.challenge_id AS challengeId,
-            c.challenge_creator AS challengeCreator,
-            c.challenge_title AS challengeTitle,
-            c.challenge_description AS challengeDescription,
-            c.challenge_max_members AS challengeMaxMembers,
-            c.challenge_participant_count AS challengeParticipantCount,
-            c.challenge_recruit_start_date AS challengeRecruitStartDate,
-            c.challenge_recruit_end_date AS challengeRecruitEndDate,
-            c.challenge_duration_days AS challengeDurationDays,
-            c.challenge_thumbnail_path AS challengeThumbnailPath
-        FROM
-            challenge c
-        JOIN
-            challenge_keyword ck ON c.challenge_id = ck.challenge_id
-        JOIN
-            keyword k ON ck.keyword_id = k.keyword_id
-        WHERE
-            k.keyword_category_id = #{categoryId}
-        GROUP BY
-            c.challenge_id
-    </select>
+    <select id="findChallengesByCategoryId" parameterType="int" resultType="com.ca.gymbackend.challenge.dto.ChallengeListResponse">
+  SELECT
+    c.challenge_id AS challengeId,
+    c.challenge_title AS challengeTitle,
+    c.challenge_thumbnail_path AS challengeThumbnailPath,
+    c.challenge_recruit_start_date AS challengeRecruitStartDate,
+    c.challenge_recruit_end_date AS challengeRecruitEndDate,
+    c.challenge_duration_days AS challengeDurationDays,
+    c.challenge_max_members AS challengeMaxMembers,
+    c.challenge_participant_count AS challengeParticipantCount,
+    GROUP_CONCAT(k.keyword_name ORDER BY k.keyword_name ASC SEPARATOR ',') AS keywordNamesString
+  FROM challenge c
+  JOIN challenge_keyword ck ON c.challenge_id = ck.challenge_id
+  JOIN keyword k ON ck.keyword_id = k.keyword_id
+  WHERE k.keyword_category_id = #{categoryId}
+  GROUP BY c.challenge_id
+</select>
 
 
 
@@ -133,6 +131,47 @@
         c.challenge_max_members, c.challenge_participant_count, c.challenge_deposit_amount,
         c.challenge_duration_days, c.challenge_thumbnail_path, c.created_at
 </select>
+
+
+
+
+    <select id="findAllChallengesWithKeywords" resultType="com.ca.gymbackend.challenge.dto.ChallengeListResponse">
+        SELECT
+            c.challenge_id AS challengeId,
+            c.challenge_title AS challengeTitle,
+            c.challenge_thumbnail_path AS challengeThumbnailPath,
+            c.challenge_recruit_start_date AS challengeRecruitStartDate,
+            c.challenge_recruit_end_date AS challengeRecruitEndDate,
+            c.challenge_duration_days AS challengeDurationDays,
+            c.challenge_max_members AS challengeMaxMembers,
+            c.challenge_participant_count AS challengeParticipantCount,
+            GROUP_CONCAT(k.keyword_name ORDER BY k.keyword_name ASC SEPARATOR ',') AS keywordNamesString
+        FROM challenge c
+        LEFT JOIN challenge_keyword ck ON c.challenge_id = ck.challenge_id
+        LEFT JOIN keyword k ON ck.keyword_id = k.keyword_id
+        GROUP BY c.challenge_id
+    </select>
+
+    <select id="findChallengeDetailById" parameterType="int" resultType="com.ca.gymbackend.challenge.dto.ChallengeDetailResponse">
+        SELECT
+            c.challenge_id AS challengeId,
+            c.challenge_creator AS challengeCreator,
+            c.challenge_title AS challengeTitle,
+            c.challenge_description AS challengeDescription,
+            c.challenge_deposit_amount AS challengeDepositAmount,
+            c.challenge_max_members AS challengeMaxMembers,
+            c.challenge_participant_count AS participantCount,
+            c.challenge_recruit_start_date AS challengeRecruitStartDate,
+            c.challenge_recruit_end_date AS challengeRecruitEndDate,
+            c.challenge_duration_days AS challengeDurationDays,
+            c.challenge_thumbnail_path AS challengeThumbnailPath,
+            GROUP_CONCAT(k.keyword_name ORDER BY k.keyword_name ASC SEPARATOR ',') AS keywordNamesString
+        FROM challenge c
+        LEFT JOIN challenge_keyword ck ON c.challenge_id = ck.challenge_id
+        LEFT JOIN keyword k ON ck.keyword_id = k.keyword_id
+        WHERE c.challenge_id = #{challengeId}
+        GROUP BY c.challenge_id
+    </select>
 
 
 

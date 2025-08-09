@@ -7,6 +7,7 @@ import com.ca.gymbackend.challenge.dto.ChallengeDetailResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeFinalTestResult;
 import com.ca.gymbackend.challenge.dto.ChallengeInfo;
 import com.ca.gymbackend.challenge.dto.ChallengeKeywordCategory;
+import com.ca.gymbackend.challenge.dto.ChallengeListResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeMyRecordDetailResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeMyRecordsResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeNorigaeAwardInfo;
@@ -71,23 +72,21 @@ public class ChallengeServiceImpl {
             }
         }
 
-        // 사용자가 선택한 키워드 ID 목록을 기반으로 챌린지 성향 ID를 분류
-        List<Integer> selectedKeywordIds = challengeCreateRequest.getChallengeKeywordIds();
-        Integer predictedTendencyId = classifyTendency(selectedKeywordIds);
+        // ✅ 성향 분류도 keywordIds만 사용
+        Integer predictedTendencyId = classifyTendency(challengeCreateRequest.getKeywordIds());
         challengeCreateRequest.setChallengeTendencyId(predictedTendencyId);
-        System.out.println("DEBUG: 챌린지 성향 ID 자동 분류 완료 - " + predictedTendencyId);
-        
-
-        // 2. 챌린지 정보 DB에 저장
         challengeCreateRequest.setChallengeThumbnailPath(imagePath);
+
+        // 챌린지 저장 (useGeneratedKeys로 challengeId 세팅됨)
         challengeMapper.createChallenge(challengeCreateRequest);
 
-        // 3. 챌린지-키워드 매핑
-        int generatedChallengeId = challengeCreateRequest.getChallengeId();
-        if (selectedKeywordIds != null && !selectedKeywordIds.isEmpty()) {
-            for (Integer keywordId : selectedKeywordIds) {
+        // ✅ 키워드 매핑 저장: keywordIds만 사용
+        int challengeId = challengeCreateRequest.getChallengeId();
+        List<Integer> keywordIds = challengeCreateRequest.getKeywordIds();
+        if (keywordIds != null && !keywordIds.isEmpty()) {
+            for (Integer keywordId : keywordIds) {
                 if (keywordId != null) {
-                    challengeMapper.createChallengeKeyword(generatedChallengeId, keywordId);
+                    challengeMapper.createChallengeKeyword(challengeId, keywordId);
                 }
             }
         }
@@ -192,8 +191,32 @@ public class ChallengeServiceImpl {
     
 
     // 챌린지 전체 목록 조회
-    public List<ChallengeCreateRequest> getAllChallengeList() {
-        return challengeMapper.findAllChallengeList();
+    // public List<ChallengeCreateRequest> getAllChallengeList() {
+    //     List<ChallengeCreateRequest> challenges = challengeMapper.findAllChallengeList();
+
+    //     for (ChallengeCreateRequest challenge : challenges) {
+    //         String keywordNamesString = challenge.getKeywordNames(); 
+    //         if (keywordNamesString != null && !keywordNamesString.isEmpty()) {
+    //             List<String> keywordsList = Arrays.asList(keywordNamesString.split(",")).stream()
+    //                                             .map(String::trim)
+    //                                             .collect(Collectors.toList());
+    //             challenge.setKeywords(keywordsList); 
+    //         } else {
+    //             challenge.setKeywords(new ArrayList<>());
+    //         }
+    //         // 사용 후 임시 필드는 null로 비워줌
+    //         challenge.setKeywordNames(null);
+    //     }
+    //     return challenges;
+    // }
+
+        // 챌린지 전체 목록 조회 (키워드 포함)
+    public List<ChallengeListResponse> getAllChallengesWithKeywords() {
+        List<ChallengeListResponse> challenges = challengeMapper.findAllChallengesWithKeywords();
+        for (ChallengeListResponse challenge : challenges) {
+            processKeywords(challenge);
+        }
+        return challenges;
     }
 
 
@@ -201,68 +224,99 @@ public class ChallengeServiceImpl {
         return challengeMapper.findAllKeywordCategories();
     }
 
-    // 카테고리 ID로 챌린지 목록 조회
-    public List<ChallengeCreateRequest> getChallengesByCategoryId(Integer categoryId) {
-        if (categoryId == null || categoryId <= 0) {
-            throw new IllegalArgumentException("유효하지 않은 카테고리 ID입니다.");
-        }
+    // // 카테고리 ID로 챌린지 목록 조회
+    // public List<ChallengeCreateRequest> getChallengesByCategoryId(Integer categoryId) {
+    //     if (categoryId == null || categoryId <= 0) {
+    //         throw new IllegalArgumentException("유효하지 않은 카테고리 ID입니다.");
+    //     }
         
-        // 1. 카테고리별 챌린지 목록 조회 (키워드 정보는 없는 상태)
-        List<ChallengeCreateRequest> challenges = challengeMapper.findChallengesByCategoryId(categoryId);
+    //     // 1. 카테고리별 챌린지 목록 조회 (키워드 정보는 없는 상태)
+    //     List<ChallengeCreateRequest> challenges = challengeMapper.findChallengesByCategoryId(categoryId);
         
-        // 2. 각 챌린지에 대해 키워드 ID 목록을 조회하여 DTO에 설정
-        for (ChallengeCreateRequest challenge : challenges) {
-            List<Integer> keywordIds = challengeMapper.findKeywordIdsByChallengeId(challenge.getChallengeId());
-            challenge.setChallengeKeywordIds(keywordIds);
-        }
+    //     // 2. 각 챌린지에 대해 키워드 ID 목록을 조회하여 DTO에 설정
+    //     for (ChallengeCreateRequest challenge : challenges) {
+    //         List<Integer> keywordIds = challengeMapper.findKeywordIdsByChallengeId(challenge.getChallengeId());
+    //         challenge.setChallengeKeywordIds(keywordIds);
+    //     }
         
-        return challenges;
-    }
+    //     return challenges;
+    // }
 
+public List<ChallengeListResponse> getChallengesByCategoryId(int categoryId) {
+    if (categoryId <= 0) throw new IllegalArgumentException("유효하지 않은 카테고리 ID입니다.");
+    List<ChallengeListResponse> list = challengeMapper.findChallengesByCategoryId(categoryId);
+    list.forEach(this::processKeywords);
+    return list;
+}
 
 
 
 
 
     // 챌린지 상세보기
-    public ChallengeDetailResponse getChallengeDetailByChallengeId(int challengeId, Integer userId) {
+    // public ChallengeDetailResponse getChallengeDetailByChallengeId(int challengeId, Integer userId) {
 
-        ChallengeDetailResponse challengeDetailResponse = challengeMapper.findChallengeDetailByChallengeId(challengeId);
+    //     ChallengeDetailResponse challengeDetailResponse = challengeMapper.findChallengeDetailByChallengeId(challengeId);
 
-        if (challengeDetailResponse == null) {
-            // 키워드가 없는 챌린지라면 null 반환 예외처리
-            return null;
+    //     if (challengeDetailResponse == null) {
+    //         // 키워드가 없는 챌린지라면 null 반환 예외처리
+    //         return null;
+    //     }
+
+    //     // 서비스 계층에서 수동으로 데이터 가공 (키워드만
+    //     // challengeKeywordsString (String)을 challengeKeywords List<String>타입으로 변환
+    //     // INNER JOIN을 사용했으므로 이 keywordsString은 보통 NULL이 아니겠지만,
+    //     // 혹시 모를 상황(예: GROUP_CONCAT이 빈 문자열 반환)을 대비하여 NULL/빈 문자열 체크는 유지
+    //     String challengeKeywordsString = challengeDetailResponse.getChallengeKeywordsString();
+    //     if (challengeKeywordsString != null && !challengeKeywordsString.trim().isEmpty()) {
+    //         List<String> keywords = Arrays.asList(challengeKeywordsString.split(","))
+    //                                         .stream()
+    //                                         .map(String::trim)
+    //                                         .collect(Collectors.toList());
+    //         challengeDetailResponse.setChallengeKeywords(keywords);
+    //     } else {
+    //         // INNER JOIN으로 왔는데도 여기가 실행된다면, 논리적으로 키워드는 있었지만 GROUP_CONCAT이 빈 문자열을 반환한 경우입니다.
+    //         challengeDetailResponse.setChallengeKeywords(new ArrayList<>());
+    //     }
+    //     // challengeKeywordsString 필드는 클라이언트에 불필요하므로 null로 설정
+    //     challengeDetailResponse.setChallengeKeywordsString(null);
+
+    //     // challengeStatus는 이미 SQL 쿼리에서 계산되어 들어왔으므로 별도 로직이 필요 없습니다.
+
+    //     // 추가된 로직: userId를 사용하여 참여 여부 확인
+    //     // Mapper에 existsUserChallenge(int userId, int challengeId) 메서드가 필요
+    //     boolean isParticipating = challengeMapper.existsUserChallenge(userId, challengeId) > 0;
+    //     challengeDetailResponse.setUserParticipating(isParticipating);
+
+    //     return challengeDetailResponse;
+    // }
+
+        // 챌린지 상세 조회
+    public ChallengeDetailResponse getChallengeDetailById(int challengeId) {
+        ChallengeDetailResponse challengeDetail = challengeMapper.findChallengeDetailById(challengeId);
+        if (challengeDetail != null) {
+            processKeywords(challengeDetail);
+            // 여기에 userParticipating 등 추가 로직 구현
         }
-
-        // 서비스 계층에서 수동으로 데이터 가공 (키워드만
-        // challengeKeywordsString (String)을 challengeKeywords List<String>타입으로 변환
-        // INNER JOIN을 사용했으므로 이 keywordsString은 보통 NULL이 아니겠지만,
-        // 혹시 모를 상황(예: GROUP_CONCAT이 빈 문자열 반환)을 대비하여 NULL/빈 문자열 체크는 유지
-        String challengeKeywordsString = challengeDetailResponse.getChallengeKeywordsString();
-        if (challengeKeywordsString != null && !challengeKeywordsString.trim().isEmpty()) {
-            List<String> keywords = Arrays.asList(challengeKeywordsString.split(","))
-                                            .stream()
-                                            .map(String::trim)
-                                            .collect(Collectors.toList());
-            challengeDetailResponse.setChallengeKeywords(keywords);
-        } else {
-            // INNER JOIN으로 왔는데도 여기가 실행된다면, 논리적으로 키워드는 있었지만 GROUP_CONCAT이 빈 문자열을 반환한 경우입니다.
-            challengeDetailResponse.setChallengeKeywords(new ArrayList<>());
-        }
-        // challengeKeywordsString 필드는 클라이언트에 불필요하므로 null로 설정
-        challengeDetailResponse.setChallengeKeywordsString(null);
-
-        // challengeStatus는 이미 SQL 쿼리에서 계산되어 들어왔으므로 별도 로직이 필요 없습니다.
-
-        // 추가된 로직: userId를 사용하여 참여 여부 확인
-        // Mapper에 existsUserChallenge(int userId, int challengeId) 메서드가 필요
-        boolean isParticipating = challengeMapper.existsUserChallenge(userId, challengeId) > 0;
-        challengeDetailResponse.setUserParticipating(isParticipating);
-
-        return challengeDetailResponse;
+        return challengeDetail;
     }
 
-
+    // 키워드 문자열을 리스트로 변환하는 공통 로직
+private void processKeywords(Object challengeResponse) {
+    if (challengeResponse instanceof ChallengeListResponse r) {
+        if (r.getKeywordNamesString() != null && !r.getKeywordNamesString().isBlank()) {
+            r.setKeywords(Arrays.stream(r.getKeywordNamesString().split(","))
+                    .map(String::trim).toList());
+        }
+        r.setKeywordNamesString(null);
+    } else if (challengeResponse instanceof ChallengeDetailResponse r) {
+        if (r.getKeywordNamesString() != null && !r.getKeywordNamesString().isBlank()) {
+            r.setKeywords(Arrays.stream(r.getKeywordNamesString().split(","))
+                    .map(String::trim).toList());
+        }
+        r.setKeywordNamesString(null);
+    }
+}
 
 
 

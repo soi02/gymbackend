@@ -4,8 +4,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus; // ★ 추가
-import org.springframework.http.ResponseEntity; // ★ 추가
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,6 +21,7 @@ import com.ca.gymbackend.challenge.dto.ChallengeCreateRequest;
 import com.ca.gymbackend.challenge.dto.ChallengeDetailResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeFinalTestResult;
 import com.ca.gymbackend.challenge.dto.ChallengeKeywordCategory;
+import com.ca.gymbackend.challenge.dto.ChallengeListResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeMyRecordDetailResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeMyRecordsResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeProgressResponse;
@@ -44,10 +45,8 @@ public class ChallengeController {
     @PostMapping("/registerChallengeProcess")
     public ResponseEntity<String> registerChallengeProcess(@ModelAttribute ChallengeCreateRequest challengeCreateRequest) {
         
-    // ★★★ 이 부분을 추가해주세요 ★★★
     System.out.println("백엔드에서 수신한 챌린지 생성 요청 데이터: " + challengeCreateRequest);
     System.out.println("보증금: " + challengeCreateRequest.getChallengeDepositAmount());
-    // ★★★ 여기까지 추가 ★★★
 
         // 로그인 사용자 확인 로직
         String creatorName = challengeCreateRequest.getChallengeCreator();
@@ -70,12 +69,12 @@ public class ChallengeController {
 
 
     // 챌린지 리스트 가져오기
-    @GetMapping("/getAllChallengeListProcess")
-    public ResponseEntity<List<ChallengeCreateRequest>> getAllChallengeListProcess() {
-        System.out.println("[챌린지 목록 응답]");
-        List<ChallengeCreateRequest> challengeCreateRequestList = challengeService.getAllChallengeList();
-        return ResponseEntity.ok(challengeCreateRequestList);
-    }
+    // @GetMapping("/getAllChallengeListProcess")
+    // public ResponseEntity<List<ChallengeCreateRequest>> getAllChallengeListProcess() {
+    //     System.out.println("[챌린지 목록 응답]");
+    //     List<ChallengeCreateRequest> challengeCreateRequestList = challengeService.getAllChallengeList();
+    //     return ResponseEntity.ok(challengeCreateRequestList);
+    // }
 
 
     // 모든 키워드 카테고리 목록을 가져오는 API
@@ -88,10 +87,10 @@ public class ChallengeController {
 
     // 카테고리별 챌린지 목록 조회
     @GetMapping("/getChallengesByCategoryId/{categoryId}")
-    public ResponseEntity<List<ChallengeCreateRequest>> getChallengesByCategoryId(@PathVariable("categoryId") Integer categoryId) {
+    public ResponseEntity<List<ChallengeListResponse>> getChallengesByCategoryId(@PathVariable("categoryId") Integer categoryId) {
         System.out.println("[카테고리별 챌린지 목록 조회] categoryId: " + categoryId);
         try {
-            List<ChallengeCreateRequest> challenges = challengeService.getChallengesByCategoryId(categoryId);
+            List<ChallengeListResponse> challenges = challengeService.getChallengesByCategoryId(categoryId);
             return ResponseEntity.ok(challenges);
         } catch (IllegalArgumentException e) {
             System.err.println("오류: " + e.getMessage());
@@ -104,28 +103,51 @@ public class ChallengeController {
 
 
     // 챌린지 상세보기
-    @GetMapping("/getChallengeDetailByChallengeIdProcess")
-    public ResponseEntity<ChallengeDetailResponse> getChallengeDetailByChallengeIdProcess(
-        @RequestParam("challengeId") int challengeId,
-        @RequestParam(value = "userId", required = false) Integer userId) {
+    // @GetMapping("/getChallengeDetailByChallengeIdProcess")
+    // public ResponseEntity<ChallengeDetailResponse> getChallengeDetailByChallengeIdProcess(
+    //     @RequestParam("challengeId") int challengeId,
+    //     @RequestParam(value = "userId", required = false) Integer userId) {
 
-        System.out.println(">>> getChallengeDetailByChallengeIdProcess 호출됨. challengeId: " + challengeId + ", userId: " + userId); 
+    //     System.out.println(">>> getChallengeDetailByChallengeIdProcess 호출됨. challengeId: " + challengeId + ", userId: " + userId); 
 
-        if (userId == null) {
-            userId = 0;
-        }
+    //     if (userId == null) {
+    //         userId = 0;
+    //     }
 
-        ChallengeDetailResponse challengeDetailResponse = challengeService.getChallengeDetailByChallengeId(challengeId, userId);
+    //     ChallengeDetailResponse challengeDetailResponse = challengeService.getChallengeDetailByChallengeId(challengeId, userId);
 
-        // 챌린지를 찾을 수 없으면 404 Not Found 반환
-        if(challengeDetailResponse == null) {
-            System.out.println("챌린지를 찾을 수 없습니다.");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+    //     // 챌린지를 찾을 수 없으면 404 Not Found 반환
+    //     if(challengeDetailResponse == null) {
+    //         System.out.println("챌린지를 찾을 수 없습니다.");
+    //         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    //     }
 
-        return ResponseEntity.ok(challengeDetailResponse);
+    //     return ResponseEntity.ok(challengeDetailResponse);
+    // }
+
+        // 챌린지 목록 API
+    @GetMapping("/list")
+    public ResponseEntity<List<ChallengeListResponse>> getChallengeList() {
+        System.out.println("챌린지 목록 조회 요청");
+        List<ChallengeListResponse> challenges = challengeService.getAllChallengesWithKeywords();
+        return ResponseEntity.ok(challenges);
     }
     
+    // 챌린지 상세 API
+    @GetMapping("/detail")
+    public ResponseEntity<ChallengeDetailResponse> getChallengeDetail(@RequestParam("challengeId") int challengeId) {
+        System.out.println("챌린지 상세 조회 요청 challengeId: " + challengeId);
+        ChallengeDetailResponse detail = challengeService.getChallengeDetailById(challengeId);
+        if (detail == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(detail);
+    }
+    
+
+
+
+
         
     // 나의 수련기록 조회
     @GetMapping("/getAllMyChallengeListProcess")
