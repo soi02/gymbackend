@@ -31,23 +31,23 @@ public class MarketController {
     @Autowired
     private JwtUtil jwtUtil;
     
-    @GetMapping("/selectMarketUserInfo") // ok 
+    @GetMapping("/selectMarketUserInfo") // ok // Front OK
     public MarketUserInfoDto selectMarketUserInfo(@RequestParam("userId") Integer userId) {
         return marketService.selectMarketUserInfo(userId);
     } 
     // temporary test code
     
-    @PostMapping("/insertMarketArticle") // ok
+    @PostMapping("/insertMarketArticle") // ok + Front OK
     public void insertMarketArticle(@RequestBody MarketArticleDto marketArticleDto) {
         marketService.insertMarketArticle(marketArticleDto);
     }
     
-    @GetMapping("/selectMarketArticle") // ok
+    @GetMapping("/selectMarketArticle") // ok + Front OK (구조 수정해야 됨)
     public List<Map<String, Object>> selectMarketArticle() {
         return marketService.selectMarketArticle();
     }
     
-    @GetMapping("/selectSpecificMarketArticle") // ok
+    @GetMapping("/selectSpecificMarketArticle") // ok + Front OK
     public MarketArticleDto selectSpecificMarketArticle(@RequestParam("id") Integer id) {
         return marketService.selectSpecificMarketArticle(id);
     }
@@ -57,22 +57,22 @@ public class MarketController {
         marketService.updateMarketArticle(marketArticleDto);
     }
     
-    @PostMapping("/deleteMarketArticle") // ok
+    @PostMapping("/deleteMarketArticle") // ok + Front OK
     public void deleteMarketArticle(@RequestParam("id") Integer id) {
         marketService.deleteMarketArticle(id);
     }
     
-    @PostMapping("/insertMarketCommentOnArticle") // ok
+    @PostMapping("/insertMarketCommentOnArticle") // ok + Front OK + View Reload OK
     public void insertMarketCommentOnArticle(@RequestBody MarketCommentOnArticleDto marketCommentOnArticleDto) {
         marketService.insertMarketCommentOnArticle(marketCommentOnArticleDto);
     }
     
-    @GetMapping("/selectMarketCommentOnArticle") // ok
+    @GetMapping("/selectMarketCommentOnArticle") // ok + Front OK + View Reload OK
     public List<Map<String, Object>> selectMarketCommentOnArticle(@RequestParam("articleId") Integer articleId) {
         return marketService.selectMarketCommentOnArticle(articleId);
     }
     
-    @PostMapping("/updateMarketCommentOnArticle") // ok
+    @PostMapping("/updateMarketCommentOnArticle") // ok + Front OK + View Reload OK
     public void updateMarketCommentOnArticle(@RequestBody MarketCommentOnArticleDto marketCommentOnArticleDto) {
         marketService.updateMarketCommentOnArticle(marketCommentOnArticleDto);
     }
