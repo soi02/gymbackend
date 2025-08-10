@@ -86,6 +86,12 @@
     
     </select>
     
+    <select id = "selectMarketProductInterestedLogWhenUserAndArticleInfo" resultType = "com.ca.gymbackend.market.dto.MarketProductInterestedLogDto">
+    
+        SELECT * FROM market_product_interested_log WHERE market_user_id = #{marketUserId} AND specific_article_id = #{specificArticleId};
+    
+    </select>
+    
     <delete id = "deleteMarketProductInterestedLog">
     
         DELETE FROM market_product_interested_log WHERE specific_article_id = #{specificArticleId};

@@ -72,17 +72,17 @@ public class MarketController {
         return marketService.selectMarketCommentOnArticle(articleId);
     }
     
-    @PostMapping("/updateMarketCommentOnArticle") // ok + Front OK + View Reload OK
+    @PostMapping("/updateMarketCommentOnArticle") // ok
     public void updateMarketCommentOnArticle(@RequestBody MarketCommentOnArticleDto marketCommentOnArticleDto) {
         marketService.updateMarketCommentOnArticle(marketCommentOnArticleDto);
     }
     
-    @PostMapping("/deleteMarketCommentOnArticle") // ok
+    @PostMapping("/deleteMarketCommentOnArticle") // ok + Front OK + View Reload OK
     public void deleteMarketCommentOnArticle(@RequestParam("id") Integer id) {
         marketService.deleteMarketCommentOnArticle(id);
     }
     
-    @PostMapping("/insertMarketProductInterestedLog") // ok
+    @PostMapping("/insertMarketProductInterestedLog") // ok + Front OK
     public void insertMarketProductInterestedLog(@RequestBody MarketProductInterestedLogDto marketProductInterestedLogDto) {
         marketService.insertMarketProductInterestedLog(marketProductInterestedLogDto);
     }
@@ -95,6 +95,16 @@ public class MarketController {
     @GetMapping("/selectMarketProductInterestedLogWhenArticleInfo") // ok
     public List<Map<String, Object>> selectMarketProductInterestedLogWhenArticleInfo(@RequestParam("specificArticleId") Integer specificArticleId) {
         return marketService.selectMarketProductInterestedLogWhenArticleInfo(specificArticleId);
+    }
+    
+    @GetMapping("/selectMarketProductInterestedLogWhenUserAndArticleInfo") // ok + Front OK + View Reload OK
+    public MarketProductInterestedLogDto selectMarketProductInterestedLogWhenUserAndArticleInfo(@RequestParam("marketUserId") Integer marketUserId, @RequestParam("specificArticleId") Integer specificArticleId) {
+        return marketService.selectMarketProductInterestedLogWhenUserAndArticleInfo(marketUserId, specificArticleId);
+    }
+    
+    @PostMapping("/deleteMarketProductInterestedLog") // ok + Front OK
+    public void deleteMarketProductInterestedLog(@RequestParam("specificArticleId") Integer specificArticleId) {
+        marketService.deleteMarketProductInterestedLog(specificArticleId);
     }
     
     @PostMapping("/insertMarketDealedLog") // ok
@@ -137,5 +147,9 @@ public class MarketController {
     // @GetMapping("/selectMarketArticleByTitleSearchWord")
     
     // @GetMapping("/selectMarketArticleByContentSearchWord")
+    
+    
+    // 모든 코드에서 중복 코드 실행 방지용 코드 작성이 필요함 (예를 들어 view 반영 전 빠른 클릭 시 중복 실행 가능성 존재)
+    
     
 }
