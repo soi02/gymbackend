@@ -31,23 +31,23 @@ public class MarketController {
     @Autowired
     private JwtUtil jwtUtil;
     
-    @GetMapping("/selectMarketUserInfo") // ok 
+    @GetMapping("/selectMarketUserInfo") // ok // Front OK
     public MarketUserInfoDto selectMarketUserInfo(@RequestParam("userId") Integer userId) {
         return marketService.selectMarketUserInfo(userId);
     } 
     // temporary test code
     
-    @PostMapping("/insertMarketArticle") // ok
+    @PostMapping("/insertMarketArticle") // ok + Front OK
     public void insertMarketArticle(@RequestBody MarketArticleDto marketArticleDto) {
         marketService.insertMarketArticle(marketArticleDto);
     }
     
-    @GetMapping("/selectMarketArticle") // ok
+    @GetMapping("/selectMarketArticle") // ok + Front OK (구조 수정해야 됨)
     public List<Map<String, Object>> selectMarketArticle() {
         return marketService.selectMarketArticle();
     }
     
-    @GetMapping("/selectSpecificMarketArticle") // ok
+    @GetMapping("/selectSpecificMarketArticle") // ok + Front OK
     public MarketArticleDto selectSpecificMarketArticle(@RequestParam("id") Integer id) {
         return marketService.selectSpecificMarketArticle(id);
     }
@@ -57,17 +57,17 @@ public class MarketController {
         marketService.updateMarketArticle(marketArticleDto);
     }
     
-    @PostMapping("/deleteMarketArticle") // ok
+    @PostMapping("/deleteMarketArticle") // ok + Front OK
     public void deleteMarketArticle(@RequestParam("id") Integer id) {
         marketService.deleteMarketArticle(id);
     }
     
-    @PostMapping("/insertMarketCommentOnArticle") // ok
+    @PostMapping("/insertMarketCommentOnArticle") // ok + Front OK + View Reload OK
     public void insertMarketCommentOnArticle(@RequestBody MarketCommentOnArticleDto marketCommentOnArticleDto) {
         marketService.insertMarketCommentOnArticle(marketCommentOnArticleDto);
     }
     
-    @GetMapping("/selectMarketCommentOnArticle") // ok
+    @GetMapping("/selectMarketCommentOnArticle") // ok + Front OK + View Reload OK
     public List<Map<String, Object>> selectMarketCommentOnArticle(@RequestParam("articleId") Integer articleId) {
         return marketService.selectMarketCommentOnArticle(articleId);
     }
@@ -77,12 +77,12 @@ public class MarketController {
         marketService.updateMarketCommentOnArticle(marketCommentOnArticleDto);
     }
     
-    @PostMapping("/deleteMarketCommentOnArticle") // ok
+    @PostMapping("/deleteMarketCommentOnArticle") // ok + Front OK + View Reload OK
     public void deleteMarketCommentOnArticle(@RequestParam("id") Integer id) {
         marketService.deleteMarketCommentOnArticle(id);
     }
     
-    @PostMapping("/insertMarketProductInterestedLog") // ok
+    @PostMapping("/insertMarketProductInterestedLog") // ok + Front OK
     public void insertMarketProductInterestedLog(@RequestBody MarketProductInterestedLogDto marketProductInterestedLogDto) {
         marketService.insertMarketProductInterestedLog(marketProductInterestedLogDto);
     }
@@ -95,6 +95,16 @@ public class MarketController {
     @GetMapping("/selectMarketProductInterestedLogWhenArticleInfo") // ok
     public List<Map<String, Object>> selectMarketProductInterestedLogWhenArticleInfo(@RequestParam("specificArticleId") Integer specificArticleId) {
         return marketService.selectMarketProductInterestedLogWhenArticleInfo(specificArticleId);
+    }
+    
+    @GetMapping("/selectMarketProductInterestedLogWhenUserAndArticleInfo") // ok + Front OK + View Reload OK
+    public MarketProductInterestedLogDto selectMarketProductInterestedLogWhenUserAndArticleInfo(@RequestParam("marketUserId") Integer marketUserId, @RequestParam("specificArticleId") Integer specificArticleId) {
+        return marketService.selectMarketProductInterestedLogWhenUserAndArticleInfo(marketUserId, specificArticleId);
+    }
+    
+    @PostMapping("/deleteMarketProductInterestedLog") // ok + Front OK
+    public void deleteMarketProductInterestedLog(@RequestParam("specificArticleId") Integer specificArticleId) {
+        marketService.deleteMarketProductInterestedLog(specificArticleId);
     }
     
     @PostMapping("/insertMarketDealedLog") // ok
@@ -137,5 +147,9 @@ public class MarketController {
     // @GetMapping("/selectMarketArticleByTitleSearchWord")
     
     // @GetMapping("/selectMarketArticleByContentSearchWord")
+    
+    
+    // 모든 코드에서 중복 코드 실행 방지용 코드 작성이 필요함 (예를 들어 view 반영 전 빠른 클릭 시 중복 실행 가능성 존재)
+    
     
 }

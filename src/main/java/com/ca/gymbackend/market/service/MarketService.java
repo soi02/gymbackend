@@ -100,6 +100,9 @@ public class MarketService {
         }
         return mapListSelectMarketProductInterestedLogWhenArticleInfo;
     }
+    public MarketProductInterestedLogDto selectMarketProductInterestedLogWhenUserAndArticleInfo(Integer marketUserId, Integer specificArticleId) {
+        return marketMapper.selectMarketProductInterestedLogWhenUserAndArticleInfo(marketUserId, specificArticleId);
+    }
     public void deleteMarketProductInterestedLog(Integer specificArticleId) {
         marketMapper.deleteMarketProductInterestedLog(specificArticleId);
     }

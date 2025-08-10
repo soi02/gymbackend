@@ -34,6 +34,7 @@ public interface MarketMapper {
     public void insertMarketProductInterestedLog(MarketProductInterestedLogDto marketProductInterestedLogDto);
     public List<MarketProductInterestedLogDto> selectMarketProductInterestedLogWhenUserInfo(@Param("marketUserId") Integer marketUserId);
     public List<MarketProductInterestedLogDto> selectMarketProductInterestedLogWhenArticleInfo(@Param("specificArticleId") Integer specificArticleId);
+    public MarketProductInterestedLogDto selectMarketProductInterestedLogWhenUserAndArticleInfo(@Param("marketUserId") Integer marketUserId, @Param("specificArticleId") Integer specificArticleId);
     public void deleteMarketProductInterestedLog(@Param("specificArticleId") Integer specificArticleId);
     
     public void insertMarketDealedLog(MarketDealedLogDto marketDealedLogDto);
