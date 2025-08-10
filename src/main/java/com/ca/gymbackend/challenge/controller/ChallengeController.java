@@ -335,25 +335,10 @@ public ResponseEntity<List<KeywordCategoryTree>> getKeywordTree() {
 
     // 결제 승인 API
     @GetMapping("/join/payment/success")
-    public ResponseEntity<String> kakaoPaySuccess(
-            @RequestParam("pg_token") String pgToken,
-            @RequestParam("challengeId") int challengeId,
-            @RequestParam("userId") int userId) {
-        try {
-            // Service 계층으로 요청 위임
-            boolean paymentSuccess = paymentService.kakaoPayApprove(Long.valueOf(challengeId), userId, pgToken);
-
-            if (paymentSuccess) {
-                // 결제 승인 성공 후 챌린지 참가 최종 처리
-                challengeService.finalizeChallengeJoin(userId, challengeId);
-                return ResponseEntity.ok("결제 및 챌린지 참가 성공");
-            } else {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("결제 승인 실패");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("결제 승인 중 오류 발생: " + e.getMessage());
-        }
+    public ResponseEntity<Void> kakaoPaySuccess(@RequestParam("pg_token") String pgToken,
+                                                  @RequestParam("challengeId") int challengeId,
+                                                  @RequestParam("userId") int userId) {
+        // PaymentService에서 리다이렉션 응답을 직접 처리하도록 위임
+        return paymentService.kakaoPayApprove(Long.valueOf(challengeId), userId, pgToken);
     }
-
 }

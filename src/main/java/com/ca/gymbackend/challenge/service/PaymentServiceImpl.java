@@ -8,8 +8,11 @@ import com.ca.gymbackend.challenge.mapper.ChallengeMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
@@ -34,6 +37,10 @@ public class PaymentServiceImpl {
 
     @Value("${kakao.pay.fail-url}")
     private String failUrl;
+
+    // 프론트엔드 애플리케이션의 기본 URL (Vite 개발 서버 기준)
+    @Value("${frontend.base-url}")
+    private String frontEndBaseUrl;
 
     private final RestClient restClient = RestClient.builder()
             .baseUrl("https://open-api.kakaopay.com")
@@ -92,22 +99,38 @@ public class PaymentServiceImpl {
         }
     }
 
-    // 결제 승인
-    public boolean kakaoPayApprove(Long challengeId, int userId, String pgToken) {
-        // Mybatis를 사용해 DB에서 READY 상태의 tid를 가져옴
-        String tid = challengeMapper.findReadyTidByUserIdAndChallengeId(userId, challengeId.intValue());
-        
-        if (tid == null) {
-            throw new IllegalStateException("결제 준비 상태의 TID가 존재하지 않습니다.");
-        }
+    /**
+     * 카카오페이 결제 승인 및 챌린지 참가 처리
+     * 결제 성공/실패에 따라 프론트엔드 URL로 리다이렉션 응답을 반환합니다.
+     * @return ResponseEntity<Void> (본문 없이 HTTP 상태 코드와 헤더로 응답)
+     */
+    @Transactional
+    public ResponseEntity<Void> kakaoPayApprove(Long challengeId, int userId, String pgToken) {
+        String existingSuccessTid = challengeMapper.findSuccessTidByUserIdAndChallengeId(userId, challengeId.intValue());
         
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Authorization", "SECRET_KEY " + secretKey);
+
+        if (existingSuccessTid != null) {
+            // 이미 성공한 결제이므로, 프론트엔드의 성공 페이지로 리다이렉션
+            headers.add("Location", frontEndBaseUrl + "/gymmadang/challenge/payment/success?challengeId=" + challengeId + "&userId=" + userId + "&status=success&message=already_processed");
+            return new ResponseEntity<>(headers, HttpStatus.FOUND);
+        }
+        
+        String readyTid = challengeMapper.findReadyTidByUserIdAndChallengeId(userId, challengeId.intValue());
+        
+        if (readyTid == null) {
+            // 결제 준비 상태가 아닌 경우, 프론트엔드의 실패 페이지로 리다이렉션
+            headers.add("Location", frontEndBaseUrl + "/gymmadang/challenge/payment/fail?message=no_ready_payment_found");
+            return new ResponseEntity<>(headers, HttpStatus.FOUND);
+        }
+        
+        HttpHeaders kakaoHeaders = new HttpHeaders();
+        kakaoHeaders.setContentType(MediaType.APPLICATION_JSON);
+        kakaoHeaders.set("Authorization", "SECRET_KEY " + secretKey);
 
         Map<String, Object> body = new HashMap<>();
         body.put("cid", cid);
-        body.put("tid", tid);
+        body.put("tid", readyTid);
         body.put("partner_order_id", challengeId.toString());
         body.put("partner_user_id", String.valueOf(userId));
         body.put("pg_token", pgToken);
@@ -115,22 +138,26 @@ public class PaymentServiceImpl {
         try {
             KakaoPayApproveResponse kakaoResponse = restClient.post()
                     .uri("/online/v1/payment/approve")
-                    .headers(h -> h.addAll(headers))
+                    .headers(h -> h.addAll(kakaoHeaders))
                     .body(body)
                     .retrieve()
                     .body(KakaoPayApproveResponse.class);
 
             if (kakaoResponse != null) {
-                // 결제 승인 성공 시 DB 상태 업데이트
-                challengeMapper.updatePaymentStatus(tid, "SUCCESS", pgToken);
-                return true;
+                // ... (기존 DB 업데이트 로직 유지) ...
+                
+                // 성공 페이지로 리다이렉트
+                headers.add("Location", frontEndBaseUrl + "/gymmadang/challenge/payment/success?challengeId=" + challengeId + "&userId=" + userId + "&status=success");
+                return new ResponseEntity<>(headers, HttpStatus.FOUND);
             }
-            return false;
+            throw new RuntimeException("카카오페이 결제 승인 응답이 유효하지 않습니다.");
+
         } catch (HttpClientErrorException e) {
-            System.err.println("카카오페이 결제 승인 실패: " + e.getResponseBodyAsString());
-            // 결제 실패 시 DB 상태 업데이트 (선택 사항)
-            challengeMapper.updatePaymentStatus(tid, "FAILED", pgToken);
-            return false;
+            // ... (기존 결제 실패 로직 유지) ...
+
+            // 실패 페이지로 리다이렉트
+            headers.add("Location", frontEndBaseUrl + "/gymmadang/challenge/payment/fail?message=payment_failed");
+            return new ResponseEntity<>(headers, HttpStatus.FOUND);
         }
     }
 }

@@ -591,6 +591,15 @@
         SET challenge_participant_count = challenge_participant_count + 1
         WHERE challenge_id = #{challengeId}
     </update>
+
+
+<select id="findSuccessTidByUserIdAndChallengeId" resultType="String">
+    SELECT challenge_payment_tid 
+    FROM challenge_payment
+    WHERE user_id = #{userId} AND challenge_id = #{challengeId} AND challenge_payment_status = 'SUCCESS'
+    ORDER BY completed_at DESC
+    LIMIT 1
+</select>
     
     <!-- <insert id="insertRaffleTicket">
         INSERT INTO raffle_ticket (
