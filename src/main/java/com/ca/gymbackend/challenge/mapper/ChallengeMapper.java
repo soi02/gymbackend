@@ -160,8 +160,8 @@ public interface ChallengeMapper {
     public void updateUserNorigae(@Param("userId") int userId, @Param("challengeId") int challengeId, @Param("tierId") int tierId);
 
 
-// user_challenge_norigae 테이블에서 획득한 모든 노리개 목록을 조회
-public List<ChallengeNorigaeAwardInfo> findAwardedNorigaeList(@Param("userId") int userId, @Param("challengeId") int challengeId);
+    // user_challenge_norigae 테이블에서 획득한 모든 노리개 목록을 조회
+    public List<ChallengeNorigaeAwardInfo> findAwardedNorigaeList(@Param("userId") int userId, @Param("challengeId") int challengeId);
 
 
 
@@ -187,44 +187,45 @@ public List<ChallengeNorigaeAwardInfo> findAwardedNorigaeList(@Param("userId") i
 
 
     // 결제 준비
-    int findChallengeDepositAmount(@Param("challengeId") int challengeId);
-    String findChallengeTitleById(@Param("challengeId") int challengeId);
-    void insertPayment(ChallengePayment payment);
+    public int findChallengeDepositAmount(@Param("challengeId") int challengeId);
+    public String findChallengeTitleById(@Param("challengeId") int challengeId);
+    public void insertPayment(ChallengePayment payment);
     
     // 결제 승인
-    String findReadyTidByUserIdAndChallengeId(@Param("userId") int userId, @Param("challengeId") int challengeId);
-    void updatePaymentStatus(@Param("tid") String tid, @Param("status") String status, @Param("pgToken") String pgToken);
+    public String findReadyTidByUserIdAndChallengeId(@Param("userId") int userId, @Param("challengeId") int challengeId);
+    public void updatePaymentStatus(@Param("tid") String tid, @Param("status") String status, @Param("pgToken") String pgToken);
     
     // 결제 성공 후 최종 처리
-    void increaseChallengeParticipantCountInfo(int challengeId);
-    void insertRaffleTicket(@Param("userId") int userId, @Param("challengeId") int challengeId, @Param("raffleTicketCount") int raffleTicketCount, @Param("raffleTicketSourceType") String raffleTicketSourceType);
+    public void increaseChallengeParticipantCountInfo(int challengeId);
+    public void insertRaffleTicket(@Param("userId") int userId, @Param("challengeId") int challengeId, @Param("raffleTicketCount") int raffleTicketCount, @Param("raffleTicketSourceType") String raffleTicketSourceType);
     // void insertUserChallengeInfo(@Param("userId") int userId, @Param("challengeId") int challengeId);
 
     
     // 추첨권 관련
     // public void insertRaffleTicket(ChallengeRaffleTicket challengeRaffleTicket);
 
+    public String findSuccessTidByUserIdAndChallengeId(@Param("userId") int userId, @Param("challengeId") int challengeId);
 
 
 
     // 새롭게 추가된 추첨권 관련 메서드
-    Integer findUserRaffleTicketCount(int userId); // 사용자의 현재 추첨권 수 조회
-    void insertUserRaffleTicket(@Param("userId") int userId, @Param("count") int count); // 추첨권 정보가 없을 경우 새로 삽입
-    void updateUserRaffleTicket(@Param("userId") int userId, @Param("count") int count); // 추첨권 수 업데이트
+    public Integer findUserRaffleTicketCount(int userId); // 사용자의 현재 추첨권 수 조회
+    public void insertUserRaffleTicket(@Param("userId") int userId, @Param("count") int count); // 추첨권 정보가 없을 경우 새로 삽입
+    public void updateUserRaffleTicket(@Param("userId") int userId, @Param("count") int count); // 추첨권 수 업데이트
     
     // 결제 후 챌린지 시작 시 사용자 챌린지 정보 삽입
-    void insertUserChallengeInfo(@Param("userId") int userId, @Param("challengeId") int challengeId);
+    public void insertUserChallengeInfo(@Param("userId") int userId, @Param("challengeId") int challengeId);
 
     // 노리개 획득 여부를 확인하는 새로운 메서드
-    int hasAwardedNorigae(@Param("userId") int userId, @Param("challengeId") int challengeId, @Param("tierId") int tierId);
+    public int hasAwardedNorigae(@Param("userId") int userId, @Param("challengeId") int challengeId, @Param("tierId") int tierId);
 
 
 
 
 
     // test
-    void deleteAttendanceRecords(@Param("userId") int userId, @Param("challengeId") int challengeId);
-    void deleteUserChallengeNorigae(@Param("userId") int userId, @Param("challengeId") int challengeId);
+    public void deleteAttendanceRecords(@Param("userId") int userId, @Param("challengeId") int challengeId);
+    public void deleteUserChallengeNorigae(@Param("userId") int userId, @Param("challengeId") int challengeId);
 
 }
 
