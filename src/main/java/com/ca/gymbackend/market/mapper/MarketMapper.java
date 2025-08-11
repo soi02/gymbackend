@@ -31,11 +31,11 @@ public interface MarketMapper {
     public void updateMarketCommentOnArticle(MarketCommentOnArticleDto marketCommentOnArticleDto);
     public void deleteMarketCommentOnArticle(@Param("id") Integer id);
     
-    public void insertMarketProductInterestedLog(MarketProductInterestedLogDto marketProductInterestedLogDto);
+    public void insertMarketProductInterestedLog(MarketProductInterestedLogDto marketProductInterestedLogDffto);
     public List<MarketProductInterestedLogDto> selectMarketProductInterestedLogWhenUserInfo(@Param("marketUserId") Integer marketUserId);
     public List<MarketProductInterestedLogDto> selectMarketProductInterestedLogWhenArticleInfo(@Param("specificArticleId") Integer specificArticleId);
     public MarketProductInterestedLogDto selectMarketProductInterestedLogWhenUserAndArticleInfo(@Param("marketUserId") Integer marketUserId, @Param("specificArticleId") Integer specificArticleId);
-    public void deleteMarketProductInterestedLog(@Param("specificArticleId") Integer specificArticleId);
+    public void deleteMarketProductInterestedLog(@Param("marketUserId") Integer marketUserId, @Param("specificArticleId") Integer specificArticleId);
     
     public void insertMarketDealedLog(MarketDealedLogDto marketDealedLogDto);
     public List<MarketDealedLogDto> selectMarketDealedLogWhenBuyer(@Param("buyerId") Integer buyerId);

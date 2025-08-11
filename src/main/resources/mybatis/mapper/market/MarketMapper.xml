@@ -94,7 +94,7 @@
     
     <delete id = "deleteMarketProductInterestedLog">
     
-        DELETE FROM market_product_interested_log WHERE specific_article_id = #{specificArticleId};
+        DELETE FROM market_product_interested_log WHERE market_user_id = #{marketUserId} AND specific_article_id = #{specificArticleId};
     
     </delete>
     
@@ -105,13 +105,29 @@
     
     </insert>
     
-    <select id = "selectMarketDealedLogWhenBuyer" resultType = "com.ca.gymbackend.market.dto.MarketDealedLogDto">
+    <insert id = "insertMarketDealedLogCheckedBySeller">
+    
+    </insert>
+    
+    <delete id = "deleteMarketDealedLogCheckedBySeller">
+    
+    </delete>
+    
+    <insert id = "insertMarketDealedLogCheckedByBuyer">
+    
+    </insert>
+    
+    <delete id = "deleteMarketDealedLogCheckedByBuyer">
+    
+    </delete>
+    
+    <select id = "selectMarketDealedLogWhenBuyer" resultType = "com.ca.gymbackend.market.dto.MarketDealedLogDto"> <!-- 테스트용 -->
     
         SELECT * FROM market_dealed_log WHERE buyer_id = #{buyerId};
     
     </select>
     
-    <select id = "selectMarketDealedLogWhenSeller" resultType = "com.ca.gymbackend.market.dto.MarketDealedLogDto">
+    <select id = "selectMarketDealedLogWhenSeller" resultType = "com.ca.gymbackend.market.dto.MarketDealedLogDto"> <!-- 테스트용 -->
     
         SELECT * FROM market_dealed_log WHERE seller_id = #{sellerId};
     

@@ -52,6 +52,11 @@ public class MarketController {
         return marketService.selectSpecificMarketArticle(id);
     }
     
+    @GetMapping("/selectSpecificMarketArticleInfo") // ok
+    public Map<String, Object> selectSpecificMarketArticleInfo(@RequestParam("id") Integer id) {
+        return marketService.selectSpecificMarketArticleInfo(id);
+    }
+    
     @PostMapping("/updateMarketArticle") // ok
     public void updateMarketArticle(@RequestBody MarketArticleDto marketArticleDto) {
         marketService.updateMarketArticle(marketArticleDto);
@@ -87,37 +92,37 @@ public class MarketController {
         marketService.insertMarketProductInterestedLog(marketProductInterestedLogDto);
     }
     
-    @GetMapping("/selectMarketProductInterestedLogWhenUserInfo") // ok
+    @GetMapping("/selectMarketProductInterestedLogWhenUserInfo") // ok + Front OK
     public List<Map<String, Object>> selectMarketProductInterestedLogWhenUserInfo(@RequestParam("marketUserId") Integer marketUserId) {
         return marketService.selectMarketProductInterestedLogWhenUserInfo(marketUserId);
     }
     
-    @GetMapping("/selectMarketProductInterestedLogWhenArticleInfo") // ok
+    @GetMapping("/selectMarketProductInterestedLogWhenArticleInfo") // ok ( 개수 카운트 시 사용될 예정 -- 탐낸 사용자 목록 비공개라 크게 필요는 없음)
     public List<Map<String, Object>> selectMarketProductInterestedLogWhenArticleInfo(@RequestParam("specificArticleId") Integer specificArticleId) {
         return marketService.selectMarketProductInterestedLogWhenArticleInfo(specificArticleId);
     }
     
     @GetMapping("/selectMarketProductInterestedLogWhenUserAndArticleInfo") // ok + Front OK + View Reload OK
-    public MarketProductInterestedLogDto selectMarketProductInterestedLogWhenUserAndArticleInfo(@RequestParam("marketUserId") Integer marketUserId, @RequestParam("specificArticleId") Integer specificArticleId) {
+    public Map<String, Object> selectMarketProductInterestedLogWhenUserAndArticleInfo(@RequestParam("marketUserId") Integer marketUserId, @RequestParam("specificArticleId") Integer specificArticleId) {
         return marketService.selectMarketProductInterestedLogWhenUserAndArticleInfo(marketUserId, specificArticleId);
     }
     
     @PostMapping("/deleteMarketProductInterestedLog") // ok + Front OK
-    public void deleteMarketProductInterestedLog(@RequestParam("specificArticleId") Integer specificArticleId) {
-        marketService.deleteMarketProductInterestedLog(specificArticleId);
+    public void deleteMarketProductInterestedLog(@RequestParam("marketUserId") Integer marketUserId, @RequestParam("specificArticleId") Integer specificArticleId) {
+        marketService.deleteMarketProductInterestedLog(marketUserId, specificArticleId);
     }
     
-    @PostMapping("/insertMarketDealedLog") // ok
+    @PostMapping("/insertMarketDealedLog") // ok --- 전체적인 구조 수정 예정
     public void insertMarketDealedLog(@RequestBody MarketDealedLogDto marketDealedLogDto) {
         marketService.insertMarketDealedLog(marketDealedLogDto);
     }
     
-    @GetMapping("/selectMarketDealedLogWhenBuyer") // ok
+    @GetMapping("/selectMarketDealedLogWhenBuyer") // ok + Front OK
     public List<Map<String, Object>> selectMarketDealedLogWhenBuyer(@RequestParam("buyerId") Integer buyerId) {
         return marketService.selectMarketDealedLogWhenBuyer(buyerId);
     }
     
-    @GetMapping("/selectMarketDealedLogWhenSeller") // ok
+    @GetMapping("/selectMarketDealedLogWhenSeller") // ok + Front OK
     public List<Map<String, Object>> selectMarketDealedLogWhenSeller(@RequestParam("sellerId") Integer sellerId) {
         return marketService.selectMarketDealedLogWhenSeller(sellerId);
     }
