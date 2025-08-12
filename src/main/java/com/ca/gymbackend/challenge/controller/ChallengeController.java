@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -334,7 +335,7 @@ public ResponseEntity<List<KeywordCategoryTree>> getKeywordTree() {
     }
 
     // 결제 승인 API
-    @GetMapping("/join/payment/success")
+    @RequestMapping(value = "/join/payment/success", method = {RequestMethod.GET, RequestMethod.POST})
     public ResponseEntity<Void> kakaoPaySuccess(@RequestParam("pg_token") String pgToken,
                                                   @RequestParam("challengeId") int challengeId,
                                                   @RequestParam("userId") int userId) {
