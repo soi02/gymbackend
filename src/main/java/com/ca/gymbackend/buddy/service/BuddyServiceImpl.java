@@ -50,9 +50,16 @@ public class BuddyServiceImpl {
         buddyMapper.updateIsBuddy(userId);
     }
 
-    public List<Map<String, Object>> getBuddyUserList() {
-        return buddyMapper.getBuddyUserList();
+    public List<Map<String, Object>> getBuddyUserList(int loggedInUserId) {
+        return buddyMapper.getBuddyUserList(loggedInUserId);
     }
+
+    //버디인지확인
+    public boolean isBuddy(int userId) {
+        // 매퍼를 통해 is_buddy 상태를 조회합니다.
+        return buddyMapper.isBuddy(userId);
+    }
+
 
     // 매칭
     @Transactional

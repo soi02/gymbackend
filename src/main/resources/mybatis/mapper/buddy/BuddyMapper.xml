@@ -38,9 +38,21 @@
         JOIN buddy b ON u.id = b.user_id
         JOIN buddy_age ba ON b.buddy_age_id = ba.id
         WHERE u.is_buddy = true
-        GROUP BY u.id
+        AND u.id != #{loggedInUserId} GROUP BY u.id
     </select>
 
+    <!-- 버디인지 확인 -->
+    <!-- <select id="isBuddy" parameterType="map" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM buddy
+        WHERE (send_buddy_id = #{userId} AND receiver_buddy_id = #{buddyId})
+           OR (send_buddy_id = #{buddyId} AND receiver_buddy_id = #{userId})
+    </select> -->
+    <select id="isBuddy" parameterType="int" resultType="boolean">
+        SELECT is_buddy
+        FROM user
+        WHERE id = #{userId}
+    </select>
 
     <!-- 매칭 -->
     <insert id="insertMatching">

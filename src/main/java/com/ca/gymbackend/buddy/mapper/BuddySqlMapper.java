@@ -22,7 +22,10 @@ public interface BuddySqlMapper {
 
     public void updateIsBuddy(int userId);
 
-    public List<Map<String, Object>> getBuddyUserList();
+    public List<Map<String, Object>> getBuddyUserList(int loggedInUserId);
+
+    //버디인지확인
+    public boolean isBuddy(int userId);
 
     // 매칭 관련 메소드
     public void insertMatching(@Param("sendBuddyId") int sendBuddyId, @Param("receiverBuddyId") int receiverBuddyId);

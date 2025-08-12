@@ -44,6 +44,8 @@ public class SecurityConfig {
 
         @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        System.out.println("DEBUG: SecurityFilterChain 설정이 적용되었습니다.");
+
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configure(http)) // WebConfig의 CORS 설정을 사용
@@ -68,6 +70,8 @@ public class SecurityConfig {
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
                         }));
+
+
 
         return http.build();
     }

@@ -1,5 +1,6 @@
 package com.ca.gymbackend.buddy.controller;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -55,9 +56,37 @@ public class BuddyController {
         return "버디 등록 완료";
     }
 
+    // 버디인지확인
+    /**
+     * 특정 유저의 is_buddy 상태를 조회하는 엔드포인트
+     * 
+     * @param userId 조회할 유저 ID
+     * @return is_buddy 상태를 담은 응답
+     */
+    @GetMapping("/is-buddy")
+    public ResponseEntity<Map<String, Boolean>> isBuddyStatus(@RequestParam("userId") int userId) {
+        // userId를 이용해 buddyService에서 is_buddy 상태를 조회합니다.
+        boolean isBuddy = buddyService.isBuddy(userId);
+
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("is_buddy", isBuddy);
+
+        // 클라이언트에 JSON 형태로 { "is_buddy": true/false } 를 반환합니다.
+        return ResponseEntity.ok(response);
+    }
+
+    // @GetMapping("/list")
+    // public ResponseEntity<List<Map<String, Object>>> getBuddyUserList() {
+    // List<Map<String, Object>> result = buddyService.getBuddyUserList();
+    // return ResponseEntity.ok(result);
+    // }
     @GetMapping("/list")
     public ResponseEntity<List<Map<String, Object>>> getBuddyUserList() {
-        List<Map<String, Object>> result = buddyService.getBuddyUserList();
+        // ✅ 현재 로그인한 유저 ID를 SecurityContextHolder에서 가져옴
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        int loggedInUserId = (int) authentication.getPrincipal();
+
+        List<Map<String, Object>> result = buddyService.getBuddyUserList(loggedInUserId); // ✅ ID 전달
         return ResponseEntity.ok(result);
     }
 

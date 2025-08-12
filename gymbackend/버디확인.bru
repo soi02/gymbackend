@@ -1,0 +1,19 @@
+meta {
+  name: 버디확인
+  type: http
+  seq: 11
+}
+
+get {
+  url: http://localhost:8080/api/buddy/is-buddy
+  body: none
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyIiwiaWF0IjoxNzU0OTE4ODEzLCJleHAiOjE3NTQ5MjI0MTN9.ynif6YuiuYD_hSElZFpG60tYQ-vlaaABDHtTg_iaEHg
+}
+
+settings {
+  encodeUrl: true
+}
