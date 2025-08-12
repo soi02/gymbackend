@@ -1,5 +1,7 @@
 package com.ca.gymbackend.routine.controller;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
@@ -149,5 +151,38 @@ public class RoutineController {
 
 
     }
+
+
+
+    // @GetMapping("/search")
+    // public ResponseEntity<List<VideoDto>> search(@RequestParam("q") String q) {
+    //     String encoded = URLEncoder.encode(q, StandardCharsets.UTF_8);
+    //     // 3개만, 임베드 가능한 비디오만, 한국 기준/한국어 가중치
+    //     String url = "https://www.googleapis.com/youtube/v3/search"
+    //             + "?part=snippet&type=video&maxResults=3&videoEmbeddable=true"
+    //             + "&safeSearch=strict&regionCode=KR&relevanceLanguage=ko"
+    //             + "&q=" + encoded
+    //             + "&key=" + apiKey;
+
+    //     SearchResponse body = rest.getForObject(url, SearchResponse.class);
+    //     if (body == null || body.items == null) return ResponseEntity.ok(List.of());
+
+    //     List<VideoDto> result = body.items.stream()
+    //             .filter(i -> i.id != null && i.id.videoId != null && i.snippet != null)
+    //             .map(i -> new VideoDto(
+    //                     i.id.videoId,
+    //                     i.snippet.title,
+    //                     i.snippet.thumbnails != null && i.snippet.thumbnails.high != null
+    //                             ? i.snippet.thumbnails.high.url
+    //                             : (i.snippet.thumbnails != null && i.snippet.thumbnails.medium != null
+    //                                 ? i.snippet.thumbnails.medium.url
+    //                                 : null)
+    //             ))
+    //             .toList();
+
+    //     return ResponseEntity.ok(result);
+    // }
+
+
 
 }
