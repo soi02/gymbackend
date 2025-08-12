@@ -107,7 +107,7 @@ public class PaymentServiceImpl {
     @Transactional
     public ResponseEntity<Void> kakaoPayApprove(Long challengeId, int userId, String pgToken) {
         String existingSuccessTid = challengeMapper.findSuccessTidByUserIdAndChallengeId(userId, challengeId.intValue());
-        
+
         HttpHeaders headers = new HttpHeaders();
 
         if (existingSuccessTid != null) {
@@ -115,15 +115,15 @@ public class PaymentServiceImpl {
             headers.add("Location", frontEndBaseUrl + "/gymmadang/challenge/payment/success?challengeId=" + challengeId + "&userId=" + userId + "&status=success&message=already_processed");
             return new ResponseEntity<>(headers, HttpStatus.FOUND);
         }
-        
+
         String readyTid = challengeMapper.findReadyTidByUserIdAndChallengeId(userId, challengeId.intValue());
-        
+
         if (readyTid == null) {
             // 결제 준비 상태가 아닌 경우, 프론트엔드의 실패 페이지로 리다이렉션
             headers.add("Location", frontEndBaseUrl + "/gymmadang/challenge/payment/fail?message=no_ready_payment_found");
             return new ResponseEntity<>(headers, HttpStatus.FOUND);
         }
-        
+
         HttpHeaders kakaoHeaders = new HttpHeaders();
         kakaoHeaders.setContentType(MediaType.APPLICATION_JSON);
         kakaoHeaders.set("Authorization", "SECRET_KEY " + secretKey);
@@ -144,16 +144,26 @@ public class PaymentServiceImpl {
                     .body(KakaoPayApproveResponse.class);
 
             if (kakaoResponse != null) {
-                // ... (기존 DB 업데이트 로직 유지) ...
-                
-                // 성공 페이지로 리다이렉트
+                // 1. DB에 결제 상태 'SUCCESS'로 업데이트
+                challengeMapper.updatePaymentStatus(readyTid, "SUCCESS", pgToken);
+
+                // 🌟 추가된 로직 시작 🌟
+                // 2. user_challenge 테이블에 참가자 정보 삽입
+                challengeMapper.insertUserChallengeInfo(userId, challengeId.intValue());
+
+                // 3. challenge 테이블의 참가자 수 1 증가
+                challengeMapper.increaseChallengeParticipantCountInfo(challengeId.intValue());
+                // 🌟 추가된 로직 끝 🌟
+
+                // 4. 성공 페이지로 리다이렉트
                 headers.add("Location", frontEndBaseUrl + "/gymmadang/challenge/payment/success?challengeId=" + challengeId + "&userId=" + userId + "&status=success");
                 return new ResponseEntity<>(headers, HttpStatus.FOUND);
             }
             throw new RuntimeException("카카오페이 결제 승인 응답이 유효하지 않습니다.");
 
         } catch (HttpClientErrorException e) {
-            // ... (기존 결제 실패 로직 유지) ...
+            // 결제 실패 시, 결제 상태를 'FAIL'로 업데이트하는 로직도 추가하는 것이 좋습니다.
+            // challengeMapper.updatePaymentStatus(readyTid, "FAIL");
 
             // 실패 페이지로 리다이렉트
             headers.add("Location", frontEndBaseUrl + "/gymmadang/challenge/payment/fail?message=payment_failed");

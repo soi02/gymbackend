@@ -143,9 +143,14 @@ public ResponseEntity<List<KeywordCategoryTree>> getKeywordTree() {
     
     // 챌린지 상세 API
     @GetMapping("/detail")
-    public ResponseEntity<ChallengeDetailResponse> getChallengeDetail(@RequestParam("challengeId") int challengeId) {
-        System.out.println("챌린지 상세 조회 요청 challengeId: " + challengeId);
-        ChallengeDetailResponse detail = challengeService.getChallengeDetailById(challengeId);
+    public ResponseEntity<ChallengeDetailResponse> getChallengeDetail(
+            @RequestParam("challengeId") int challengeId,
+            @RequestParam(value = "userId", required = false) Integer userId) { // 🌟 userId 쿼리 파라미터 추가
+        
+        System.out.println("챌린지 상세 조회 요청 challengeId: " + challengeId + ", userId: " + userId);
+        
+        ChallengeDetailResponse detail = challengeService.getChallengeDetailById(challengeId, userId); // 🌟 userId 전달
+        
         if (detail == null) {
             return ResponseEntity.notFound().build();
         }
