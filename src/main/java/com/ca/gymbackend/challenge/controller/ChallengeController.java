@@ -1,9 +1,11 @@
 package com.ca.gymbackend.challenge.controller;
 
+import java.time.LocalDate;
 import java.util.List;
 
-import org.springframework.http.HttpStatus; // ★ 추가
-import org.springframework.http.ResponseEntity; // ★ 추가
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,11 +21,13 @@ import com.ca.gymbackend.challenge.dto.ChallengeCreateRequest;
 import com.ca.gymbackend.challenge.dto.ChallengeDetailResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeFinalTestResult;
 import com.ca.gymbackend.challenge.dto.ChallengeKeywordCategory;
+import com.ca.gymbackend.challenge.dto.ChallengeListResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeMyRecordDetailResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeMyRecordsResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeProgressResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeStartRequest;
 import com.ca.gymbackend.challenge.dto.ChallengeTendencyTestRequest;
+import com.ca.gymbackend.challenge.dto.KeywordCategoryTree;
 import com.ca.gymbackend.challenge.dto.payment.PaymentReadyResponse;
 import com.ca.gymbackend.challenge.service.ChallengeServiceImpl;
 import com.ca.gymbackend.challenge.service.PaymentServiceImpl;
@@ -42,10 +46,9 @@ public class ChallengeController {
     @PostMapping("/registerChallengeProcess")
     public ResponseEntity<String> registerChallengeProcess(@ModelAttribute ChallengeCreateRequest challengeCreateRequest) {
         
-    // ★★★ 이 부분을 추가해주세요 ★★★
     System.out.println("백엔드에서 수신한 챌린지 생성 요청 데이터: " + challengeCreateRequest);
-    System.out.println("보증금: " + challengeCreateRequest.getChallengeDepositAmount());
-    // ★★★ 여기까지 추가 ★★★
+    System.out.println(">>> 생성요청: " + challengeCreateRequest);
+    System.out.println(">>> keywordIds: " + challengeCreateRequest.getKeywordIds()); // ✅ 추가
 
         // 로그인 사용자 확인 로직
         String creatorName = challengeCreateRequest.getChallengeCreator();
@@ -68,12 +71,12 @@ public class ChallengeController {
 
 
     // 챌린지 리스트 가져오기
-    @GetMapping("/getAllChallengeListProcess")
-    public ResponseEntity<List<ChallengeCreateRequest>> getAllChallengeListProcess() {
-        System.out.println("[챌린지 목록 응답]");
-        List<ChallengeCreateRequest> challengeCreateRequestList = challengeService.getAllChallengeList();
-        return ResponseEntity.ok(challengeCreateRequestList);
-    }
+    // @GetMapping("/getAllChallengeListProcess")
+    // public ResponseEntity<List<ChallengeCreateRequest>> getAllChallengeListProcess() {
+    //     System.out.println("[챌린지 목록 응답]");
+    //     List<ChallengeCreateRequest> challengeCreateRequestList = challengeService.getAllChallengeList();
+    //     return ResponseEntity.ok(challengeCreateRequestList);
+    // }
 
 
     // 모든 키워드 카테고리 목록을 가져오는 API
@@ -84,12 +87,17 @@ public class ChallengeController {
         return ResponseEntity.ok(categories);
     }
 
+    @GetMapping("/keywords/tree")
+public ResponseEntity<List<KeywordCategoryTree>> getKeywordTree() {
+    return ResponseEntity.ok(challengeService.getKeywordTree());
+}
+
     // 카테고리별 챌린지 목록 조회
     @GetMapping("/getChallengesByCategoryId/{categoryId}")
-    public ResponseEntity<List<ChallengeCreateRequest>> getChallengesByCategoryId(@PathVariable("categoryId") Integer categoryId) {
+    public ResponseEntity<List<ChallengeListResponse>> getChallengesByCategoryId(@PathVariable("categoryId") Integer categoryId) {
         System.out.println("[카테고리별 챌린지 목록 조회] categoryId: " + categoryId);
         try {
-            List<ChallengeCreateRequest> challenges = challengeService.getChallengesByCategoryId(categoryId);
+            List<ChallengeListResponse> challenges = challengeService.getChallengesByCategoryId(categoryId);
             return ResponseEntity.ok(challenges);
         } catch (IllegalArgumentException e) {
             System.err.println("오류: " + e.getMessage());
@@ -102,61 +110,51 @@ public class ChallengeController {
 
 
     // 챌린지 상세보기
-    @GetMapping("/getChallengeDetailByChallengeIdProcess")
-    public ResponseEntity<ChallengeDetailResponse> getChallengeDetailByChallengeIdProcess(
-        @RequestParam("challengeId") int challengeId,
-        @RequestParam(value = "userId", required = false) Integer userId) {
+    // @GetMapping("/getChallengeDetailByChallengeIdProcess")
+    // public ResponseEntity<ChallengeDetailResponse> getChallengeDetailByChallengeIdProcess(
+    //     @RequestParam("challengeId") int challengeId,
+    //     @RequestParam(value = "userId", required = false) Integer userId) {
 
-        System.out.println(">>> getChallengeDetailByChallengeIdProcess 호출됨. challengeId: " + challengeId + ", userId: " + userId); 
+    //     System.out.println(">>> getChallengeDetailByChallengeIdProcess 호출됨. challengeId: " + challengeId + ", userId: " + userId); 
 
-        if (userId == null) {
-            userId = 0;
-        }
+    //     if (userId == null) {
+    //         userId = 0;
+    //     }
 
-        ChallengeDetailResponse challengeDetailResponse = challengeService.getChallengeDetailByChallengeId(challengeId, userId);
+    //     ChallengeDetailResponse challengeDetailResponse = challengeService.getChallengeDetailByChallengeId(challengeId, userId);
 
-        // 챌린지를 찾을 수 없으면 404 Not Found 반환
-        if(challengeDetailResponse == null) {
-            System.out.println("챌린지를 찾을 수 없습니다.");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+    //     // 챌린지를 찾을 수 없으면 404 Not Found 반환
+    //     if(challengeDetailResponse == null) {
+    //         System.out.println("챌린지를 찾을 수 없습니다.");
+    //         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    //     }
 
-        return ResponseEntity.ok(challengeDetailResponse);
+    //     return ResponseEntity.ok(challengeDetailResponse);
+    // }
+
+        // 챌린지 목록 API
+    @GetMapping("/list")
+    public ResponseEntity<List<ChallengeListResponse>> getChallengeList() {
+        System.out.println("챌린지 목록 조회 요청");
+        List<ChallengeListResponse> challenges = challengeService.getAllChallengesWithKeywords();
+        return ResponseEntity.ok(challenges);
     }
     
-    // 챌린지 도전 시작
-    @PostMapping("/startChallengeProcess")
-    public ResponseEntity<String> startChallengeProcess(
-        @RequestBody ChallengeStartRequest challengeStartRequest) {
-            if (challengeStartRequest.getUserId() <= 0 || challengeStartRequest.getChallengeId() <= 0) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("UserId와 ChallengeId는 유효해야 합니다.");
-            }
-
-            try {
-                // 1. 중복 참여 여부 확인
-                challengeService.checkExistsUserChallenge(
-                    challengeStartRequest.getUserId(), 
-                    challengeStartRequest.getChallengeId()
-                );
-                
-                // 2. user_challenge 테이블에 사용자 챌린지 정보를 삽입
-                challengeService.insertUserChallengeInfo(
-                    challengeStartRequest.getUserId(), 
-                    challengeStartRequest.getChallengeId()
-                );
-
-                // 3. challenge 테이블의 participant_count를 1 증가시키기
-                challengeService.increaseChallengeParticipantCountInfo(
-                    challengeStartRequest.getChallengeId()
-                );
-
-                return ResponseEntity.ok("챌린지 도전 시작 성공");
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("에러: 챌린지 도전 시작 실패 " + e.getMessage());
-            }
+    // 챌린지 상세 API
+    @GetMapping("/detail")
+    public ResponseEntity<ChallengeDetailResponse> getChallengeDetail(@RequestParam("challengeId") int challengeId) {
+        System.out.println("챌린지 상세 조회 요청 challengeId: " + challengeId);
+        ChallengeDetailResponse detail = challengeService.getChallengeDetailById(challengeId);
+        if (detail == null) {
+            return ResponseEntity.notFound().build();
         }
+        return ResponseEntity.ok(detail);
+    }
+    
+
+
+
+
         
     // 나의 수련기록 조회
     @GetMapping("/getAllMyChallengeListProcess")
@@ -170,6 +168,7 @@ public class ChallengeController {
         // 이는 정상적인 응답이며, 프론트엔드가 이를 처리해야 합니다.
         return ResponseEntity.ok(challengeMyRecordsResponseList);
     }
+
 
     // 특정 사용자의 특정 챌린지 상세 정보 & 인증 기록 조회
     @GetMapping("/getMyRecordDetailProcess")
@@ -185,11 +184,6 @@ public class ChallengeController {
             }
             return ResponseEntity.ok(challengeMyRecordDetailResponse);
     }
-
-
-
-
-
 
 
 
@@ -213,25 +207,46 @@ public class ChallengeController {
 
     // 새로운 API 2: 일일 인증 사진 업로드
     @PostMapping("/attendChallengeProcess")
-    public ResponseEntity<String> attendChallengeProcess(
+    public ResponseEntity<ChallengeProgressResponse> attendChallengeProcess(
             @RequestParam("userId") int userId,
             @RequestParam("challengeId") int challengeId,
             @RequestPart("photo") MultipartFile photo) {
         
-        if (userId <= 0 || challengeId <= 0 || photo == null || photo.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("필수 요청 파라미터가 누락되었습니다.");
+    if (userId <= 0 || challengeId <= 0 || photo == null || photo.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // 수정: DTO 반환
+    }
+    
+        
+    try {
+        int newlyAwardedNorigaeTierId = challengeService.attendChallenge(userId, challengeId, photo);
+        
+        // 인증 후 새로 갱신된 진행 상황 정보를 다시 조회
+        ChallengeProgressResponse response = challengeService.getChallengeProgressInfo(challengeId, userId);
+
+        // 새로 획득한 노리개 정보 추가
+        if (newlyAwardedNorigaeTierId > 0) {
+             response.setNewlyAwardedNorigaeTierId(newlyAwardedNorigaeTierId);
         }
         
-        try {
-            challengeService.attendChallenge(userId, challengeId, photo);
-            return ResponseEntity.ok("챌린지 인증 완료!");
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("인증 처리 중 오류 발생");
-        }
+        return ResponseEntity.ok(response);
+    } catch (IllegalStateException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
     }
+}
+    // try { (테스트용입니다)
+    //     // testDate 파라미터를 서비스 메서드로 전달
+    //     challengeService.attendChallenge(userId, challengeId, photo, testDate);
+    //     return ResponseEntity.ok("챌린지 인증 완료!");
+    // } catch (IllegalStateException e) {
+    //     return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+    // } catch (Exception e) {
+    //     e.printStackTrace();
+    //     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("인증 처리 중 오류 발생");
+    // }
+    
 
 
 
@@ -304,41 +319,26 @@ public class ChallengeController {
 
     
 
-    // 결제
+    // 결제 준비 API
     @PostMapping("/join/payment")
     public ResponseEntity<PaymentReadyResponse> startChallengeWithPayment(
             @RequestParam("userId") int userId,
             @RequestParam("challengeId") int challengeId) {
         try {
+            // Service 계층으로 요청 위임
             PaymentReadyResponse response = challengeService.startChallengeWithPayment(userId, challengeId);
             return ResponseEntity.ok(response);
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
-    
+
+    // 결제 승인 API
     @GetMapping("/join/payment/success")
-    public ResponseEntity<String> kakaoPaySuccess(
-            @RequestParam("pg_token") String pgToken,
-            @RequestParam("challengeId") int challengeId,
-            @RequestParam("userId") int userId) {
-        
-        String tid = paymentService.getReadyTid(userId, challengeId);
-
-        if (tid == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("결제 정보가 유효하지 않습니다.");
-        }
-        
-        // 결제 승인 로직 실행
-        boolean paymentSuccess = paymentService.kakaoPayApprove(tid, challengeId, userId, pgToken);
-        
-        if (paymentSuccess) {
-            // 결제 승인 후 챌린지 참가 최종 처리
-            challengeService.finalizeChallengeJoin(userId, challengeId, tid, pgToken);
-            return ResponseEntity.ok("결제 및 챌린지 참가 성공");
-        } else {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("결제 승인 실패");
-        }
+    public ResponseEntity<Void> kakaoPaySuccess(@RequestParam("pg_token") String pgToken,
+                                                  @RequestParam("challengeId") int challengeId,
+                                                  @RequestParam("userId") int userId) {
+        // PaymentService에서 리다이렉션 응답을 직접 처리하도록 위임
+        return paymentService.kakaoPayApprove(Long.valueOf(challengeId), userId, pgToken);
     }
-
 }

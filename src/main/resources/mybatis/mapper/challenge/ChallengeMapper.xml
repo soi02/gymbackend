@@ -4,36 +4,34 @@
 
     <!-- 챌린지 생성 -->
 
-    <insert id="createChallenge" parameterType="com.ca.gymbackend.challenge.dto.ChallengeCreateRequest"
-            useGeneratedKeys="true" keyProperty="challengeId">
-        INSERT INTO challenge (
-            challenge_creator,
-            challenge_title,
-            challenge_description,
-            challenge_max_members,
-            challenge_recruit_start_date,
-            challenge_recruit_end_date,
-            challenge_duration_days,
-            challenge_thumbnail_path,
-            created_at,
-            challenge_participant_count,
-            
-            challenge_tendency_id 
-        ) VALUES (
-            #{challengeCreator},
-            #{challengeTitle},
-            #{challengeDescription},
-            #{challengeMaxMembers},
-            #{challengeRecruitStartDate},
-            #{challengeRecruitEndDate},
-            #{challengeDurationDays},
-            #{challengeThumbnailPath},
-            NOW(),
-            0,
-            
-            #{challengeTendencyId}
-        );
-    </insert>
+<insert id="createChallenge" parameterType="com.ca.gymbackend.challenge.dto.ChallengeCreateRequest"
+        useGeneratedKeys="true" keyProperty="challengeId">
+    INSERT INTO challenge (
+        challenge_creator,
+        challenge_title,
+        challenge_description,
+        challenge_max_members,
+        challenge_recruit_start_date,
+        challenge_recruit_end_date,
+        challenge_duration_days,
+        challenge_deposit_amount,  challenge_thumbnail_path,
+        created_at,
+        challenge_participant_count,
+        challenge_tendency_id 
+    ) VALUES (
+        #{challengeCreator},
+        #{challengeTitle},
+        #{challengeDescription},
+        #{challengeMaxMembers},
+        #{challengeRecruitStartDate},
+        #{challengeRecruitEndDate},
+        #{challengeDurationDays},
+        #{challengeDepositAmount}, #{challengeThumbnailPath},
+        NOW(),
+        0,
+        #{challengeTendencyId}
+    );
+</insert>
 
 
 
@@ -42,17 +40,21 @@
     <!-- 챌린지 가져오기 (목록) -->
     <select id="findAllChallengeList" resultType="com.ca.gymbackend.challenge.dto.ChallengeCreateRequest">
         SELECT
-            challenge_id AS challengeId,
-            challenge_creator AS challengeCreator,
-            challenge_title AS challengeTitle,
-            challenge_description AS challengeDescription,
-            challenge_max_members AS challengeMaxMembers,
-            challenge_participant_count AS challengeParticipantCount,
-            challenge_recruit_start_date AS challengeRecruitStartDate,
-            challenge_recruit_end_date AS challengeRecruitEndDate,
-            challenge_duration_days AS challengeDurationDays,
-            challenge_thumbnail_path AS challengeThumbnailPath
-        FROM challenge
+            c.challenge_id AS challengeId,
+            c.challenge_creator AS challengeCreator,
+            c.challenge_title AS challengeTitle,
+            c.challenge_description AS challengeDescription,
+            c.challenge_max_members AS challengeMaxMembers,
+            c.challenge_participant_count AS challengeParticipantCount,
+            c.challenge_recruit_start_date AS challengeRecruitStartDate,
+            c.challenge_recruit_end_date AS challengeRecruitEndDate,
+            c.challenge_duration_days AS challengeDurationDays,
+            c.challenge_thumbnail_path AS challengeThumbnailPath,
+            GROUP_CONCAT(k.keyword_name ORDER BY k.keyword_name ASC SEPARATOR ',') AS keywordNames
+        FROM challenge c
+        LEFT JOIN challenge_keyword ck ON c.challenge_id = ck.challenge_id
+        LEFT JOIN keyword k ON ck.keyword_id = k.keyword_id
+        GROUP BY c.challenge_id
     </select>
 
 
@@ -68,7 +70,7 @@
 
 
 
-
+    <!-- 모든 카테고리 -->
     <select id="findAllKeywordCategories" resultType="com.ca.gymbackend.challenge.dto.ChallengeKeywordCategory">
         SELECT
             keyword_category_id AS keywordCategoryId,
@@ -77,65 +79,125 @@
             keyword_category
     </select>
 
+<!-- 모든 키워드(카테고리까지) -->
+<select id="findAllKeywords"
+        resultType="com.ca.gymbackend.challenge.dto.KeywordItem">
+  SELECT
+    k.keyword_id        AS keywordId,
+    k.keyword_category_id AS keywordCategoryId,
+    k.keyword_name      AS keywordName
+  FROM keyword k
+  ORDER BY k.keyword_category_id, k.keyword_id
+</select>
+
+<!-- (옵션) 카테고리별 키워드 -->
+<select id="findKeywordsByCategoryId"
+        parameterType="int"
+        resultType="com.ca.gymbackend.challenge.dto.KeywordItem">
+  SELECT
+    k.keyword_id        AS keywordId,
+    k.keyword_category_id AS keywordCategoryId,
+    k.keyword_name      AS keywordName
+  FROM keyword k
+  WHERE k.keyword_category_id = #{categoryId}
+  ORDER BY k.keyword_id
+</select>
+
+
+
 
     <!-- 챌린지 목록 가져오기 (카테고리별 필터 적용) -->
-    <select id="findChallengesByCategoryId" parameterType="int" resultType="com.ca.gymbackend.challenge.dto.ChallengeCreateRequest">
-        SELECT
-            c.challenge_id AS challengeId,
-            c.challenge_creator AS challengeCreator,
-            c.challenge_title AS challengeTitle,
-            c.challenge_description AS challengeDescription,
-            c.challenge_max_members AS challengeMaxMembers,
-            c.challenge_participant_count AS challengeParticipantCount,
-            c.challenge_recruit_start_date AS challengeRecruitStartDate,
-            c.challenge_recruit_end_date AS challengeRecruitEndDate,
-            c.challenge_duration_days AS challengeDurationDays,
-            c.challenge_thumbnail_path AS challengeThumbnailPath
-        FROM
-            challenge c
-        JOIN
-            challenge_keyword ck ON c.challenge_id = ck.challenge_id
-        JOIN
-            keyword k ON ck.keyword_id = k.keyword_id
-        WHERE
-            k.keyword_category_id = #{categoryId}
-        GROUP BY
-            c.challenge_id
-    </select>
+    <select id="findChallengesByCategoryId" parameterType="int" resultType="com.ca.gymbackend.challenge.dto.ChallengeListResponse">
+  SELECT
+    c.challenge_id AS challengeId,
+    c.challenge_title AS challengeTitle,
+    c.challenge_thumbnail_path AS challengeThumbnailPath,
+    c.challenge_recruit_start_date AS challengeRecruitStartDate,
+    c.challenge_recruit_end_date AS challengeRecruitEndDate,
+    c.challenge_duration_days AS challengeDurationDays,
+    c.challenge_max_members AS challengeMaxMembers,
+    c.challenge_participant_count AS challengeParticipantCount,
+    GROUP_CONCAT(k.keyword_name ORDER BY k.keyword_name ASC SEPARATOR ',') AS keywordNamesString
+  FROM challenge c
+  JOIN challenge_keyword ck ON c.challenge_id = ck.challenge_id
+  JOIN keyword k ON ck.keyword_id = k.keyword_id
+  WHERE k.keyword_category_id = #{categoryId}
+  GROUP BY c.challenge_id
+</select>
 
 
 
     <!-- 챌린지 상세보기 -->
     <select id="findChallengeDetailByChallengeId" parameterType="int" resultType="com.ca.gymbackend.challenge.dto.ChallengeDetailResponse">
+    SELECT
+        c.challenge_id AS challengeId,
+        c.challenge_creator AS challengeCreator,
+        c.challenge_title AS challengeTitle,
+        c.challenge_description AS challengeDescription,
+        c.challenge_deposit_amount AS challengeDepositAmount,
+        c.challenge_max_members AS challengeMaxMembers,
+        c.challenge_participant_count AS participantCount,
+        c.challenge_recruit_start_date AS challengeRecruitStartDate,
+        c.challenge_recruit_end_date AS challengeRecruitEndDate,
+        c.challenge_duration_days AS challengeDurationDays,
+        c.challenge_thumbnail_path AS challengeThumbnailPath,
+        
+        GROUP_CONCAT(k.keyword_name ORDER BY k.keyword_name ASC SEPARATOR ',') AS challengeKeywordsString
+    
+    FROM
+        challenge c
+    LEFT JOIN
+        challenge_keyword ck ON c.challenge_id = ck.challenge_id
+    LEFT JOIN
+        keyword k ON ck.keyword_id = k.keyword_id
+    WHERE
+        c.challenge_id = #{challengeId}
+    GROUP BY
+        c.challenge_id, c.challenge_creator, c.challenge_title, c.challenge_description,
+        c.challenge_max_members, c.challenge_participant_count, c.challenge_deposit_amount,
+        c.challenge_duration_days, c.challenge_thumbnail_path, c.created_at
+</select>
+
+
+
+
+    <select id="findAllChallengesWithKeywords" resultType="com.ca.gymbackend.challenge.dto.ChallengeListResponse">
         SELECT
             c.challenge_id AS challengeId,
-            c.challenge_creator AS challengeCreator, 
+            c.challenge_title AS challengeTitle,
+            c.challenge_thumbnail_path AS challengeThumbnailPath,
+            c.challenge_recruit_start_date AS challengeRecruitStartDate,
+            c.challenge_recruit_end_date AS challengeRecruitEndDate,
+            c.challenge_duration_days AS challengeDurationDays,
+            c.challenge_max_members AS challengeMaxMembers,
+            c.challenge_participant_count AS challengeParticipantCount,
+            GROUP_CONCAT(k.keyword_name ORDER BY k.keyword_name ASC SEPARATOR ',') AS keywordNamesString
+        FROM challenge c
+        LEFT JOIN challenge_keyword ck ON c.challenge_id = ck.challenge_id
+        LEFT JOIN keyword k ON ck.keyword_id = k.keyword_id
+        GROUP BY c.challenge_id
+    </select>
+
+    <select id="findChallengeDetailById" parameterType="int" resultType="com.ca.gymbackend.challenge.dto.ChallengeDetailResponse">
+        SELECT
+            c.challenge_id AS challengeId,
+            c.challenge_creator AS challengeCreator,
             c.challenge_title AS challengeTitle,
             c.challenge_description AS challengeDescription,
             c.challenge_deposit_amount AS challengeDepositAmount,
-            c.challenge_max_members AS challengeMaxMembers, 
+            c.challenge_max_members AS challengeMaxMembers,
             c.challenge_participant_count AS participantCount,
-            c.challenge_recruit_start_date AS challengeRecruitStartDate, 
-            c.challenge_recruit_end_date AS challengeRecruitEndDate,     
-            c.challenge_duration_days AS challengeDurationDays, 
-            c.challenge_thumbnail_path AS challengeThumbnailPath, 
-            
-            GROUP_CONCAT(k.keyword_name ORDER BY k.keyword_name ASC SEPARATOR ',') AS challengeKeywordsString
-    
-        FROM
-            challenge c
-        LEFT JOIN
-            challenge_keyword ck ON c.challenge_id = ck.challenge_id
-        LEFT JOIN
-            keyword k ON ck.keyword_id = k.keyword_id
-        WHERE
-            c.challenge_id = #{challengeId}
-        GROUP BY
-            c.challenge_id, c.challenge_creator, c.challenge_title, c.challenge_description,
-            c.challenge_max_members, c.challenge_participant_count,
-            c.challenge_duration_days, c.challenge_thumbnail_path, c.created_at
+            c.challenge_recruit_start_date AS challengeRecruitStartDate,
+            c.challenge_recruit_end_date AS challengeRecruitEndDate,
+            c.challenge_duration_days AS challengeDurationDays,
+            c.challenge_thumbnail_path AS challengeThumbnailPath,
+            GROUP_CONCAT(k.keyword_name ORDER BY k.keyword_name ASC SEPARATOR ',') AS keywordNamesString
+        FROM challenge c
+        LEFT JOIN challenge_keyword ck ON c.challenge_id = ck.challenge_id
+        LEFT JOIN keyword k ON ck.keyword_id = k.keyword_id
+        WHERE c.challenge_id = #{challengeId}
+        GROUP BY c.challenge_id
     </select>
-
 
 
 
@@ -184,8 +246,9 @@
             c.challenge_title AS challengeTitle,
             c.challenge_thumbnail_path AS challengeThumbnailPath,
             c.challenge_duration_days AS challengeDurationDays,
-            uc.personal_join_date AS personalJoinDate  FROM user_challenge uc         
-
+            uc.personal_join_date AS personalJoinDate  
+            
+        FROM user_challenge uc         
         JOIN challenge c ON uc.challenge_id = c.challenge_id
         WHERE uc.user_id = #{userId}
         ORDER BY uc.personal_join_date DESC
@@ -261,24 +324,43 @@
     </select>
 
     <!-- 챌린지 상세 진행 상황 조회 (노리개 등급 정보 포함) -->
-    <select id="findChallengeProgressInfo" resultType="com.ca.gymbackend.challenge.dto.ChallengeProgressResponse">
-        SELECT
-            c.challenge_title,
-            c.challenge_duration_days AS totalPeriod,
-            ucn.awarded_tier_id,
-            nt.norigae_tier_name AS awardedNorigaeName,
-            nt.norigae_tier_icon_path AS awardedNorigaeIconPath
-        FROM
-            challenge c
-        INNER JOIN
-            user_challenge uc ON c.challenge_id = uc.challenge_id
-        LEFT JOIN
-            user_challenge_norigae ucn ON uc.user_id = ucn.user_id AND uc.challenge_id = ucn.challenge_id
-        LEFT JOIN
-            norigae_tier nt ON ucn.awarded_tier_id = nt.norigae_tier_id  WHERE
-            c.challenge_id = #{challengeId} AND uc.user_id = #{userId}
-    </select>
+<select id="findChallengeProgressInfo" resultType="com.ca.gymbackend.challenge.dto.ChallengeProgressResponse">
+    SELECT
+        c.challenge_title,
+        c.challenge_duration_days AS totalPeriod,
+        -- 가장 높은 노리개 등급 ID를 가져옴
+        MAX(ucn.awarded_tier_id) AS awarded_tier_id,
+        MAX(nt.norigae_tier_name) AS awardedNorigaeName,
+        MAX(nt.norigae_tier_icon_path) AS awardedNorigaeIconPath
+    FROM
+        challenge c
+    INNER JOIN
+        user_challenge uc ON c.challenge_id = uc.challenge_id
+    LEFT JOIN
+        user_challenge_norigae ucn ON uc.user_id = ucn.user_id AND uc.challenge_id = ucn.challenge_id
+    LEFT JOIN
+        norigae_tier nt ON ucn.awarded_tier_id = nt.norigae_tier_id 
+    WHERE
+        c.challenge_id = #{challengeId} AND uc.user_id = #{userId}
+    GROUP BY
+        c.challenge_id
+</select>
 
+<!-- user_challenge_norigae 테이블에서 획득한 모든 노리개 목록을 조회 -->
+<select id="findAwardedNorigaeList" resultType="com.ca.gymbackend.challenge.dto.ChallengeNorigaeAwardInfo">
+    SELECT
+        nt.norigae_tier_id AS tierId,
+        nt.norigae_tier_name AS name,
+        nt.norigae_tier_icon_path AS iconPath
+    FROM
+        user_challenge_norigae ucn
+    JOIN
+        norigae_tier nt ON ucn.awarded_tier_id = nt.norigae_tier_id
+    WHERE
+        ucn.user_id = #{userId} AND ucn.challenge_id = #{challengeId}
+    ORDER BY
+        nt.norigae_tier_required_rate DESC
+</select>
 
 
 
@@ -311,6 +393,13 @@
         FROM attendance_record
         WHERE user_id = #{userId} AND challenge_id = #{challengeId} AND attendance_date = #{today}
     </select>
+
+    <!-- 테스트용
+    <select id="countTodayAttendance" resultType="int">
+        SELECT COUNT(*)
+        FROM attendance_record
+        WHERE user_id = #{userId} AND challenge_id = #{challengeId} AND attendance_date = #{testDate}
+    </select> -->
 
     <!-- 출석 기록 삽입 -->
     <insert id="insertAttendanceRecord">
@@ -487,12 +576,6 @@
         WHERE challenge_payment_tid = #{tid}
     </update>
 
-    <select id="findPaymentByTid" resultType="com.ca.gymbackend.challenge.dto.payment.ChallengePayment">
-        SELECT *
-        FROM challenge_payment
-        WHERE challenge_payment_tid = #{tid}
-    </select>
-
     <select id="findReadyTidByUserIdAndChallengeId" resultType="String">
         SELECT challenge_payment_tid
         FROM challenge_payment
@@ -503,10 +586,57 @@
         LIMIT 1
     </select>
 
+    <update id="increaseChallengeParticipantCountInfo">
+        UPDATE challenge
+        SET challenge_participant_count = challenge_participant_count + 1
+        WHERE challenge_id = #{challengeId}
+    </update>
+
+
+<select id="findSuccessTidByUserIdAndChallengeId" resultType="String">
+    SELECT challenge_payment_tid 
+    FROM challenge_payment
+    WHERE user_id = #{userId} AND challenge_id = #{challengeId} AND challenge_payment_status = 'SUCCESS'
+    ORDER BY completed_at DESC
+    LIMIT 1
+</select>
+    
+    <!-- <insert id="insertRaffleTicket">
+        INSERT INTO raffle_ticket (
+            user_id, 
+            challenge_id, 
+            raffle_ticket_count, 
+            raffle_ticket_source_type, 
+            created_at
+        ) VALUES (
+            #{userId}, 
+            #{challengeId}, 
+            #{raffleTicketCount}, 
+            #{raffleTicketSourceType}, 
+            NOW()
+        )
+    </insert> -->
+    
+<insert id="insertUserChallengeInfo">
+    INSERT INTO user_challenge (
+        user_id,
+        challenge_id,
+        personal_join_date,
+        personal_end_date,
+        challenge_completed
+    ) VALUES (
+        #{userId},
+        #{challengeId},
+        NOW(),
+        DATE_ADD(NOW(), INTERVAL (SELECT challenge_duration_days FROM challenge WHERE challenge_id = #{challengeId}) DAY),
+        '0'
+    )
+</insert>
+
 
 
     <!-- 추첨권 관련 -->
-    <insert id="insertRaffleTicket" parameterType="com.ca.gymbackend.challenge.dto.payment.ChallengeRaffleTicket">
+    <!-- <insert id="insertRaffleTicket" parameterType="com.ca.gymbackend.challenge.dto.payment.ChallengeRaffleTicket">
         INSERT INTO raffle_ticket (
             user_id, 
             challenge_id, 
@@ -521,6 +651,44 @@
             NOW()
         )
     </insert>
-    
+     -->
         
+
+
+    <insert id="createChallengeKeyword">
+        INSERT INTO challenge_keyword (challenge_id, keyword_id) VALUES (#{challengeId}, #{keywordId})
+    </insert>
+
+    <select id="hasAwardedNorigae" resultType="int">
+        SELECT COUNT(*) FROM user_challenge_norigae
+        WHERE user_id = #{userId} AND challenge_id = #{challengeId} AND awarded_tier_id = #{tierId}
+    </select>
+
+    <select id="findUserRaffleTicketCount" resultType="Integer">
+        SELECT raffle_ticket_count FROM user_raffle_ticket WHERE user_id = #{userId}
+    </select>
+    
+    <insert id="insertUserRaffleTicket">
+        INSERT INTO user_raffle_ticket (user_id, raffle_ticket_count, updated_at) VALUES (#{userId}, #{count}, NOW())
+    </insert>
+
+    <update id="updateUserRaffleTicket">
+        UPDATE user_raffle_ticket SET raffle_ticket_count = #{count}, updated_at = NOW() WHERE user_id = #{userId}
+    </update>
+
+
+
+
+
+    <!-- test -->
+    <delete id="deleteAttendanceRecords">
+        DELETE FROM attendance_record
+        WHERE user_id = #{userId} AND challenge_id = #{challengeId}
+    </delete>
+
+    <delete id="deleteUserChallengeNorigae">
+        DELETE FROM user_challenge_norigae
+        WHERE user_id = #{userId} AND challenge_id = #{challengeId}
+    </delete>
+
 </mapper>

@@ -7,12 +7,16 @@ import com.ca.gymbackend.challenge.dto.ChallengeDetailResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeFinalTestResult;
 import com.ca.gymbackend.challenge.dto.ChallengeInfo;
 import com.ca.gymbackend.challenge.dto.ChallengeKeywordCategory;
+import com.ca.gymbackend.challenge.dto.ChallengeListResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeMyRecordDetailResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeMyRecordsResponse;
+import com.ca.gymbackend.challenge.dto.ChallengeNorigaeAwardInfo;
 import com.ca.gymbackend.challenge.dto.ChallengeProgressResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeRecordInfo;
 import com.ca.gymbackend.challenge.dto.ChallengeTestScore;
 import com.ca.gymbackend.challenge.dto.ChallengeUserInfo;
+import com.ca.gymbackend.challenge.dto.KeywordCategoryTree;
+import com.ca.gymbackend.challenge.dto.KeywordItem;
 import com.ca.gymbackend.challenge.dto.payment.ChallengeRaffleTicket;
 import com.ca.gymbackend.challenge.dto.payment.PaymentReadyResponse;
 import com.ca.gymbackend.challenge.mapper.ChallengeMapper;
@@ -33,6 +37,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -70,23 +75,21 @@ public class ChallengeServiceImpl {
             }
         }
 
-        // 사용자가 선택한 키워드 ID 목록을 기반으로 챌린지 성향 ID를 분류
-        List<Integer> selectedKeywordIds = challengeCreateRequest.getChallengeKeywordIds();
-        Integer predictedTendencyId = classifyTendency(selectedKeywordIds);
+        // ✅ 성향 분류도 keywordIds만 사용
+        Integer predictedTendencyId = classifyTendency(challengeCreateRequest.getKeywordIds());
         challengeCreateRequest.setChallengeTendencyId(predictedTendencyId);
-        System.out.println("DEBUG: 챌린지 성향 ID 자동 분류 완료 - " + predictedTendencyId);
-        
-
-        // 2. 챌린지 정보 DB에 저장
         challengeCreateRequest.setChallengeThumbnailPath(imagePath);
+
+        // 챌린지 저장 (useGeneratedKeys로 challengeId 세팅됨)
         challengeMapper.createChallenge(challengeCreateRequest);
 
-        // 3. 챌린지-키워드 매핑
-        int generatedChallengeId = challengeCreateRequest.getChallengeId();
-        if (selectedKeywordIds != null && !selectedKeywordIds.isEmpty()) {
-            for (Integer keywordId : selectedKeywordIds) {
+        // ✅ 키워드 매핑 저장: keywordIds만 사용
+        int challengeId = challengeCreateRequest.getChallengeId();
+        List<Integer> keywordIds = challengeCreateRequest.getKeywordIds();
+        if (keywordIds != null && !keywordIds.isEmpty()) {
+            for (Integer keywordId : keywordIds) {
                 if (keywordId != null) {
-                    challengeMapper.createChallengeKeyword(generatedChallengeId, keywordId);
+                    challengeMapper.createChallengeKeyword(challengeId, keywordId);
                 }
             }
         }
@@ -191,8 +194,32 @@ public class ChallengeServiceImpl {
     
 
     // 챌린지 전체 목록 조회
-    public List<ChallengeCreateRequest> getAllChallengeList() {
-        return challengeMapper.findAllChallengeList();
+    // public List<ChallengeCreateRequest> getAllChallengeList() {
+    //     List<ChallengeCreateRequest> challenges = challengeMapper.findAllChallengeList();
+
+    //     for (ChallengeCreateRequest challenge : challenges) {
+    //         String keywordNamesString = challenge.getKeywordNames(); 
+    //         if (keywordNamesString != null && !keywordNamesString.isEmpty()) {
+    //             List<String> keywordsList = Arrays.asList(keywordNamesString.split(",")).stream()
+    //                                             .map(String::trim)
+    //                                             .collect(Collectors.toList());
+    //             challenge.setKeywords(keywordsList); 
+    //         } else {
+    //             challenge.setKeywords(new ArrayList<>());
+    //         }
+    //         // 사용 후 임시 필드는 null로 비워줌
+    //         challenge.setKeywordNames(null);
+    //     }
+    //     return challenges;
+    // }
+
+        // 챌린지 전체 목록 조회 (키워드 포함)
+    public List<ChallengeListResponse> getAllChallengesWithKeywords() {
+        List<ChallengeListResponse> challenges = challengeMapper.findAllChallengesWithKeywords();
+        for (ChallengeListResponse challenge : challenges) {
+            processKeywords(challenge);
+        }
+        return challenges;
     }
 
 
@@ -200,68 +227,118 @@ public class ChallengeServiceImpl {
         return challengeMapper.findAllKeywordCategories();
     }
 
-    // 카테고리 ID로 챌린지 목록 조회
-    public List<ChallengeCreateRequest> getChallengesByCategoryId(Integer categoryId) {
-        if (categoryId == null || categoryId <= 0) {
-            throw new IllegalArgumentException("유효하지 않은 카테고리 ID입니다.");
-        }
-        
-        // 1. 카테고리별 챌린지 목록 조회 (키워드 정보는 없는 상태)
-        List<ChallengeCreateRequest> challenges = challengeMapper.findChallengesByCategoryId(categoryId);
-        
-        // 2. 각 챌린지에 대해 키워드 ID 목록을 조회하여 DTO에 설정
-        for (ChallengeCreateRequest challenge : challenges) {
-            List<Integer> keywordIds = challengeMapper.findKeywordIdsByChallengeId(challenge.getChallengeId());
-            challenge.setChallengeKeywordIds(keywordIds);
-        }
-        
-        return challenges;
-    }
+    
+public List<KeywordCategoryTree> getKeywordTree() {
+    List<ChallengeKeywordCategory> cats = challengeMapper.findAllKeywordCategories();
+    List<KeywordItem> all = challengeMapper.findAllKeywords();
 
+    Map<Integer, List<KeywordItem>> byCat = all.stream()
+        .collect(Collectors.groupingBy(KeywordItem::getKeywordCategoryId));
+
+    List<KeywordCategoryTree> tree = new ArrayList<>();
+    for (ChallengeKeywordCategory c : cats) {
+        KeywordCategoryTree node = new KeywordCategoryTree();
+        node.setKeywordCategoryId(c.getKeywordCategoryId());
+        node.setKeywordCategoryName(c.getKeywordCategoryName());
+        node.setKeywords(byCat.getOrDefault(c.getKeywordCategoryId(), Collections.emptyList()));
+        tree.add(node);
+    }
+    return tree;
+}
+
+    // // 카테고리 ID로 챌린지 목록 조회
+    // public List<ChallengeCreateRequest> getChallengesByCategoryId(Integer categoryId) {
+    //     if (categoryId == null || categoryId <= 0) {
+    //         throw new IllegalArgumentException("유효하지 않은 카테고리 ID입니다.");
+    //     }
+        
+    //     // 1. 카테고리별 챌린지 목록 조회 (키워드 정보는 없는 상태)
+    //     List<ChallengeCreateRequest> challenges = challengeMapper.findChallengesByCategoryId(categoryId);
+        
+    //     // 2. 각 챌린지에 대해 키워드 ID 목록을 조회하여 DTO에 설정
+    //     for (ChallengeCreateRequest challenge : challenges) {
+    //         List<Integer> keywordIds = challengeMapper.findKeywordIdsByChallengeId(challenge.getChallengeId());
+    //         challenge.setChallengeKeywordIds(keywordIds);
+    //     }
+        
+    //     return challenges;
+    // }
+
+public List<ChallengeListResponse> getChallengesByCategoryId(int categoryId) {
+    if (categoryId <= 0) throw new IllegalArgumentException("유효하지 않은 카테고리 ID입니다.");
+    List<ChallengeListResponse> list = challengeMapper.findChallengesByCategoryId(categoryId);
+    list.forEach(this::processKeywords);
+    return list;
+}
 
 
 
 
 
     // 챌린지 상세보기
-    public ChallengeDetailResponse getChallengeDetailByChallengeId(int challengeId, Integer userId) {
+    // public ChallengeDetailResponse getChallengeDetailByChallengeId(int challengeId, Integer userId) {
 
-        ChallengeDetailResponse challengeDetailResponse = challengeMapper.findChallengeDetailByChallengeId(challengeId);
+    //     ChallengeDetailResponse challengeDetailResponse = challengeMapper.findChallengeDetailByChallengeId(challengeId);
 
-        if (challengeDetailResponse == null) {
-            // 키워드가 없는 챌린지라면 null 반환 예외처리
-            return null;
+    //     if (challengeDetailResponse == null) {
+    //         // 키워드가 없는 챌린지라면 null 반환 예외처리
+    //         return null;
+    //     }
+
+    //     // 서비스 계층에서 수동으로 데이터 가공 (키워드만
+    //     // challengeKeywordsString (String)을 challengeKeywords List<String>타입으로 변환
+    //     // INNER JOIN을 사용했으므로 이 keywordsString은 보통 NULL이 아니겠지만,
+    //     // 혹시 모를 상황(예: GROUP_CONCAT이 빈 문자열 반환)을 대비하여 NULL/빈 문자열 체크는 유지
+    //     String challengeKeywordsString = challengeDetailResponse.getChallengeKeywordsString();
+    //     if (challengeKeywordsString != null && !challengeKeywordsString.trim().isEmpty()) {
+    //         List<String> keywords = Arrays.asList(challengeKeywordsString.split(","))
+    //                                         .stream()
+    //                                         .map(String::trim)
+    //                                         .collect(Collectors.toList());
+    //         challengeDetailResponse.setChallengeKeywords(keywords);
+    //     } else {
+    //         // INNER JOIN으로 왔는데도 여기가 실행된다면, 논리적으로 키워드는 있었지만 GROUP_CONCAT이 빈 문자열을 반환한 경우입니다.
+    //         challengeDetailResponse.setChallengeKeywords(new ArrayList<>());
+    //     }
+    //     // challengeKeywordsString 필드는 클라이언트에 불필요하므로 null로 설정
+    //     challengeDetailResponse.setChallengeKeywordsString(null);
+
+    //     // challengeStatus는 이미 SQL 쿼리에서 계산되어 들어왔으므로 별도 로직이 필요 없습니다.
+
+    //     // 추가된 로직: userId를 사용하여 참여 여부 확인
+    //     // Mapper에 existsUserChallenge(int userId, int challengeId) 메서드가 필요
+    //     boolean isParticipating = challengeMapper.existsUserChallenge(userId, challengeId) > 0;
+    //     challengeDetailResponse.setUserParticipating(isParticipating);
+
+    //     return challengeDetailResponse;
+    // }
+
+        // 챌린지 상세 조회
+    public ChallengeDetailResponse getChallengeDetailById(int challengeId) {
+        ChallengeDetailResponse challengeDetail = challengeMapper.findChallengeDetailById(challengeId);
+        if (challengeDetail != null) {
+            processKeywords(challengeDetail);
+            // 여기에 userParticipating 등 추가 로직 구현
         }
-
-        // 서비스 계층에서 수동으로 데이터 가공 (키워드만
-        // challengeKeywordsString (String)을 challengeKeywords List<String>타입으로 변환
-        // INNER JOIN을 사용했으므로 이 keywordsString은 보통 NULL이 아니겠지만,
-        // 혹시 모를 상황(예: GROUP_CONCAT이 빈 문자열 반환)을 대비하여 NULL/빈 문자열 체크는 유지
-        String challengeKeywordsString = challengeDetailResponse.getChallengeKeywordsString();
-        if (challengeKeywordsString != null && !challengeKeywordsString.trim().isEmpty()) {
-            List<String> keywords = Arrays.asList(challengeKeywordsString.split(","))
-                                            .stream()
-                                            .map(String::trim)
-                                            .collect(Collectors.toList());
-            challengeDetailResponse.setChallengeKeywords(keywords);
-        } else {
-            // INNER JOIN으로 왔는데도 여기가 실행된다면, 논리적으로 키워드는 있었지만 GROUP_CONCAT이 빈 문자열을 반환한 경우입니다.
-            challengeDetailResponse.setChallengeKeywords(new ArrayList<>());
-        }
-        // challengeKeywordsString 필드는 클라이언트에 불필요하므로 null로 설정
-        challengeDetailResponse.setChallengeKeywordsString(null);
-
-        // challengeStatus는 이미 SQL 쿼리에서 계산되어 들어왔으므로 별도 로직이 필요 없습니다.
-
-        // 추가된 로직: userId를 사용하여 참여 여부 확인
-        // Mapper에 existsUserChallenge(int userId, int challengeId) 메서드가 필요
-        boolean isParticipating = challengeMapper.existsUserChallenge(userId, challengeId) > 0;
-        challengeDetailResponse.setUserParticipating(isParticipating);
-
-        return challengeDetailResponse;
+        return challengeDetail;
     }
 
-
+    // 키워드 문자열을 리스트로 변환하는 공통 로직
+private void processKeywords(Object challengeResponse) {
+    if (challengeResponse instanceof ChallengeListResponse r) {
+        if (r.getKeywordNamesString() != null && !r.getKeywordNamesString().isBlank()) {
+            r.setKeywords(Arrays.stream(r.getKeywordNamesString().split(","))
+                    .map(String::trim).toList());
+        }
+        r.setKeywordNamesString(null);
+    } else if (challengeResponse instanceof ChallengeDetailResponse r) {
+        if (r.getKeywordNamesString() != null && !r.getKeywordNamesString().isBlank()) {
+            r.setKeywords(Arrays.stream(r.getKeywordNamesString().split(","))
+                    .map(String::trim).toList());
+        }
+        r.setKeywordNamesString(null);
+    }
+}
 
 
 
@@ -360,6 +437,10 @@ public class ChallengeServiceImpl {
             return null;
         }
 
+        // **추가된 로직: 획득한 노리개 목록 조회 및 DTO에 설정**
+        List<ChallengeNorigaeAwardInfo> awardedList = challengeMapper.findAwardedNorigaeList(challengeId, userId);
+        response.setAwardedNorigaeList(awardedList);
+
         // 2. 총 달성 일수 계산
         int myAchievement = challengeMapper.countAttendedDays(challengeId, userId);
         response.setMyAchievement(myAchievement);
@@ -424,76 +505,71 @@ public class ChallengeServiceImpl {
 
 
 
-    // 일일 인증 기록을 저장하는 메서드
+    // 일일 인증 기록을 저장하는 메서드 (추첨권 로직 수정)
     @Transactional
-    public void attendChallenge(int userId, int challengeId, MultipartFile photo) {
+    public int attendChallenge(int userId, int challengeId, MultipartFile photo) {
         LocalDate today = LocalDate.now();
 
+        // 새로 획득한 노리개 티어 ID를 저장할 변수
+        int newlyAwardedTierId = 0;
+
         try {
-            // 1. 오늘 날짜로 이미 인증했는지 확인
             int existingRecordCount = challengeMapper.countTodayAttendance(userId, challengeId, today);
             if (existingRecordCount > 0) {
-                System.out.println("DEBUG: 이미 오늘 날짜로 인증했으므로 로직 중단.");
                 throw new IllegalStateException("오늘 이미 인증했습니다.");
             }
 
-            // 2. 사진 파일 업로드
-            String photoUrl = saveAttendancePhoto(photo); 
-            System.out.println("DEBUG: 사진 파일 업로드 성공. URL: " + photoUrl);
-
-            // 3. DB에 출석 기록 저장
+            String photoUrl = saveAttendancePhoto(photo);
             challengeMapper.insertAttendanceRecord(userId, challengeId, today, photoUrl);
-            System.out.println("DEBUG: 출석 기록 DB 저장 성공.");
 
-            // 4. 노리개 지급 (시나리오 1)
-            // 총 달성 일수와 챌린지 총 기간을 가져와 달성률 계산
+            // 노리개 지급 및 추첨권 지급 로직
             int totalAttendedDays = challengeMapper.countAttendedDays(challengeId, userId);
             int totalChallengeDays = challengeMapper.findChallengeTotalDays(challengeId);
+
+        if (totalChallengeDays > 0) {
+            double achievementRate = (double) totalAttendedDays / totalChallengeDays * 100;
+            int intAchievementRate = (int) achievementRate;
             
-            System.out.println("DEBUG: totalAttendedDays = " + totalAttendedDays);
-            System.out.println("DEBUG: totalChallengeDays = " + totalChallengeDays);
+            // Gold (100%)
+            int awardedTier = checkAndAwardNorigaeAndRaffleTicket(userId, challengeId, intAchievementRate, 3, 100);
+            if (awardedTier > 0) newlyAwardedTierId = awardedTier;
 
-            if (totalChallengeDays > 0) {
-                System.out.println("DEBUG: totalChallengeDays > 0 조건 만족.");
-                // 달성률 계산
-                double achievementRate = (double) totalAttendedDays / totalChallengeDays * 100;
-                // 달성률을 정수형으로 변환 (소수점 버림)
-                int intAchievementRate = (int) achievementRate;
-                System.out.println("DEBUG: achievementRate = " + achievementRate + ", intAchievementRate = " + intAchievementRate);
-
-                // 달성률에 맞는 노리개 등급 조회
-                Integer awardedTierId = challengeMapper.findTierIdByAchievementRate(intAchievementRate);
-                System.out.println("DEBUG: awardedTierId = " + awardedTierId); 
-                
-                if (awardedTierId != null) {
-                    System.out.println("DEBUG: awardedTierId가 null이 아님. 노리개 지급 로직 계속 진행.");
-                    // 현재 사용자가 획득한 노리개 등급이 있는지 확인
-                    Integer existingTierId = challengeMapper.findUserNorigaeTierId(userId, challengeId);
-                    System.out.println("DEBUG: 기존 노리개 등급 ID (existingTierId) = " + existingTierId);
-                    
-                    if (existingTierId == null) {
-                        // 획득한 등급이 없다면 새로 지급
-                        challengeMapper.insertUserNorigae(userId, challengeId, awardedTierId);
-                        System.out.println("INFO: 새로운 노리개 등급(" + awardedTierId + ")이 지급되었습니다! (INSERT)");
-                    } else if (awardedTierId > existingTierId) {
-                        // 기존 등급보다 더 높은 등급을 달성했다면 업데이트
-                        challengeMapper.updateUserNorigae(userId, challengeId, awardedTierId);
-                        System.out.println("INFO: 노리개 등급이 " + existingTierId + "에서 " + awardedTierId + "로 업데이트되었습니다! (UPDATE)");
-                    } else {
-                        System.out.println("INFO: 현재 등급보다 높은 등급이 아니므로 변경 없음.");
-                    }
-                } else {
-                    System.out.println("DEBUG: awardedTierId가 null임. 노리개 지급 로직 중단.");
-                }
-            } else {
-                System.out.println("DEBUG: totalChallengeDays가 0 이하임. 노리개 지급 로직 실행 안됨.");
+            // Silver (80%)
+            if (newlyAwardedTierId == 0) { // Gold를 획득하지 않았을 때만 체크
+                awardedTier = checkAndAwardNorigaeAndRaffleTicket(userId, challengeId, intAchievementRate, 2, 80);
+                if (awardedTier > 0) newlyAwardedTierId = awardedTier;
             }
 
+            // Bronze (50%)
+            if (newlyAwardedTierId == 0) { // Silver, Gold를 획득하지 않았을 때만 체크
+                awardedTier = checkAndAwardNorigaeAndRaffleTicket(userId, challengeId, intAchievementRate, 1, 50);
+                if (awardedTier > 0) newlyAwardedTierId = awardedTier;
+            }
+        }
+
         } catch (IOException e) {
-            System.err.println("ERROR: 사진 파일 업로드 실패: " + e.getMessage());
             throw new RuntimeException("사진 파일 업로드 실패", e);
         }
+
+    return newlyAwardedTierId;
+}
+
+
+
+    // 노리개 등급 및 추첨권 지급을 확인하고 처리하는 보조 메서드
+// checkAndAwardNorigaeAndRaffleTicket 메서드 수정
+private int checkAndAwardNorigaeAndRaffleTicket(int userId, int challengeId, int achievementRate, int tierId, int requiredRate) {
+    if (achievementRate >= requiredRate) {
+        if (challengeMapper.hasAwardedNorigae(userId, challengeId, tierId) == 0) {
+            // 아직 해당 등급의 노리개를 획득하지 않았다면 지급
+            challengeMapper.insertUserNorigae(userId, challengeId, tierId);
+            // ... 추첨권 지급 로직 ...
+            System.out.println("INFO: 노리개 등급 " + tierId + " 획득 및 추첨권 1장 지급!");
+            return tierId; // 새로 획득한 티어 ID 반환
+        }
     }
+    return 0; // 획득한 노리개가 없으면 0 반환
+}
 
 
 
@@ -631,81 +707,28 @@ public class ChallengeServiceImpl {
 
 
 
-    // 결제 후 챌린지 참가 로직 (PaymentService에 위임)
+    // 결제 준비 로직
     public PaymentReadyResponse startChallengeWithPayment(int userId, int challengeId) {
-        // 이미 참여한 챌린지인지 확인
-        if (challengeMapper.existsUserChallenge(userId, challengeId) > 0) {
-            throw new IllegalStateException("이미 참여 중인 챌린지입니다.");
-        }
+        // 챌린지 보증금과 제목 조회 (Mybatis XML에 있는 SQL ID 사용)
+        int totalAmount = challengeMapper.findChallengeDepositAmount(challengeId);
+        String challengeTitle = challengeMapper.findChallengeTitleById(challengeId);
 
-        // 결제 준비는 PaymentServiceImpl에 위임
-        return paymentService.kakaoPayReady(challengeId, userId);
+        // PaymentService에 결제 준비 요청 위임
+        return paymentService.kakaoPayReady(
+                Long.valueOf(challengeId),
+                userId,
+                challengeTitle,
+                totalAmount
+        );
+    }
+    
+    // 결제 승인 성공 후 최종 처리 (추첨권 지급 로직 제거)
+    public void finalizeChallengeJoin(int userId, int challengeId) {
+        challengeMapper.increaseChallengeParticipantCountInfo(challengeId);
+        challengeMapper.insertUserChallengeInfo(userId, challengeId);
     }
     
 
 
-    // 결제 승인 성공 후 챌린지 참가 최종 처리
-    // PaymentServiceImpl에서 결제 승인이 완료되면 이 메서드를 호출
-    @Transactional
-    public void finalizeChallengeJoin(int userId, int challengeId, String tid, String pgToken) {
-        // 결제 상태를 확인하는 등의 로직 추가 가능
-        
-        // 1. user_challenge 테이블에 참가 기록 삽입
-        challengeMapper.insertUserChallenge(userId, challengeId);
-        
-        // 2. challenge 테이블 참가자 수 증가
-        challengeMapper.increaseChallengeParticipantCount(challengeId);
-        
-        // 3. raffle_ticket 테이블에 추첨권 지급
-        int amount = challengeMapper.findChallengeDepositAmount(challengeId);
-        int ticketCount = (amount / 1000) * 10; // 1000원당 10장 가정
-        
-        if (ticketCount > 0) {
-            ChallengeRaffleTicket challengeRaffleTicket = new ChallengeRaffleTicket();
-            challengeRaffleTicket.setUserId(userId);
-            challengeRaffleTicket.setChallengeId(challengeId);
-            challengeRaffleTicket.setRaffleTicketCount(ticketCount);
-            challengeRaffleTicket.setRaffleTicketSourceType("PAYMENT");
-            challengeMapper.insertRaffleTicket(challengeRaffleTicket);
-        }
-    }
 
-
-
-    // 챌린지 종료 후 노리개 등급 지급 & 추첨권 추가 지급
-    public void awardNorigaeAndRaffleTicket(int userId, int challengeId) {
-        // 1. 챌린지 달성률 계산 (기존 로직)
-        int totalDays = challengeMapper.findChallengeTotalDays(challengeId);
-        int attendedDays = challengeMapper.countAttendedDays(challengeId, userId);
-        int achievementRate = (int) ((double) attendedDays / totalDays * 100);
-
-        // 2. 달성률에 맞는 노리개 등급 ID 조회 (기존 로직)
-        Integer tierId = challengeMapper.findTierIdByAchievementRate(achievementRate); // ★ tierId 변수 선언 및 할당
-
-        // 3. 노리개 지급 (기존 로직)
-        // ... (이 부분은 이전 코드에 있었지만, 추첨권 로직에만 집중하기 위해 여기서는 생략) ...
-        
-        // 4. 노리개 등급에 따라 추가 추첨권 지급
-        int additionalTickets = 0;
-        
-        // ★ tierId가 null이 아닐 때만 아래 로직을 실행하도록 수정
-        if (tierId != null) {
-             if (tierId == 1) { // Bronze
-                additionalTickets = 5;
-            } else if (tierId == 2) { // Silver
-                additionalTickets = 15;
-            } else if (tierId == 3) { // Gold
-                additionalTickets = 30;
-            }
-        }
-       
-        if (additionalTickets > 0) {
-            ChallengeRaffleTicket challengeRaffleTicket = new ChallengeRaffleTicket();
-            challengeRaffleTicket.setUserId(userId);
-            challengeRaffleTicket.setChallengeId(challengeId);
-            challengeRaffleTicket.setRaffleTicketCount(additionalTickets);
-            challengeRaffleTicket.setRaffleTicketSourceType("NORIGAE_AWARD");
-            challengeMapper.insertRaffleTicket(challengeRaffleTicket);
-        }
-    }
 }

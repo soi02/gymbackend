@@ -201,4 +201,9 @@ public class RoutineService {
         return routineSqlMapper.findWorkoutDatesBetween(userId, startDate, endDate);
     }
 
+    public void updateMemo(int elementId, String memoContent){
+        routineSqlMapper.deleteMemoByElementId(elementId);
+        routineSqlMapper.insertMemo(elementId, memoContent);
+    }
+
 }

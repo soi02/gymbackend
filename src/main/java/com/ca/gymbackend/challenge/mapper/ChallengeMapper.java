@@ -12,11 +12,14 @@ import com.ca.gymbackend.challenge.dto.ChallengeDetailResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeFinalTestResult;
 import com.ca.gymbackend.challenge.dto.ChallengeInfo;
 import com.ca.gymbackend.challenge.dto.ChallengeKeywordCategory;
+import com.ca.gymbackend.challenge.dto.ChallengeListResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeMyRecordsResponse;
+import com.ca.gymbackend.challenge.dto.ChallengeNorigaeAwardInfo;
 import com.ca.gymbackend.challenge.dto.ChallengeProgressResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeRecordInfo;
 import com.ca.gymbackend.challenge.dto.ChallengeTestScore;
 import com.ca.gymbackend.challenge.dto.ChallengeUserInfo;
+import com.ca.gymbackend.challenge.dto.KeywordItem;
 import com.ca.gymbackend.challenge.dto.payment.ChallengePayment;
 import com.ca.gymbackend.challenge.dto.payment.ChallengeRaffleTicket;
 
@@ -44,15 +47,29 @@ public interface ChallengeMapper {
 
     public List<ChallengeKeywordCategory> findAllKeywordCategories();
 
+    // 모든 키워드 일괄 조회 (카테고리 ID 포함)
+    List<KeywordItem> findAllKeywords();
+
+    // (선택) 특정 카테고리의 키워드만 조회하고 싶을 때
+    List<KeywordItem> findKeywordsByCategoryId(@Param("categoryId") int categoryId);
+
 
     // 카테고리별 챌린지 목록 조회
-    public List<ChallengeCreateRequest> findChallengesByCategoryId(@Param("categoryId") Integer categoryId);
+    public List<ChallengeListResponse> findChallengesByCategoryId(@Param("categoryId") Integer categoryId);
+    
 
 
 
     // 챌린지 상세보기
     public ChallengeDetailResponse findChallengeDetailByChallengeId(@Param("challengeId") int challengeId);
     
+
+    public List<ChallengeListResponse> findAllChallengesWithKeywords();
+    public ChallengeDetailResponse findChallengeDetailById(@Param("challengeId") int challengeId);
+
+
+
+
 
 
     // 챌린지 도전 시작
@@ -117,6 +134,7 @@ public interface ChallengeMapper {
     
     // 오늘 날짜로 이미 인증 기록이 있는지 확인
     public int countTodayAttendance(@Param("userId") int userId, @Param("challengeId") int challengeId, @Param("today") LocalDate today);
+    // public int countTodayAttendance(@Param("userId") int userId, @Param("challengeId") int challengeId, @Param("testDate") LocalDate testDate); // 테스트용
 
     // 출석 기록 삽입
     public void insertAttendanceRecord(@Param("userId") int userId, @Param("challengeId") int challengeId, 
@@ -142,6 +160,8 @@ public interface ChallengeMapper {
     public void updateUserNorigae(@Param("userId") int userId, @Param("challengeId") int challengeId, @Param("tierId") int tierId);
 
 
+    // user_challenge_norigae 테이블에서 획득한 모든 노리개 목록을 조회
+    public List<ChallengeNorigaeAwardInfo> findAwardedNorigaeList(@Param("userId") int userId, @Param("challengeId") int challengeId);
 
 
 
@@ -166,17 +186,46 @@ public interface ChallengeMapper {
 
 
 
-    // 결제 관련
-    public Integer findChallengeDepositAmount(@Param("challengeId") int challengeId);
+    // 결제 준비
+    public int findChallengeDepositAmount(@Param("challengeId") int challengeId);
     public String findChallengeTitleById(@Param("challengeId") int challengeId);
-    public void insertPayment(ChallengePayment challengePayment);
-    public void updatePaymentStatus(@Param("tid") String tid, @Param("status") String status, @Param("pgToken") String pgToken);
-    public ChallengePayment findPaymentByTid(@Param("tid") String tid);
+    public void insertPayment(ChallengePayment payment);
+    
+    // 결제 승인
     public String findReadyTidByUserIdAndChallengeId(@Param("userId") int userId, @Param("challengeId") int challengeId);
+    public void updatePaymentStatus(@Param("tid") String tid, @Param("status") String status, @Param("pgToken") String pgToken);
+    
+    // 결제 성공 후 최종 처리
+    public void increaseChallengeParticipantCountInfo(int challengeId);
+    public void insertRaffleTicket(@Param("userId") int userId, @Param("challengeId") int challengeId, @Param("raffleTicketCount") int raffleTicketCount, @Param("raffleTicketSourceType") String raffleTicketSourceType);
+    // void insertUserChallengeInfo(@Param("userId") int userId, @Param("challengeId") int challengeId);
+
     
     // 추첨권 관련
-    public void insertRaffleTicket(ChallengeRaffleTicket challengeRaffleTicket);
+    // public void insertRaffleTicket(ChallengeRaffleTicket challengeRaffleTicket);
 
+    public String findSuccessTidByUserIdAndChallengeId(@Param("userId") int userId, @Param("challengeId") int challengeId);
+
+
+
+    // 새롭게 추가된 추첨권 관련 메서드
+    public Integer findUserRaffleTicketCount(int userId); // 사용자의 현재 추첨권 수 조회
+    public void insertUserRaffleTicket(@Param("userId") int userId, @Param("count") int count); // 추첨권 정보가 없을 경우 새로 삽입
+    public void updateUserRaffleTicket(@Param("userId") int userId, @Param("count") int count); // 추첨권 수 업데이트
+    
+    // 결제 후 챌린지 시작 시 사용자 챌린지 정보 삽입
+    public void insertUserChallengeInfo(@Param("userId") int userId, @Param("challengeId") int challengeId);
+
+    // 노리개 획득 여부를 확인하는 새로운 메서드
+    public int hasAwardedNorigae(@Param("userId") int userId, @Param("challengeId") int challengeId, @Param("tierId") int tierId);
+
+
+
+
+
+    // test
+    public void deleteAttendanceRecords(@Param("userId") int userId, @Param("challengeId") int challengeId);
+    public void deleteUserChallengeNorigae(@Param("userId") int userId, @Param("challengeId") int challengeId);
 
 }
 

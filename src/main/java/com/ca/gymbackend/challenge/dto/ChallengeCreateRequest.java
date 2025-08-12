@@ -23,20 +23,12 @@ public class ChallengeCreateRequest {
     private LocalDate challengeRecruitStartDate; // 모집 기간
     private LocalDate challengeRecruitEndDate; // 모집 기간
     private int challengeDurationDays; // 진행 기간
-    private List<Integer> challengeKeywordIds;
 
-    // 키워드 리스트 필드 추가
-    // private List<String> challengeKeywordNameList;
-
-
-   
-    private MultipartFile challengeThumbnailImage;
-
-   
-    private String challengeThumbnailPath;
     
+    private MultipartFile challengeThumbnailImage; // 파일 자체
+    private String challengeThumbnailPath; // 파일 업로드
+    private Integer challengeTendencyId; // 성향
+    private Integer challengeDepositAmount; // 보증금
 
-    private Integer challengeTendencyId;
-
-    private int challengeDepositAmount;
+    private List<Integer> keywordIds; // 키워드 ID 목록
 }

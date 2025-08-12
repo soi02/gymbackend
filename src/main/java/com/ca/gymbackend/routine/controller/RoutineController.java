@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ca.gymbackend.routine.request.ActualWorkoutSaveRequest;
+import com.ca.gymbackend.routine.request.MemoUpdateRequest;
 import com.ca.gymbackend.routine.request.RoutineSaveRequest;
 import com.ca.gymbackend.routine.response.ActualWorkoutResultResponse;
 import com.ca.gymbackend.routine.response.CalendarSummaryResponse;
@@ -126,7 +127,7 @@ public class RoutineController {
         @RequestParam("endDate") String endDate
     ) {
         System.out.println("🕒 서버 현재 시간: " + LocalDateTime.now());
-System.out.println("🕒 시스템 타임존: " + ZoneId.systemDefault());
+        System.out.println("🕒 시스템 타임존: " + ZoneId.systemDefault());
 
         try {
             List<String> result = routineService.getWorkoutDatesBetween(userId, startDate, endDate);
@@ -140,6 +141,13 @@ System.out.println("🕒 시스템 타임존: " + ZoneId.systemDefault());
         }
     }
 
+    @PostMapping("/updateMemo")
+    public ResponseEntity<?> saveRoutine(@RequestBody MemoUpdateRequest request) {
+    
+        routineService.updateMemo(request.getElementId(), request.getMemoContent());
+        return ResponseEntity.ok().build();
 
+
+    }
 
 }
