@@ -36,7 +36,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        // ✅ 순수 웹소켓으로 변경: .withSockJS()를 제거합니다.
+        // ✅ 순수 웹소켓으로 변경: .withSockJS()를 제거합니다."https://gymmadang.null-pointer-exception.com"
         registry.addEndpoint("/ws/chat")
                 .setAllowedOriginPatterns("http://localhost:5173");
 
