@@ -77,6 +77,11 @@ public class MarketController {
         return marketService.selectMarketCommentOnArticle(articleId);
     }
     
+    @GetMapping("/selectCountMarketCommentOnArticle") // ok
+    public Integer selectCountMarketCommentOnArticle(@RequestParam("articleId") Integer articleId) {
+        return marketService.selectCountMarketCommentOnArticle(articleId);
+    }
+    
     @PostMapping("/updateMarketCommentOnArticle") // ok
     public void updateMarketCommentOnArticle(@RequestBody MarketCommentOnArticleDto marketCommentOnArticleDto) {
         marketService.updateMarketCommentOnArticle(marketCommentOnArticleDto);
@@ -97,9 +102,19 @@ public class MarketController {
         return marketService.selectMarketProductInterestedLogWhenUserInfo(marketUserId);
     }
     
-    @GetMapping("/selectMarketProductInterestedLogWhenArticleInfo") // ok ( 개수 카운트 시 사용될 예정 -- 탐낸 사용자 목록 비공개라 크게 필요는 없음)
+    @GetMapping("/selectCountMarketProductInterestedLogWhenUserInfo") // ok
+    public Integer selectCountMarketProductInterestedLogWhenUserInfo(@RequestParam("marketUserId") Integer marketUserId) {
+        return marketService.selectCountMarketProductInterestedLogWhenUserInfo(marketUserId);
+    }
+    
+    @GetMapping("/selectMarketProductInterestedLogWhenArticleInfo") // ok ( 탐낸 사용자 목록 비공개라 크게 필요는 없음)
     public List<Map<String, Object>> selectMarketProductInterestedLogWhenArticleInfo(@RequestParam("specificArticleId") Integer specificArticleId) {
         return marketService.selectMarketProductInterestedLogWhenArticleInfo(specificArticleId);
+    }
+    
+    @GetMapping("/selectCountMarketProductInterestedLogWhenArticleInfo") // ok
+    public Integer selectCountMarketProductInterestedLogWhenArticleInfo(@RequestParam("specificArticleId") Integer specificArticleId) {
+        return marketService.selectCountMarketProductInterestedLogWhenArticleInfo(specificArticleId);
     }
     
     @GetMapping("/selectMarketProductInterestedLogWhenUserAndArticleInfo") // ok + Front OK + View Reload OK
@@ -122,9 +137,19 @@ public class MarketController {
         return marketService.selectMarketDealedLogWhenBuyer(buyerId);
     }
     
+    @GetMapping("/selectCountMarketDealedLogWhenBuyer") // ok
+    public Integer selectCountMarketDealedLogWhenBuyer(@RequestParam("buyerId") Integer buyerId) {
+        return marketService.selectCountMarketDealedLogWhenBuyer(buyerId);
+    }
+    
     @GetMapping("/selectMarketDealedLogWhenSeller") // ok + Front OK
     public List<Map<String, Object>> selectMarketDealedLogWhenSeller(@RequestParam("sellerId") Integer sellerId) {
         return marketService.selectMarketDealedLogWhenSeller(sellerId);
+    }
+    
+    @GetMapping("/selectCountMarketDealedLogWhenSeller") // ok
+    public Integer selectCountMarketDealedLogWhenSeller(@RequestParam("sellerId") Integer sellerId) {
+        return marketService.selectCountMarketDealedLogWhenSeller(sellerId);
     }
     
     @PostMapping("/insertMarketReviewToUser") // ok

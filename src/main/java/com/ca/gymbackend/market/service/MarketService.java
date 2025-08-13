@@ -131,6 +131,9 @@ public class MarketService {
         
         return mapListSelectMarketCommentOnArticle;
     }
+    public Integer selectCountMarketCommentOnArticle(Integer articleId) {
+        return marketMapper.selectCountMarketCommentOnArticle(articleId);
+    }
     public void updateMarketCommentOnArticle(MarketCommentOnArticleDto marketCommentOnArticleDto) {
         marketMapper.updateMarketCommentOnArticle(marketCommentOnArticleDto);
     }
@@ -178,6 +181,9 @@ public class MarketService {
         
         return mapListSelectMarketProductInterestedLogWhenUserInfo;
     }
+    public Integer selectCountMarketProductInterestedLogWhenUserInfo(Integer marketUserId) {
+        return marketMapper.selectCountMarketProductInterestedLogWhenUserInfo(marketUserId);
+    }
     public List<Map<String, Object>> selectMarketProductInterestedLogWhenArticleInfo(Integer specificArticleId) {
         List<Map<String, Object>> mapListSelectMarketProductInterestedLogWhenArticleInfo = new ArrayList<>();
         List<MarketProductInterestedLogDto> listMarketProductInterestedLogDto = marketMapper.selectMarketProductInterestedLogWhenArticleInfo(specificArticleId);
@@ -214,6 +220,9 @@ public class MarketService {
         }
         
         return mapListSelectMarketProductInterestedLogWhenArticleInfo;
+    }
+    public Integer selectCountMarketProductInterestedLogWhenArticleInfo(Integer specificArticleId) {
+        return marketMapper.selectCountMarketProductInterestedLogWhenArticleInfo(specificArticleId);
     }
     public Map<String, Object> selectMarketProductInterestedLogWhenUserAndArticleInfo(Integer marketUserId, Integer specificArticleId) {
         Map<String, Object> mapSelectMarketProductInterestedLogWhenUserAndArticleInfo = new HashMap<>();
@@ -275,6 +284,9 @@ public class MarketService {
         
         return mapListSelectMarketDealedLogWhenBuyer;
     }
+    public Integer selectCountMarketDealedLogWhenBuyer(Integer buyerId) {
+        return marketMapper.selectCountMarketDealedLogWhenBuyer(buyerId);
+    }
     public List<Map<String, Object>> selectMarketDealedLogWhenSeller(Integer sellerId) {
         List<Map<String, Object>> mapListSelectMarketDealedLogWhenSeller = new ArrayList<>();
         List<MarketDealedLogDto> listMarketDealedLogDto = marketMapper.selectMarketDealedLogWhenSeller(sellerId);
@@ -311,6 +323,9 @@ public class MarketService {
         }
         
         return mapListSelectMarketDealedLogWhenSeller;
+    }
+    public Integer selectCountMarketDealedLogWhenSeller(Integer sellerId) {
+        return marketMapper.selectCountMarketDealedLogWhenSeller(sellerId);
     }
     
     public void insertMarketReviewToUser(MarketReviewOnUserDto marketReviewOnUserDto) {
