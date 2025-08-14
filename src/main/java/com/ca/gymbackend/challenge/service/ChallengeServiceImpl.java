@@ -314,13 +314,27 @@ public List<ChallengeListResponse> getChallengesByCategoryId(int categoryId) {
     // }
 
         // 챌린지 상세 조회
-    public ChallengeDetailResponse getChallengeDetailById(int challengeId) {
+    public ChallengeDetailResponse getChallengeDetailById(int challengeId, Integer userId) {
         ChallengeDetailResponse challengeDetail = challengeMapper.findChallengeDetailById(challengeId);
+        
         if (challengeDetail != null) {
+            // 챌린지 키워드 파싱 로직
             processKeywords(challengeDetail);
-            // 여기에 userParticipating 등 추가 로직 구현
+            
+            // 🌟 추가된 로직 시작 🌟
+            // userId가 있을 경우에만 참가 여부 확인
+        if (userId != null) {
+            // int를 반환하는 메서드를 호출하고, 반환값이 0보다 큰지 확인
+            int participationCount = challengeMapper.existsUserChallenge(userId, challengeId);
+            challengeDetail.setUserParticipating(participationCount > 0);
+        } else {
+            // userId가 없으면(로그인하지 않은 경우), 항상 false로 설정
+            challengeDetail.setUserParticipating(false);
         }
-        return challengeDetail;
+        // 🌟 수정된 로직 끝 🌟
+    }
+    
+    return challengeDetail;
     }
 
     // 키워드 문자열을 리스트로 변환하는 공통 로직

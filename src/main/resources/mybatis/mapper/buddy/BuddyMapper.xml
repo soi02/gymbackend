@@ -67,7 +67,7 @@
     </update>
 
     <select id="selectMatchingNotifications" resultType="map">
-        SELECT 
+        SELECT
             m.id AS matching_id,
             m.send_buddy_id,
             m.receiver_buddy_id,
@@ -79,12 +79,12 @@
             su.profile_image AS sender_image,
             ru.profile_image AS receiver_image
         FROM matching m
-        JOIN buddy sb ON m.send_buddy_id = sb.id
-        JOIN buddy rb ON m.receiver_buddy_id = rb.id
-        JOIN user su ON sb.user_id = su.id
-        JOIN user ru ON rb.user_id = ru.id
+        LEFT JOIN user su ON m.send_buddy_id = su.id
+        LEFT JOIN user ru ON m.receiver_buddy_id = ru.id
+        LEFT JOIN buddy sb ON m.send_buddy_id = sb.user_id
+        LEFT JOIN buddy rb ON m.receiver_buddy_id = rb.user_id
         WHERE m.send_buddy_id = #{buddyId} OR m.receiver_buddy_id = #{buddyId}
-        ORDER BY m.id DESC
+        GROUP BY m.id ORDER BY m.id DESC
     </select>
 
     <!-- 채팅룸 나열 -->

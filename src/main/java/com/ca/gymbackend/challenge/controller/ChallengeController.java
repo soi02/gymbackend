@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -142,9 +143,14 @@ public ResponseEntity<List<KeywordCategoryTree>> getKeywordTree() {
     
     // 챌린지 상세 API
     @GetMapping("/detail")
-    public ResponseEntity<ChallengeDetailResponse> getChallengeDetail(@RequestParam("challengeId") int challengeId) {
-        System.out.println("챌린지 상세 조회 요청 challengeId: " + challengeId);
-        ChallengeDetailResponse detail = challengeService.getChallengeDetailById(challengeId);
+    public ResponseEntity<ChallengeDetailResponse> getChallengeDetail(
+            @RequestParam("challengeId") int challengeId,
+            @RequestParam(value = "userId", required = false) Integer userId) { // 🌟 userId 쿼리 파라미터 추가
+        
+        System.out.println("챌린지 상세 조회 요청 challengeId: " + challengeId + ", userId: " + userId);
+        
+        ChallengeDetailResponse detail = challengeService.getChallengeDetailById(challengeId, userId); // 🌟 userId 전달
+        
         if (detail == null) {
             return ResponseEntity.notFound().build();
         }
@@ -334,7 +340,7 @@ public ResponseEntity<List<KeywordCategoryTree>> getKeywordTree() {
     }
 
     // 결제 승인 API
-    @GetMapping("/join/payment/success")
+    @RequestMapping(value = "/join/payment/success", method = {RequestMethod.GET, RequestMethod.POST})
     public ResponseEntity<Void> kakaoPaySuccess(@RequestParam("pg_token") String pgToken,
                                                   @RequestParam("challengeId") int challengeId,
                                                   @RequestParam("userId") int userId) {

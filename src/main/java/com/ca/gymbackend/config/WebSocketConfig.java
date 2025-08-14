@@ -39,10 +39,12 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         // ✅ 순수 웹소켓으로 변경: .withSockJS()를 제거합니다.
         registry.addEndpoint("/ws/chat")
                 .setAllowedOriginPatterns("http://localhost:5173");
+                // .setAllowedOriginPatterns("http://localhost:5173","https://gymmadang.null-pointer-exception.com");
 
         // ✅ 순수 웹소켓으로 변경: .withSockJS()를 제거합니다.
         registry.addEndpoint("/ws/group-chat")
                 .setAllowedOriginPatterns("http://localhost:5173");
+                // .setAllowedOriginPatterns("http://localhost:5173","https://gymmadang.null-pointer-exception.com");
     }
 
     @Override

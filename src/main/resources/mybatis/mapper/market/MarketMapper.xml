@@ -54,6 +54,12 @@
     
     </select>
     
+    <select id = "selectCountMarketCommentOnArticle" resultType = "int">
+    
+        SELECT COUNT(*) FROM market_comment_on_article WHERE article_id = #{articleId};
+    
+    </select>
+    
     <update id = "updateMarketCommentOnArticle">
     
         UPDATE market_comment_on_article mc_oa SET content = 'Bird My Dragon', updated_at = NOW()
@@ -80,9 +86,21 @@
     
     </select>
     
+    <select id = "selectCountMarketProductInterestedLogWhenUserInfo" resultType = "int">
+    
+        SELECT COUNT(*) FROM market_product_interested_log WHERE market_user_id = #{marketUserId};
+    
+    </select>
+    
     <select id = "selectMarketProductInterestedLogWhenArticleInfo" resultType = "com.ca.gymbackend.market.dto.MarketProductInterestedLogDto">
     
         SELECT * FROM market_product_interested_log WHERE specific_article_id = #{specificArticleId};
+    
+    </select>
+    
+    <select id = "selectCountMarketProductInterestedLogWhenArticleInfo" resultType = "int">
+    
+        SELECT COUNT(*) FROM market_product_interested_log WHERE specific_article_id = #{specificArticleId};
     
     </select>
     
@@ -127,9 +145,21 @@
     
     </select>
     
+    <select id = "selectCountMarketDealedLogWhenBuyer" resultType = "int"> <!-- 테스트용 -->
+    
+        SELECT COUNT(*) FROM market_dealed_log WHERE buyer_id = #{buyerId};
+    
+    </select>
+    
     <select id = "selectMarketDealedLogWhenSeller" resultType = "com.ca.gymbackend.market.dto.MarketDealedLogDto"> <!-- 테스트용 -->
     
         SELECT * FROM market_dealed_log WHERE seller_id = #{sellerId};
+    
+    </select>
+    
+    <select id = "selectCountMarketDealedLogWhenSeller" resultType = "int"> <!-- 테스트용 -->
+    
+        SELECT COUNT(*) FROM market_dealed_log WHERE seller_id = #{sellerId};
     
     </select>
     

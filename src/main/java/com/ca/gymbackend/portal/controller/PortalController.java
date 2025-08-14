@@ -29,27 +29,6 @@ public class PortalController {
     private PortalService portalService;
     @Autowired
     private JwtUtil jwtUtil;
-
-    // @PostMapping("/register")
-    // public ResponseEntity<?> register(@RequestBody UserRequest userRequest) {
-    // UserDto userDto = new UserDto();
-    // userDto.setName(userRequest.getName());
-    // userDto.setGender(userRequest.getGender());
-    // userDto.setAccountName(userRequest.getAccountName());
-    // userDto.setPassword(userRequest.getPassword());
-    // userDto.setBirth(userRequest.getBirth());
-    // userDto.setAddress(userRequest.getAddress());
-    // userDto.setPhone(userRequest.getPhone());
-    // userDto.setProfileImage(userRequest.getProfileImage());
-    // userDto.setHeight(userRequest.getHeight());
-    // userDto.setWeight(userRequest.getWeight());
-    // userDto.setMuscleMass(userRequest.getMuscleMass());
-    // userDto.setBuddy(userRequest.isBuddy());
-
-    // portalService.register(userDto);
-
-    // return ResponseEntity.ok(new ApiResponse(true, "회원가입 성공"));
-    // }
     @PostMapping("/register")
     public ResponseEntity<?> register(
             @ModelAttribute UserRequest userRequest, // JSON 대신 폼 데이터 바인딩
