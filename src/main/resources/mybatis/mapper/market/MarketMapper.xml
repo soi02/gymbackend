@@ -62,7 +62,7 @@
     
     <update id = "updateMarketCommentOnArticle">
     
-        UPDATE market_comment_on_article mc_oa SET content = 'Bird My Dragon', updated_at = NOW()
+        UPDATE market_comment_on_article mc_oa SET content = #{content}, updated_at = NOW()
         WHERE id = #{id};
     
     </update>
