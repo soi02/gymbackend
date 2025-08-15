@@ -82,6 +82,11 @@ public class MarketController {
         return marketService.selectCountMarketCommentOnArticle(articleId);
     }
     
+    @GetMapping("/selectSpecificMarketCommentOnArticle") // ok
+    public Map<String, Object> selectSpecificMarketCommentOnArticle(@RequestParam("id") Integer id) {
+        return marketService.selectSpecificMarketCommentOnArticle(id);
+    }
+    
     @PostMapping("/updateMarketCommentOnArticle") // ok
     public void updateMarketCommentOnArticle(@RequestBody MarketCommentOnArticleDto marketCommentOnArticleDto) {
         marketService.updateMarketCommentOnArticle(marketCommentOnArticleDto);

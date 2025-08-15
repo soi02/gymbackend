@@ -134,6 +134,19 @@ public class MarketService {
     public Integer selectCountMarketCommentOnArticle(Integer articleId) {
         return marketMapper.selectCountMarketCommentOnArticle(articleId);
     }
+    public Map<String, Object> selectSpecificMarketCommentOnArticle(Integer id) {
+        Map<String, Object> mapSelectSpecificMarketCommentOnArticle = new HashMap<>();
+        MarketCommentOnArticleDto marketCommentOnArticleDto = marketMapper.selectSpecificMarketCommentOnArticle(id);
+        MarketUserInfoDto marketUserInfoDto = new MarketUserInfoDto();
+        if (marketCommentOnArticleDto != null) {
+            marketUserInfoDto = marketMapper.selectMarketUserInfo(marketCommentOnArticleDto.getMarketUserId());
+        } else {
+            marketCommentOnArticleDto = new MarketCommentOnArticleDto();
+        }
+        mapSelectSpecificMarketCommentOnArticle.put("marketCommentOnArticleDto", marketCommentOnArticleDto);
+        mapSelectSpecificMarketCommentOnArticle.put("marketUserInfoDto", marketUserInfoDto);
+        return mapSelectSpecificMarketCommentOnArticle;
+    }
     public void updateMarketCommentOnArticle(MarketCommentOnArticleDto marketCommentOnArticleDto) {
         marketMapper.updateMarketCommentOnArticle(marketCommentOnArticleDto);
     }

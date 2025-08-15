@@ -29,6 +29,7 @@ public interface MarketMapper {
     public void insertMarketCommentOnArticle(MarketCommentOnArticleDto marketCommentOnArticleDto);
     public List<MarketCommentOnArticleDto> selectMarketCommentOnArticle(@Param("articleId") Integer articleId);
     public Integer selectCountMarketCommentOnArticle(@Param("articleId") Integer articleId);
+    public MarketCommentOnArticleDto selectSpecificMarketCommentOnArticle(@Param("id") Integer id);
     public void updateMarketCommentOnArticle(MarketCommentOnArticleDto marketCommentOnArticleDto);
     public void deleteMarketCommentOnArticle(@Param("id") Integer id);
     

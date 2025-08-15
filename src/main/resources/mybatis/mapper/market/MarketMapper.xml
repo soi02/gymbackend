@@ -60,6 +60,12 @@
     
     </select>
     
+    <select id = "selectSpecificMarketCommentOnArticle" resultType = "com.ca.gymbackend.market.dto.MarketCommentOnArticleDto">
+    
+        SELECT * FROM market_comment_on_article WHERE id = #{id};
+        
+    </select>
+    
     <update id = "updateMarketCommentOnArticle">
     
         UPDATE market_comment_on_article mc_oa SET content = #{content}, updated_at = NOW()
