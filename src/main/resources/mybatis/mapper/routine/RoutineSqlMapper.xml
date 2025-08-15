@@ -143,20 +143,26 @@
 </select>
 
 <select id="findWorkoutResultByWorkoutId" resultType="com.ca.gymbackend.routine.response.ActualWorkoutResultResponse">
-    SELECT 
-        aw.created_at,
-        awd.detail_id,
-        we.element_name,
-        aws.set_id,
-        aws.kg,
-        aws.reps,
-        we.element_picture
-    FROM actual_workout aw
-    LEFT JOIN actual_workout_detail awd ON aw.workout_id = awd.workout_id
-    LEFT JOIN actual_workout_set aws ON awd.detail_id = aws.detail_id
-    LEFT JOIN workout_element we ON we.element_id = awd.element_id
-    WHERE aw.workout_id = #{workoutId}
-    ORDER BY awd.detail_id, aws.set_id
+SELECT
+  aw.created_at,
+  awd.detail_id,
+  we.element_name              AS elementName,
+  aws.set_id,
+  aws.kg,
+  aws.reps,
+  we.element_picture           AS elementPicture,
+  COALESCE(wl.calories, 0)     AS calories,
+  COALESCE(wl.minutes, 0)      AS minutes,
+  wl.start_time                AS startTime,
+  wl.end_time                  AS endTime
+FROM actual_workout aw
+LEFT JOIN actual_workout_detail awd ON awd.workout_id = aw.workout_id
+LEFT JOIN actual_workout_set    aws ON aws.detail_id   = awd.detail_id
+JOIN       workout_element      we  ON we.element_id   = awd.element_id
+LEFT JOIN  workout_log          wl  ON wl.workout_id   = aw.workout_id   -- ✅ 조인 추가
+WHERE aw.workout_id = #{workoutId}
+ORDER BY awd.detail_id, aws.set_id;
+
 </select>
 
 <select id="findWorkoutResultByDate" resultType="com.ca.gymbackend.routine.response.CalendarSummaryResponse">
