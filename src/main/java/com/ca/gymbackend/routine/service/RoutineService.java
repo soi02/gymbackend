@@ -1,11 +1,14 @@
 package com.ca.gymbackend.routine.service;
 
+import java.io.File;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.ca.gymbackend.routine.dto.RoutineSetDto;
 import com.ca.gymbackend.routine.dto.WorkoutLogDto;
@@ -35,6 +38,8 @@ public class RoutineService {
     @Autowired
     private RoutineSqlMapper routineSqlMapper;
 
+    @Autowired @Qualifier("fileRootPath")
+    private String fileRootPath; 
     
     public List<EveryWorkoutList> getArticleList() {
         return routineSqlMapper.findAllWorkout();
@@ -215,6 +220,56 @@ public class RoutineService {
     public void updateMemo(int elementId, String memoContent){
         routineSqlMapper.deleteMemoByElementId(elementId);
         routineSqlMapper.insertMemo(elementId, memoContent);
+    }
+
+
+    public WorkoutLogDto getWorkoutLogByWorkoutId(int workoutId) {
+        return routineSqlMapper.findWorkoutLogByWorkoutId(workoutId);
+    }
+
+    public WorkoutLogDto upsertWorkoutLogExtras(int workoutId, String memo, MultipartFile file) {
+        String pictureUrl = null;
+        try {
+            if (file != null && !file.isEmpty()) {
+                pictureUrl = saveUpload(file.getBytes(), file.getOriginalFilename()); // ← 상대경로 반환
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("이미지 업로드 실패", e);
+        }
+
+        // 없으면 INSERT, 있으면 UPDATE (보통 saveActualWorkout 때 이미 한 줄 생김)
+        WorkoutLogDto exists = routineSqlMapper.findWorkoutLogByWorkoutId(workoutId);
+        if (exists == null) {
+            routineSqlMapper.insertEmptyWorkoutLog(workoutId); // created_at, workout_id만 우선 생성
+        }
+
+        routineSqlMapper.updateWorkoutLogExtras(workoutId, memo, pictureUrl);
+        return routineSqlMapper.findWorkoutLogByWorkoutId(workoutId);
+    }
+
+    // 친구 saveImage와 동일 로직: 날짜 폴더 + uuid_시각.확장자
+    private String saveUpload(byte[] buffer, String originalFilename) {
+        String uuid = java.util.UUID.randomUUID().toString();
+        long now = System.currentTimeMillis();
+        String ext = originalFilename.substring(originalFilename.lastIndexOf("."));
+        String filename = uuid + "_" + now + ext;
+
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy/MM/dd/");
+        String todayPath = sdf.format(new java.sql.Date(now));   // ex) 2025/08/16/
+
+        File dir = new File(fileRootPath + todayPath);
+        if (!dir.exists()) dir.mkdirs();
+
+        try (var in = new java.io.ByteArrayInputStream(buffer)) {
+            net.coobird.thumbnailator.Thumbnails.of(in)
+                    .scale(1.0) // 원본 그대로 저장
+                    .toFile(fileRootPath + todayPath + filename);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        // ⚠️ DB엔 상대경로만 저장 (정적 리소스 핸들러가 /uploadFiles/** 로 매핑)
+        return todayPath + filename;
     }
 
 }

@@ -41,4 +41,11 @@ public interface RoutineSqlMapper {
     public List<String> findWorkoutDatesBetween(@Param("userId") int userId, @Param("startDate") String startDate, @Param("endDate") String endDate);
     public void deleteMemoByElementId(@Param("elementId") int elementId);
     public void insertMemo(@Param("elementId") int elementId, @Param("memoContent") String memoContent);
+    public WorkoutLogDto findWorkoutLogByWorkoutId(int workoutId);
+
+    public void updateWorkoutLogExtras(@Param("workoutId") int workoutId,
+                                @Param("memo") String memo,
+                                @Param("pictureUrl") String pictureUrl);
+
+    public void insertEmptyWorkoutLog(@Param("workoutId") int workoutId);
 }

@@ -17,7 +17,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.MediaType;   
 
+
+import com.ca.gymbackend.routine.dto.WorkoutLogDto;
 import com.ca.gymbackend.routine.request.ActualWorkoutSaveRequest;
 import com.ca.gymbackend.routine.request.MemoUpdateRequest;
 import com.ca.gymbackend.routine.request.RoutineSaveRequest;
@@ -153,6 +157,25 @@ public class RoutineController {
     }
 
 
+    // 사진/메모 upsert (workout_log 기준 업데이트)
+    @PostMapping(
+    value = "/workoutLog/{workoutId}/extras",
+    consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )    public ResponseEntity<WorkoutLogDto> upsertWorkoutLogExtras(
+            @PathVariable("workoutId") int workoutId,
+            @RequestParam(value = "memo", required = false) String memo,
+            @RequestParam(value = "file", required = false) MultipartFile file
+    ) {
+            System.out.println("memo=" + memo + ", file=" + (file != null ? file.getOriginalFilename() : "null"));
+
+        return ResponseEntity.ok(routineService.upsertWorkoutLogExtras(workoutId, memo, file));
+    }
+
+    // 조회(업로드 후 갱신용)
+    @GetMapping("/workoutLog/{workoutId}")
+    public ResponseEntity<WorkoutLogDto> getWorkoutLog(@PathVariable int workoutId) {
+        return ResponseEntity.ok(routineService.getWorkoutLogByWorkoutId(workoutId));
+    }
 
     // @GetMapping("/search")
     // public ResponseEntity<List<VideoDto>> search(@RequestParam("q") String q) {

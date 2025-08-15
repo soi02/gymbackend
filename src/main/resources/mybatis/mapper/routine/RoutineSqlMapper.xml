@@ -194,6 +194,30 @@ ORDER BY awd.detail_id, aws.set_id;
       AND DATE(wl.created_at) BETWEEN #{startDate} AND #{endDate}
 </select>
 
+<!-- RoutineSqlMapper.xml -->
+
+<select id="findWorkoutLogByWorkoutId" resultType="com.ca.gymbackend.routine.dto.WorkoutLogDto">
+  SELECT log_id, user_id, workout_id, date, hours, minutes, calories,
+         start_time, end_time, memo, picture_url, created_at
+  FROM workout_log
+  WHERE workout_id = #{workoutId}
+  LIMIT 1
+</select>
+
+<update id="updateWorkoutLogExtras">
+  UPDATE workout_log
+  <set>
+    <if test="memo != null"> memo = #{memo}, </if>
+    <if test="pictureUrl != null"> picture_url = #{pictureUrl}, </if>
+    created_at = created_at
+  </set>
+  WHERE workout_id = #{workoutId}
+</update>
+
+<insert id="insertEmptyWorkoutLog">
+  INSERT INTO workout_log (workout_id, created_at)
+  VALUES (#{workoutId}, NOW())
+</insert>
 
 
 
