@@ -1,12 +1,23 @@
 package com.ca.gymbackend.market.service;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.ca.gymbackend.market.dto.MarketArticleDto;
 import com.ca.gymbackend.market.dto.MarketCommentOnArticleDto;
@@ -16,18 +27,61 @@ import com.ca.gymbackend.market.dto.MarketReviewOnUserDto;
 import com.ca.gymbackend.market.dto.MarketUserInfoDto;
 import com.ca.gymbackend.market.mapper.MarketMapper;
 
+import net.coobird.thumbnailator.Thumbnails;
+
 @Service
 public class MarketService {
     
     @Autowired
     private MarketMapper marketMapper;
+    
+    @Autowired
+    @Qualifier("fileRootPath")
+    private String fileRootPath;
 
     public MarketUserInfoDto selectMarketUserInfo(Integer userId) {
         return marketMapper.selectMarketUserInfo(userId);
     }
     
-    public void insertMarketArticle(MarketArticleDto marketArticleDto) {
+    public void insertMarketArticleIncludesImage(MarketArticleDto marketArticleDto, MultipartFile multipartFile) throws IOException {
+        
+        if (multipartFile != null && !multipartFile.isEmpty()) {
+            String stringImageLink = this.saveArticleImage(multipartFile);
+            marketArticleDto.setImageLink(stringImageLink);
+        } else {
+            marketArticleDto.setImageLink(null);
+        }
+        
         marketMapper.insertMarketArticle(marketArticleDto);
+    }
+    private String saveArticleImage(MultipartFile multipartFile
+    // , byte[] buffer
+    ) throws IOException {
+        String uuid = UUID.randomUUID().toString();
+        long currentTime = System.currentTimeMillis();
+        String filename = uuid + "_" + currentTime;
+        String originalFilename = multipartFile.getOriginalFilename();
+        String ext = originalFilename.substring(originalFilename.lastIndexOf("."));
+        filename += ext;
+        
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd/");
+        String todayPath = simpleDateFormat.format(new Date(currentTime));
+        Path dirPath = Paths.get(fileRootPath, "marketArticleImages", todayPath);
+        Files.createDirectories(dirPath);
+        
+        // ByteArrayInputStream inputStream = new ByteArrayInputStream(buffer);
+        Path filePath = dirPath.resolve(filename);
+        
+        try (InputStream inputStream = multipartFile.getInputStream()) {
+            Thumbnails.of(inputStream)
+            .scale(1.0)
+            .toFile(filePath.toFile()); 
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+        
+        return "/marketArticleImages/" + todayPath + filename;
     }
     public List<Map<String, Object>> selectMarketArticle() {
         List<Map<String, Object>> mapListSelectMarketArticle = new ArrayList<>();

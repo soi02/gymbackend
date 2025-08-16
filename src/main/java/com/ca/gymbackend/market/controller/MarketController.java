@@ -1,16 +1,19 @@
 package com.ca.gymbackend.market.controller;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.ca.gymbackend.market.dto.MarketArticleDto;
 import com.ca.gymbackend.market.dto.MarketCommentOnArticleDto;
@@ -37,9 +40,31 @@ public class MarketController {
     } 
     // temporary test code
     
+    // @PostMapping("/insertMarketArticle") // ok + Front OK
+    // public void insertMarketArticle(@ModelAttribute MarketArticleDto marketArticleDto, @RequestParam(value = "imageFile", required = false) MultipartFile multipartFile) {
+    //     System.out.println("marketArticleDto" + marketArticleDto);
+    //     System.out.println("multipartFile" + multipartFile);
+    //     marketService.insertMarketArticle(marketArticleDto);
+    // }
+    
     @PostMapping("/insertMarketArticle") // ok + Front OK
-    public void insertMarketArticle(@RequestBody MarketArticleDto marketArticleDto) {
-        marketService.insertMarketArticle(marketArticleDto);
+    public void insertMarketArticle(@RequestParam(value = "imageLink", required = false) MultipartFile multipartFile
+    ,
+    @RequestParam("marketUserId") Integer marketUserId, 
+    @RequestParam("title") String title, 
+    @RequestParam("productCost") Integer productCost, 
+    @RequestParam("content") String content
+    ) throws IOException {
+        MarketArticleDto marketArticleDto = new MarketArticleDto();
+        marketArticleDto.setMarketUserId(marketUserId);
+        marketArticleDto.setTitle(title);
+        marketArticleDto.setProductCost(productCost);
+        marketArticleDto.setContent(content);
+        // if (multipartFile != null && !multipartFile.isEmpty()) {
+        //     String stringImageLink = multipartFile.getOriginalFilename();
+        //     marketArticleDto.setImageLink(stringImageLink);
+        // }
+        marketService.insertMarketArticleIncludesImage(marketArticleDto, multipartFile);
     }
     
     @GetMapping("/selectMarketArticle") // ok + Front OK (구조 수정해야 됨)

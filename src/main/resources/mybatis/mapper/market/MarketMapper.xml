@@ -11,7 +11,7 @@
     <insert id = "insertMarketArticle" parameterType="com.ca.gymbackend.market.dto.MarketArticleDto">
     
         INSERT INTO market_article (market_user_id, image_link, main_image_id, title, content, product_cost_option, product_cost)
-        VALUES (#{marketUserId}, null, 1, #{title}, #{content}, #{productCostOption}, #{productCost});
+        VALUES (#{marketUserId}, #{imageLink}, 1, #{title}, #{content}, #{productCostOption}, #{productCost});
     
     </insert>
     
