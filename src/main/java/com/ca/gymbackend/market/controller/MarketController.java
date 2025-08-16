@@ -48,22 +48,14 @@ public class MarketController {
     // }
     
     @PostMapping("/insertMarketArticle") // ok + Front OK
-    public void insertMarketArticle(@RequestParam(value = "imageLink", required = false) MultipartFile multipartFile
-    ,
-    @RequestParam("marketUserId") Integer marketUserId, 
-    @RequestParam("title") String title, 
-    @RequestParam("productCost") Integer productCost, 
-    @RequestParam("content") String content
-    ) throws IOException {
+    public void insertMarketArticle(@RequestParam(value = "imageLink", required = false) MultipartFile multipartFile,
+    @RequestParam("marketUserId") Integer marketUserId, @RequestParam("title") String title, 
+    @RequestParam("productCost") Integer productCost, @RequestParam("content") String content) throws IOException {
         MarketArticleDto marketArticleDto = new MarketArticleDto();
         marketArticleDto.setMarketUserId(marketUserId);
         marketArticleDto.setTitle(title);
         marketArticleDto.setProductCost(productCost);
         marketArticleDto.setContent(content);
-        // if (multipartFile != null && !multipartFile.isEmpty()) {
-        //     String stringImageLink = multipartFile.getOriginalFilename();
-        //     marketArticleDto.setImageLink(stringImageLink);
-        // }
         marketService.insertMarketArticleIncludesImage(marketArticleDto, multipartFile);
     }
     
@@ -83,8 +75,15 @@ public class MarketController {
     }
     
     @PostMapping("/updateMarketArticle") // ok
-    public void updateMarketArticle(@RequestBody MarketArticleDto marketArticleDto) {
-        marketService.updateMarketArticle(marketArticleDto);
+    public void updateMarketArticle(@RequestParam(value = "imageLink", required = false) MultipartFile multipartFile,
+    @RequestParam("marketUserId") Integer marketUserId, @RequestParam("title") String title, 
+    @RequestParam("productCost") Integer productCost, @RequestParam("content") String content) throws IOException {
+        MarketArticleDto marketArticleDto = new MarketArticleDto();
+        marketArticleDto.setMarketUserId(marketUserId);
+        marketArticleDto.setTitle(title);
+        marketArticleDto.setProductCost(productCost);
+        marketArticleDto.setContent(content);
+        marketService.updateMarketArticleIncludesImage(marketArticleDto, multipartFile);
     }
     
     @PostMapping("/deleteMarketArticle") // ok + Front OK

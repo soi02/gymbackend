@@ -142,7 +142,15 @@ public class MarketService {
         return mapSelectSpecificMarketArticleInfo;
     }
     
-    public void updateMarketArticle(MarketArticleDto marketArticleDto) {
+    public void updateMarketArticleIncludesImage(MarketArticleDto marketArticleDto, MultipartFile multipartFile) throws IOException {
+        
+        if (multipartFile != null && !multipartFile.isEmpty()) {
+            String stringImageLink = this.saveArticleImage(multipartFile);
+            marketArticleDto.setImageLink(stringImageLink);
+        } else {
+            marketArticleDto.setImageLink(null);
+        }
+        
         marketMapper.updateMarketArticle(marketArticleDto);
     }
     public void deleteMarketArticle(Integer id) {
