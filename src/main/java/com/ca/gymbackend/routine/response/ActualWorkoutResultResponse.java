@@ -13,4 +13,9 @@ public class ActualWorkoutResultResponse {
     private Integer setId;
     private Double kg;
     private Integer reps;
+    private Integer minutes;
+    private Integer calories;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
+
 }
