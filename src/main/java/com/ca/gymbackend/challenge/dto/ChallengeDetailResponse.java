@@ -37,6 +37,7 @@ public class ChallengeDetailResponse {
 
     private int challengeId;
     private String challengeCreator;
+    private String creatorProfileImagePath;
     private String challengeTitle;
     private String challengeDescription;
     private int challengeDepositAmount;
