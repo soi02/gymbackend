@@ -50,23 +50,6 @@ public class RoutineService {
     }
 
     public void saveRoutine(RoutineSaveRequest request) {
-        // 1️⃣ 루틴 저장
-        // 루틴 테이블에 새로운 루틴을 등록.
-        // 참고
-
-        // const payload = {
-        //     userId: Number(userId),
-        //     routineName: routineName,
-        //     routineDetailList: routineData.map((workout, idx) => ({
-        //         elementId: workout.elementId,
-        //         elementOrder: idx + 1,
-        //         setList: workout.sets.map(set => ({
-        //             kg: Number(set.weight || 0),
-        //             reps: Number(set.reps || 0)
-        //         }))
-        //     }))
-        // };
-
 
 
         RoutineDto routine = new RoutineDto();
@@ -100,6 +83,14 @@ public class RoutineService {
                 routineSqlMapper.insertRoutineSet(set);
             }
         }
+    }
+
+    // 루틴 삭제
+    public boolean deleteRoutine(int routineId) {
+        routineSqlMapper.deleteRoutineSetsByRoutineId(routineId);     // 세트
+        routineSqlMapper.deleteRoutineDetailsByRoutineId(routineId);  // 상세
+        int affected = routineSqlMapper.deleteRoutineById(routineId); // 루틴 본체
+        return affected > 0;
     }
 
     public List<RoutineByUserId> getRoutinesByUserId(int userId) {

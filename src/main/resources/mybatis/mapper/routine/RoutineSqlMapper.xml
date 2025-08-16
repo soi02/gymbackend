@@ -219,6 +219,25 @@ ORDER BY awd.detail_id, aws.set_id;
   VALUES (#{workoutId}, NOW())
 </insert>
 
+<!-- 세트 삭제: JOIN으로 detail 통해 한 번에 -->
+<delete id="deleteRoutineSetsByRoutineId" parameterType="int">
+  DELETE s
+  FROM routine_set s
+  JOIN routine_detail d ON d.detail_id = s.detail_id
+  WHERE d.routine_id = #{routineId}
+</delete>
+
+<!-- 디테일 삭제 -->
+<delete id="deleteRoutineDetailsByRoutineId" parameterType="int">
+  DELETE FROM routine_detail
+  WHERE routine_id = #{routineId}
+</delete>
+
+<!-- 루틴 본체 삭제 -->
+<delete id="deleteRoutineById" parameterType="int">
+  DELETE FROM routine
+  WHERE routine_id = #{routineId}
+</delete>
 
 
 </mapper>

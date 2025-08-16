@@ -10,6 +10,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -56,8 +57,6 @@ public class RoutineController {
 
     @PostMapping("/saveRoutine")
     public ResponseEntity<?> saveRoutine(@RequestBody RoutineSaveRequest request) {
-            System.out.println("🔥 saveRoutine() 진입!");
-            System.out.println("📦 받은 요청: " + request);
     
         try {
             routineService.saveRoutine(request);
@@ -69,6 +68,23 @@ public class RoutineController {
         }
 
     }
+
+    @DeleteMapping("/deleteRoutine/{routineId}")
+    public ResponseEntity<?> deleteRoutine(@PathVariable("routineId") int routineId) {
+        try {
+            boolean deleted = routineService.deleteRoutine(routineId);
+            if (!deleted) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("존재하지 않는 루틴");
+            }
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                 .body("루틴 삭제 실패: " + e.getMessage());
+        }
+    }
+
+
 
     @GetMapping("/getRoutinesByUserId/{userId}")
     public ResponseEntity<?> getRoutinesByUserId(@PathVariable("userId") int userId) {

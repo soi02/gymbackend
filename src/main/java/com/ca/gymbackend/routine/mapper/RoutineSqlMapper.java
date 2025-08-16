@@ -27,6 +27,9 @@ public interface RoutineSqlMapper {
     public void insertRoutineInfo(RoutineDto routine);
     public void insertRoutineDetail(RoutineDetailDto detail);
     public void insertRoutineSet(RoutineSetDto set);
+    public int deleteRoutineById(@Param("routineId") int routineId);
+    public int deleteRoutineDetailsByRoutineId(@Param("routineId") int routineId);
+    public int deleteRoutineSetsByRoutineId(@Param("routineId") int routineId);
     public List<RoutineByUserId> findRoutinesByUserId(int userId);
     public List<RoutineDetailResponseDto> findRoutineDetailByRoutineId(@Param("routineId") int routineId);
     public List<RoutineSetDto> findRoutineSetsByRoutineId(@Param("routineId") int routineId);
