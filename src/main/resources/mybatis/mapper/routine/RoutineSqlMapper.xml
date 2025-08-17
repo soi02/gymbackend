@@ -240,6 +240,27 @@ ORDER BY awd.detail_id, aws.set_id;
   DELETE FROM routine
   WHERE routine_id = #{routineId}
 </delete>
+<select id="findWorkoutsByDate"
+        resultType="com.ca.gymbackend.routine.response.WorkoutCardResponse">
+  SELECT
+    aw.workout_id AS workoutId,
+    COUNT(aws.set_id)                           AS setCount,
+    COUNT(DISTINCT awd.element_id)              AS workoutCount,
+    COALESCE(SUM(aws.kg * aws.reps), 0)         AS totalVolume,
+    COALESCE(MAX(wl.calories), 0)               AS calories,
+    wl.memo                                     AS memo,
+    wl.picture_url                              AS pictureUrl,
+    aw.created_at                                AS createdAt
+  FROM actual_workout aw
+  LEFT JOIN actual_workout_detail awd ON aw.workout_id = awd.workout_id
+  LEFT JOIN actual_workout_set aws     ON awd.detail_id  = aws.detail_id
+  LEFT JOIN workout_log wl             ON wl.workout_id  = aw.workout_id
+  WHERE aw.user_id = #{userId}
+    AND DATE(aw.created_at) = #{date}
+  GROUP BY aw.workout_id, wl.memo, wl.picture_url, aw.created_at
+  ORDER BY aw.created_at ASC
+</select>
+
 
 
 </mapper>

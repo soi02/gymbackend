@@ -222,6 +222,53 @@ public class RoutineController {
     //     return ResponseEntity.ok(result);
     // }
 
+// 아래 3개 메서드를 RoutineController 클래스 안에 추가
+
+// 1) 날짜별 여러 운동 카드(목록) — GET /api/routine/workouts/byDate?userId=..&date=YYYY-MM-DD
+@GetMapping("/workouts/byDate")
+public ResponseEntity<?> getWorkoutsByDate(
+        @RequestParam("userId") int userId,
+        @RequestParam("date") String date
+) {
+    try {
+        // ⚠️ 서비스에 이 메서드가 있어야 함: routineService.getWorkoutsByDate(userId, date)
+        // 반환타입은 List<DTO>든 List<Map>이든 상관없음. 프론트가 사용하는 필드들만 포함되면 됨.
+        // (workoutId, setCount, calories, totalVolume, workoutCount 등을 포함)
+        return ResponseEntity.ok(routineService.getWorkoutsByDate(userId, date));
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("결과 조회 실패: " + e.getMessage());
+    }
+}
+
+// 2) 일지/사진 조회 — GET /api/routine/workoutlog/workoutId?workoutId=123
+@GetMapping("/workoutlog/workoutId")
+public ResponseEntity<WorkoutLogDto> getWorkoutLogByWorkoutId(
+        @RequestParam("workoutId") int workoutId
+) {
+    try {
+        return ResponseEntity.ok(routineService.getWorkoutLogByWorkoutId(workoutId));
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+}
+
+// 3) 세트 상세 조회 — GET /api/routine/actualworkout/workoutId?workoutId=123
+@GetMapping("/actualworkout/workoutId")
+public ResponseEntity<List<ActualWorkoutResultResponse>> getActualWorkoutByWorkoutId(
+        @RequestParam("workoutId") int workoutId
+) {
+    try {
+        // 기존 /result/{workoutId}와 동일 데이터 반환 (별칭 엔드포인트)
+        return ResponseEntity.ok(routineService.getWorkoutResult(workoutId));
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(List.of());
+    }
+}
 
 
 }

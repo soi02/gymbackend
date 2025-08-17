@@ -30,6 +30,7 @@ import com.ca.gymbackend.routine.response.EveryWorkoutList;
 import com.ca.gymbackend.routine.response.RoutineByUserId;
 import com.ca.gymbackend.routine.response.RoutineDetailResponse;
 import com.ca.gymbackend.routine.response.RoutineDetailResponseDto;
+import com.ca.gymbackend.routine.response.WorkoutCardResponse;
 import com.ca.gymbackend.routine.response.WorkoutGuideList;
 
 @Service
@@ -238,7 +239,6 @@ public class RoutineService {
         return routineSqlMapper.findWorkoutLogByWorkoutId(workoutId);
     }
 
-    // 친구 saveImage와 동일 로직: 날짜 폴더 + uuid_시각.확장자
     private String saveUpload(byte[] buffer, String originalFilename) {
         String uuid = java.util.UUID.randomUUID().toString();
         long now = System.currentTimeMillis();
@@ -262,5 +262,18 @@ public class RoutineService {
         // ⚠️ DB엔 상대경로만 저장 (정적 리소스 핸들러가 /uploadFiles/** 로 매핑)
         return todayPath + filename;
     }
+
+
+
+
+
+    /** 날짜별로 해당 유저가 여러 번 운동했으면 각 운동(workout_id)별 카드용 요약 반환 */
+    public List<WorkoutCardResponse> getWorkoutsByDate(int userId, String date) {
+        // date: "YYYY-MM-DD"
+        // 내부적으로 aw.created_at의 DATE 또는 workout_log.date 중 하나로 필터
+        return routineSqlMapper.findWorkoutsByDate(userId, date);
+    }
+
+
 
 }

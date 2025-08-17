@@ -18,6 +18,7 @@ import com.ca.gymbackend.routine.response.CalendarSummaryResponse;
 import com.ca.gymbackend.routine.response.EveryWorkoutList;
 import com.ca.gymbackend.routine.response.RoutineByUserId;
 import com.ca.gymbackend.routine.response.RoutineDetailResponseDto;
+import com.ca.gymbackend.routine.response.WorkoutCardResponse;
 import com.ca.gymbackend.routine.response.WorkoutGuideList;
 
 @Mapper
@@ -51,4 +52,6 @@ public interface RoutineSqlMapper {
                                 @Param("pictureUrl") String pictureUrl);
 
     public void insertEmptyWorkoutLog(@Param("workoutId") int workoutId);
+    List<WorkoutCardResponse> findWorkoutsByDate(@Param("userId") int userId,
+                                             @Param("date") String date);
 }
