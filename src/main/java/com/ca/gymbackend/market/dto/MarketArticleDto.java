@@ -9,6 +9,7 @@ public class MarketArticleDto {
     private int id;
     private int marketUserId;
     private String imageLink;
+    private String imageOriginalFilename;
     private int mainImageId;
     private String title;
     private String content;

@@ -10,8 +10,8 @@
 
     <insert id = "insertMarketArticle" parameterType="com.ca.gymbackend.market.dto.MarketArticleDto">
     
-        INSERT INTO market_article (market_user_id, image_link, main_image_id, title, content, product_cost_option, product_cost)
-        VALUES (#{marketUserId}, #{imageLink}, 1, #{title}, #{content}, #{productCostOption}, #{productCost});
+        INSERT INTO market_article (market_user_id, image_link, image_original_filename, main_image_id, title, content, product_cost_option, product_cost)
+        VALUES (#{marketUserId}, #{imageLink}, #{imageOriginalFilename}, 1, #{title}, #{content}, #{productCostOption}, #{productCost});
     
     </insert>
     
@@ -31,7 +31,7 @@
         
         UPDATE market_article ma
         <set>
-            <if test = "imageLink != null"> image_link = #{imageLink},</if>
+            <if test = "imageLink != null"> image_link = #{imageLink}, image_original_filename = #{imageOriginalFilename},</if>
             title = #{title}, content = #{content}, product_cost = #{productCost}, updated_at = NOW()
         </set>
         WHERE id = #{id};

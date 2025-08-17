@@ -48,8 +48,10 @@ public class MarketService {
         if (multipartFile != null && !multipartFile.isEmpty()) {
             String stringImageLink = this.saveArticleImage(multipartFile);
             marketArticleDto.setImageLink(stringImageLink);
+            marketArticleDto.setImageOriginalFilename(multipartFile.getOriginalFilename());
         } else {
             marketArticleDto.setImageLink(null);
+            marketArticleDto.setImageOriginalFilename(null);
         }
         
         marketMapper.insertMarketArticle(marketArticleDto);
@@ -147,8 +149,10 @@ public class MarketService {
         if (multipartFile != null && !multipartFile.isEmpty()) {
             String stringImageLink = this.saveArticleImage(multipartFile);
             marketArticleDto.setImageLink(stringImageLink);
+            marketArticleDto.setImageOriginalFilename(multipartFile.getOriginalFilename());
         } else {
             marketArticleDto.setImageLink(null);
+            marketArticleDto.setImageOriginalFilename(null);
         }
         
         marketMapper.updateMarketArticle(marketArticleDto);
