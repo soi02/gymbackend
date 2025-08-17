@@ -315,12 +315,16 @@
     <!-- 사용자의 챌린지 참여 정보 조회 -->
     <select id="findUserChallengeInfoByUserIdAndChallengeId" resultType="com.ca.gymbackend.challenge.dto.ChallengeUserInfo">
         SELECT
-            personal_join_date,
-            personal_end_date
+            c.challenge_title AS challengeTitle,
+            c.challenge_duration_days AS totalPeriod,  <!-- 이 부분을 'challenge_duration_days'로 수정했습니다. -->
+            uc.personal_join_date AS personalJoinDate,
+            uc.personal_end_date AS personalEndDate
         FROM
-            user_challenge
+            user_challenge uc
+        JOIN
+            challenge c ON uc.challenge_id = c.challenge_id
         WHERE
-            user_id = #{userId} AND challenge_id = #{challengeId}
+            uc.user_id = #{userId} AND uc.challenge_id = #{challengeId}
     </select>
 
     <!-- 챌린지 상세 진행 상황 조회 (노리개 등급 정보 포함) -->
