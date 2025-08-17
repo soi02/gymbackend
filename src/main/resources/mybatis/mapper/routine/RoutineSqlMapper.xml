@@ -174,17 +174,19 @@ ORDER BY awd.detail_id, aws.set_id;
            AND DATE(aw.created_at) = #{date}
         ) AS workoutCount,
 
+    (SELECT COUNT(*)
+     FROM actual_workout aw
+     JOIN actual_workout_detail awd ON aw.workout_id = awd.workout_id
+     WHERE aw.user_id = #{userId}
+       AND DATE(aw.created_at) = #{date}
+    ) AS setCount,
+
         (SELECT SUM(wl.calories)
          FROM workout_log wl
          WHERE wl.user_id = #{userId}
            AND DATE(wl.created_at) = #{date}
-        ) AS calories,
+        ) AS calories
 
-        (SELECT SUM(wl.minutes)
-         FROM workout_log wl
-         WHERE wl.user_id = #{userId}
-           AND DATE(wl.created_at) = #{date}
-        ) AS workoutTime
 </select>
 
 <select id="findWorkoutDatesBetween" resultType="string">
@@ -219,7 +221,7 @@ ORDER BY awd.detail_id, aws.set_id;
   VALUES (#{workoutId}, NOW())
 </insert>
 
-<!-- 세트 삭제: JOIN으로 detail 통해 한 번에 -->
+<!-- 세트 삭제 -->
 <delete id="deleteRoutineSetsByRoutineId" parameterType="int">
   DELETE s
   FROM routine_set s
