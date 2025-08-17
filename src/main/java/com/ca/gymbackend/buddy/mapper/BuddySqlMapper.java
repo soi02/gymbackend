@@ -24,7 +24,7 @@ public interface BuddySqlMapper {
 
     public List<Map<String, Object>> getBuddyUserList(int loggedInUserId);
 
-    //버디인지확인
+    // 버디인지확인
     public boolean isBuddy(int userId);
 
     // 매칭 관련 메소드
@@ -36,11 +36,18 @@ public interface BuddySqlMapper {
 
     public List<ChatRoomDto> getChatRoomsByBuddyId(@Param("buddyId") int buddyId);
 
-    //채팅
-    // void insertInitialChat(@Param("matchingId") int matchingId, @Param("sendBuddyId") int sendBuddyId);
+    // 채팅
+    // ✅ 추가: 매칭 ID로 매칭 정보 조회
+    public Map<String, Object> selectMatchingInfo(int matchingId);
+
+    // void insertInitialChat(@Param("matchingId") int matchingId,
+    // @Param("sendBuddyId") int sendBuddyId);
     public void insertInitialChat(Map<String, Object> params);
+
     public void insertChat(ChatDto chatDto);
+
     public List<ChatDto> selectChatsByMatchingId(int matchingId);
+
     public void markMessagesAsRead(@Param("matchingId") int matchingId, @Param("readerBuddyId") int readerBuddyId);
 
 }

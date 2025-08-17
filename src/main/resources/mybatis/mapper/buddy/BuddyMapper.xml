@@ -137,10 +137,40 @@
         VALUES (#{matchingId}, #{sendBuddyId}, '안녕하세요.', NOW(), false)
     </insert>
 
+    <!-- 상대방 이름 보이게 -->
+    <select id="selectMatchingInfo" parameterType="int" resultType="map">
+        SELECT 
+            m.send_buddy_id AS buddy1Id,
+            u1.name AS buddy1Name,
+            u1.profile_image AS buddy1ProfileImage,
+            m.receiver_buddy_id AS buddy2Id,
+            u2.name AS buddy2Name,
+            u2.profile_image AS buddy2ProfileImage
+        FROM matching m
+        JOIN user u1 ON m.send_buddy_id = u1.id
+        JOIN user u2 ON m.receiver_buddy_id = u2.id
+        WHERE m.id = #{matchingId}
+    </select>
 
-    <insert id="insertChat" useGeneratedKeys="true" keyProperty="id">
+
+    <!-- <insert id="insertChat" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO chat(matching_id, send_buddy_id, message, is_read, sent_at)
         VALUES(#{matchingId}, #{sendBuddyId}, #{message}, #{isRead}, #{sentAt})
+    </insert> -->
+    <insert id="insertChat"  useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO chat (
+            matching_id,
+            send_buddy_id,
+            message,
+            is_read,
+            sent_at
+        ) VALUES (
+            #{matchingId},
+            #{sendBuddyId},
+            #{message},
+            #{isRead},
+            #{sentAt}
+        )
     </insert>
 
     <!-- <select id="selectChatsByMatchingId" parameterType="int">
