@@ -28,11 +28,14 @@
     </select>
     
     <update id = "updateMarketArticle" parameterType="com.ca.gymbackend.market.dto.MarketArticleDto">
-    
-        UPDATE market_article ma SET image_link = #{imageLink}, main_image_id = #{mainImageId}, title = #{title}, content = #{content}, 
-        product_cost_option = #{productCostOption}, product_cost = #{productCost}, sell_ended = #{sellEnded}, updated_at = NOW()
+        
+        UPDATE market_article ma
+        <set>
+            <if test = "imageLink != null"> image_link = #{imageLink},</if>
+            title = #{title}, content = #{content}, product_cost = #{productCost}, updated_at = NOW()
+        </set>
         WHERE id = #{id};
-    
+        
     </update>
     
     <delete id = "deleteMarketArticle" parameterType="int">
