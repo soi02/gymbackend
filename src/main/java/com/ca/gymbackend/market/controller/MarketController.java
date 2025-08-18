@@ -204,12 +204,10 @@ public class MarketController {
     
     // [ additional crud ]
     
-    // @GetMapping("/selectMarketArticleByTitleSearchWord")
-    
-    // @GetMapping("/selectMarketArticleByContentSearchWord")
-    
-    
-    // 모든 코드에서 중복 코드 실행 방지용 코드 작성이 필요함 (예를 들어 view 반영 전 빠른 클릭 시 중복 실행 가능성 존재)
+    @GetMapping("/selectMarketArticleBySearchWord")
+    public List<Map<String, Object>> selectMarketArticleBySearchWord(@RequestParam("searchWord") String searchWord) {
+        return marketService.selectMarketArticleBySearchWord(searchWord);
+    }
     
     
 }
