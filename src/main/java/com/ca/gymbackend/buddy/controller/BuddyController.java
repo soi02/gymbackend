@@ -140,6 +140,24 @@ public class BuddyController {
         return buddyService.getMatchingNotifications(buddyId);
     }
 
+    @GetMapping("/matching-info/{matchingId}")
+    public ResponseEntity<Map<String, Object>> getMatchingInfo(@PathVariable("matchingId") int matchingId) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            int loggedInUserId = (int) authentication.getPrincipal();
+
+            Map<String, Object> matchingInfo = buddyService.getMatchingInfo(matchingId, loggedInUserId);
+
+            if (matchingInfo != null) {
+                return ResponseEntity.ok(matchingInfo);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
     // 채팅 관련 API
     @PostMapping("/send")
     public ResponseEntity<?> sendChat(@RequestBody ChatDto chatDto) {

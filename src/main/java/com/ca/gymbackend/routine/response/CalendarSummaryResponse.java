@@ -5,6 +5,6 @@ import lombok.Data;
 @Data
 public class CalendarSummaryResponse {
     private int workoutCount;
+    private int setCount;
     private int calories;
-    private int workoutMinutes; // 분
 }

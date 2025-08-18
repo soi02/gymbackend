@@ -442,59 +442,66 @@ private void processKeywords(Object challengeResponse) {
 
     // 노리개
     // 챌린지 상세 진행 상황(스티커판)을 조회하는 메서드
-    public ChallengeProgressResponse getChallengeProgressInfo(int challengeId, int userId) {
-        // 1. 챌린지 기본 정보와 노리개 등급 정보 조회
-        ChallengeProgressResponse response = challengeMapper.findChallengeProgressInfo(challengeId, userId);
+public ChallengeProgressResponse getChallengeProgressInfo(int challengeId, int userId) {
+    // 1. 챌린지 기본 정보와 획득한 노리개 목록 조회
+    ChallengeUserInfo challengeUserInfo = challengeMapper.findUserChallengeInfoByUserIdAndChallengeId(userId, challengeId);
 
-        if (response == null) {
-            // 사용자가 이 챌린지에 참여하지 않았거나, 챌린지 ID가 유효하지 않은 경우
-            return null;
-        }
-
-        // **추가된 로직: 획득한 노리개 목록 조회 및 DTO에 설정**
-        List<ChallengeNorigaeAwardInfo> awardedList = challengeMapper.findAwardedNorigaeList(challengeId, userId);
-        response.setAwardedNorigaeList(awardedList);
-
-        // 2. 총 달성 일수 계산
-        int myAchievement = challengeMapper.countAttendedDays(challengeId, userId);
-        response.setMyAchievement(myAchievement);
-
-        // 3. 사용자의 출석 기록 조회
-        List<ChallengeAttendanceRecord> records = challengeMapper.findAttendanceRecords(challengeId, userId);
-
-        // 4. 스티커판 상태 리스트 생성 (기존 로직과 동일)
-        ChallengeUserInfo challengeUserInfo = challengeMapper.findUserChallengeInfoByUserIdAndChallengeId(userId, challengeId);
-        if (challengeUserInfo == null) {
-            return null; // 사용자가 챌린지에 참여하지 않은 경우
-        }
-        LocalDate startDate = challengeUserInfo.getPersonalJoinDate().toLocalDate();
-        LocalDate endDate = challengeUserInfo.getPersonalEndDate().toLocalDate();
-        
-        List<ChallengeAttendanceStatus> statusList = new ArrayList<>();
-        Map<LocalDate, String> attendedDates = records.stream()
-                .collect(Collectors.toMap(ChallengeAttendanceRecord::getAttendanceDate, ChallengeAttendanceRecord::getAttendanceImagePath));
-
-        LocalDate currentDate = startDate;
-        while (!currentDate.isAfter(endDate)) {
-            ChallengeAttendanceStatus status = new ChallengeAttendanceStatus();
-            status.setRecordDate(currentDate);
-
-            if (currentDate.isAfter(LocalDate.now())) {
-                status.setStatus("미래");
-            } else if (attendedDates.containsKey(currentDate)) {
-                status.setStatus("인증완료");
-                status.setPhotoUrl(attendedDates.get(currentDate));
-            } else {
-                status.setStatus("결석");
-            }
-            statusList.add(status);
-            currentDate = currentDate.plusDays(1);
-        }
-        
-        response.setChallengeAttendanceStatus(statusList);
-        return response;
+    if (challengeUserInfo == null) {
+        return null; // 사용자가 이 챌린지에 참여하지 않았거나, ID가 유효하지 않은 경우
     }
 
+    ChallengeProgressResponse response = new ChallengeProgressResponse();
+    
+    // challengeUserInfo에서 값 설정
+    response.setChallengeTitle(challengeUserInfo.getChallengeTitle());
+    response.setTotalPeriod(challengeUserInfo.getTotalPeriod());
+    
+    // 획득한 노리개 목록 조회
+    List<ChallengeNorigaeAwardInfo> awardedList = challengeMapper.findAwardedNorigaeList(userId, challengeId);
+    response.setAwardedNorigaeList(awardedList);
+
+    // 가장 높은 등급의 노리개 정보 추출
+    if (!awardedList.isEmpty()) {
+        ChallengeNorigaeAwardInfo highestNorigae = awardedList.get(0);
+        response.setAwardedNorigaeName(highestNorigae.getName());
+        response.setAwardedNorigaeIconPath(highestNorigae.getIconPath());
+    }
+
+    // 2. 총 달성 일수 계산
+    int myAchievement = challengeMapper.countAttendedDays(challengeId, userId);
+    response.setMyAchievement(myAchievement);
+
+    // 3. 사용자의 출석 기록 조회
+    List<ChallengeAttendanceRecord> records = challengeMapper.findAttendanceRecords(challengeId, userId);
+
+    // 4. 스티커판 상태 리스트 생성
+    LocalDate startDate = challengeUserInfo.getPersonalJoinDate().toLocalDate();
+    LocalDate endDate = challengeUserInfo.getPersonalEndDate().toLocalDate();
+    
+    List<ChallengeAttendanceStatus> statusList = new ArrayList<>();
+    Map<LocalDate, String> attendedDates = records.stream()
+            .collect(Collectors.toMap(ChallengeAttendanceRecord::getAttendanceDate, ChallengeAttendanceRecord::getAttendanceImagePath));
+
+    LocalDate currentDate = startDate;
+    while (!currentDate.isAfter(endDate)) {
+        ChallengeAttendanceStatus status = new ChallengeAttendanceStatus();
+        status.setRecordDate(currentDate);
+
+        if (currentDate.isAfter(LocalDate.now())) {
+            status.setStatus("미래");
+        } else if (attendedDates.containsKey(currentDate)) {
+            status.setStatus("인증완료");
+            status.setPhotoUrl(attendedDates.get(currentDate));
+        } else {
+            status.setStatus("결석");
+        }
+        statusList.add(status);
+        currentDate = currentDate.plusDays(1);
+    }
+    
+    response.setChallengeAttendanceStatus(statusList);
+    return response;
+}
 
     // 일일 인증 사진을 로컬에 저장하고 URL을 반환
     private String saveAttendancePhoto(MultipartFile photo) throws IOException {
