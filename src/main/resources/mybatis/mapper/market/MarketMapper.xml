@@ -76,6 +76,12 @@
     
     </update>
     
+    <delete id = "deleteMarketCommentOnArticleWhenDeleteArticle">
+    
+        DELETE FROM market_comment_on_article WHERE article_id = #{articleId};
+    
+    </delete>
+    
     <delete id = "deleteMarketCommentOnArticle">
     
         DELETE FROM market_comment_on_article WHERE id = #{id};
@@ -118,6 +124,12 @@
         SELECT * FROM market_product_interested_log WHERE market_user_id = #{marketUserId} AND specific_article_id = #{specificArticleId};
     
     </select>
+    
+    <delete id = "deleteMarketProductInterestedLogWhenDeleteArticle">
+    
+        DELETE FROM market_product_interested_log WHERE specific_article_id = #{specificArticleId};
+    
+    </delete>
     
     <delete id = "deleteMarketProductInterestedLog">
     
@@ -172,6 +184,12 @@
     
     </select>
     
+    <delete id = "deleteMarketDealedLogWhenDeleteArticle">
+    
+        DELETE FROM market_dealed_log WHERE specific_article_id = #{specificArticleId};
+    
+    </delete>
+    
     <insert id = "insertMarketReviewToUser">
     
         INSERT INTO market_review_on_user (writer_id, evaluated_user_id, content)
@@ -198,15 +216,9 @@
     
     </delete>
     
-    <select id = "selectMarketArticleByTitleSearchWord" resultType = "com.ca.gymbackend.market.dto.MarketArticleDto">
+    <select id = "selectMarketArticleBySearchWord" resultType = "com.ca.gymbackend.market.dto.MarketArticleDto">
     
-        SELECT * FROM market_article ma WHERE ma.title LIKE CONCAT('%', #{searchWord}, '%');
-    
-    </select>
-    
-    <select id = "selectMarketArticleByContentSearchWord" resultType = "com.ca.gymbackend.market.dto.MarketArticleDto">
-    
-        SELECT * FROM market_article ma WHERE ma.content LIKE CONCAT('%', #{searchWord}, '%');
+        SELECT * FROM market_article ma WHERE ma.title LIKE CONCAT('%', #{searchWord}, '%') OR ma.content LIKE CONCAT('%', #{searchWord}, '%');
     
     </select>
 

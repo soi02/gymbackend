@@ -31,6 +31,7 @@ public interface MarketMapper {
     public Integer selectCountMarketCommentOnArticle(@Param("articleId") Integer articleId);
     public MarketCommentOnArticleDto selectSpecificMarketCommentOnArticle(@Param("id") Integer id);
     public void updateMarketCommentOnArticle(MarketCommentOnArticleDto marketCommentOnArticleDto);
+    public void deleteMarketCommentOnArticleWhenDeleteArticle(@Param("articleId") Integer articleId);
     public void deleteMarketCommentOnArticle(@Param("id") Integer id);
     
     public void insertMarketProductInterestedLog(MarketProductInterestedLogDto marketProductInterestedLogDffto);
@@ -39,6 +40,7 @@ public interface MarketMapper {
     public List<MarketProductInterestedLogDto> selectMarketProductInterestedLogWhenArticleInfo(@Param("specificArticleId") Integer specificArticleId);
     public Integer selectCountMarketProductInterestedLogWhenArticleInfo(@Param("specificArticleId") Integer specificArticleId);
     public MarketProductInterestedLogDto selectMarketProductInterestedLogWhenUserAndArticleInfo(@Param("marketUserId") Integer marketUserId, @Param("specificArticleId") Integer specificArticleId);
+    public void deleteMarketProductInterestedLogWhenDeleteArticle(@Param("specificArticleId") Integer specificArticleId);
     public void deleteMarketProductInterestedLog(@Param("marketUserId") Integer marketUserId, @Param("specificArticleId") Integer specificArticleId);
     
     public void insertMarketDealedLog(MarketDealedLogDto marketDealedLogDto);
@@ -46,6 +48,7 @@ public interface MarketMapper {
     public Integer selectCountMarketDealedLogWhenBuyer(@Param("buyerId") Integer buyerId);
     public List<MarketDealedLogDto> selectMarketDealedLogWhenSeller(@Param("sellerId") Integer sellerId);
     public Integer selectCountMarketDealedLogWhenSeller(@Param("sellerId") Integer sellerId);
+    public void deleteMarketDealedLogWhenDeleteArticle(@Param("specificArticleId") Integer specificArticleId);
     
     public void insertMarketReviewToUser(MarketReviewOnUserDto marketReviewOnUserDto);
     public List<MarketReviewOnUserDto> selectMarketReviewToUser(@Param("evaluatedUserId") Integer evaluatedUserId);
@@ -54,7 +57,6 @@ public interface MarketMapper {
     
     // [ 페이지에 따른 추가 crud ]
     
-    public List<MarketArticleDto> selectMarketArticleByTitleSearchWord(@Param("searchWord") String searchWord);
-    public List<MarketArticleDto> selectMarketArticleByContentSearchWord(@Param("searchWord") String searchWord);
+    public List<MarketArticleDto> selectMarketArticleBySearchWord(@Param("searchWord") String searchWord);
     
 }

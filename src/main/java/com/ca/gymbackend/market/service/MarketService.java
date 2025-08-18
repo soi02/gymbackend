@@ -159,6 +159,9 @@ public class MarketService {
     }
     public void deleteMarketArticle(Integer id) {
         marketMapper.deleteMarketArticle(id);
+        marketMapper.deleteMarketCommentOnArticleWhenDeleteArticle(id);
+        marketMapper.deleteMarketProductInterestedLogWhenDeleteArticle(id);
+        marketMapper.deleteMarketDealedLogWhenDeleteArticle(id);
     }
     
     public void insertMarketCommentOnArticle(MarketCommentOnArticleDto marketCommentOnArticleDto) {
@@ -460,11 +463,42 @@ public class MarketService {
 
     // [ additional crud ]
     
-    public void selectMarketArticleByTitleSearchWord(String searchWord) {
-        marketMapper.selectMarketArticleByTitleSearchWord(searchWord);
-    }
-    public void selectMarketArticleByContentSearchWord(String searchWord) {
-        marketMapper.selectMarketArticleByContentSearchWord(searchWord);
+    public List<Map<String, Object>> selectMarketArticleBySearchWord(String searchWord) {
+        List<Map<String, Object>> mapListSelectMarketArticle = new ArrayList<>();
+        List<MarketArticleDto> listMarketArticleDto = marketMapper.selectMarketArticleBySearchWord(searchWord);
+        
+        if (listMarketArticleDto != null) {
+        
+            for (MarketArticleDto marketArticleDto : listMarketArticleDto) {
+                Map<String, Object> map = new HashMap<>();
+                MarketUserInfoDto marketUserInfoDto = marketMapper.selectMarketUserInfo(marketArticleDto.getMarketUserId());
+                map.put("marketArticleDto", marketArticleDto);
+                map.put("marketUserInfoDto", marketUserInfoDto);
+                mapListSelectMarketArticle.add(map);
+            }
+            
+        } else {
+            
+            //
+            
+            // Map<String, Object> map = new HashMap<>();
+            // MarketArticleDto marketArticleDto = new MarketArticleDto();
+            // MarketUserInfoDto marketUserInfoDto = new MarketUserInfoDto();
+            // map.put("marketArticleDto", marketArticleDto);
+            // map.put("marketUserInfoDto", marketUserInfoDto);
+            // mapListSelectMarketArticle.add(map);
+            // System.out.println("selectMarketArticleTest");
+            // System.out.println(map);
+            
+            // ▲ 필요 없는 코드
+            
+            listMarketArticleDto = new ArrayList<>();
+            
+        }
+        
+        // List 에는 사용 불가능한 코드 (map 구조에만 사용 가능함)
+        
+        return mapListSelectMarketArticle;
     }
     
 }
