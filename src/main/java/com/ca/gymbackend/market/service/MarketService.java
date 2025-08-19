@@ -333,12 +333,42 @@ public class MarketService {
     }
     public void insertMarketDealedLogCheckedBySeller(MarketDealedLogCheckedBySellerDto marketDealedLogCheckedBySellerDto) {
         marketMapper.insertMarketDealedLogCheckedBySeller(marketDealedLogCheckedBySellerDto);
+        MarketDealedLogCheckedByBuyerDto marketDealedLogCheckedByBuyerDto = new MarketDealedLogCheckedByBuyerDto();
+        marketDealedLogCheckedByBuyerDto.setSellerId(marketDealedLogCheckedBySellerDto.getSellerId());
+        marketDealedLogCheckedByBuyerDto.setBuyerId(marketDealedLogCheckedBySellerDto.getBuyerId());
+        marketDealedLogCheckedByBuyerDto.setSpecificArticleId(marketDealedLogCheckedBySellerDto.getSpecificArticleId());
+        if (marketMapper.selectMarketDealedLogCheckedByBuyer(marketDealedLogCheckedByBuyerDto) != null) {
+            MarketDealedLogDto marketDealedLogDto = new MarketDealedLogDto();
+            marketDealedLogDto.setSellerId(marketDealedLogCheckedBySellerDto.getSellerId());
+            marketDealedLogDto.setBuyerId(marketDealedLogCheckedBySellerDto.getBuyerId());
+            marketDealedLogDto.setSpecificArticleId(marketDealedLogCheckedBySellerDto.getSpecificArticleId());
+            marketMapper.insertMarketDealedLog(marketDealedLogDto);
+            marketMapper.updateMarketArticleToSellEnded(marketDealedLogCheckedBySellerDto.getSpecificArticleId());
+        }
+    }
+    public void selectSpecificMarketDealedLogCheckedBySeller(Integer sellerId, Integer specificArticleId) {
+        marketMapper.selectSpecificMarketDealedLogCheckedBySeller(sellerId, specificArticleId);
     }
     public void deleteMarketDealedLogCheckedBySeller(Integer specificArticleId) {
         marketMapper.deleteMarketDealedLogCheckedBySeller(specificArticleId);
     }
-    public void insertMarketDealedLogCheckedByBuyer(MarketDealedLogCheckedByBuyerDto marketDealedLogDto) {
-        marketMapper.insertMarketDealedLogCheckedByBuyer(marketDealedLogDto);
+    public void insertMarketDealedLogCheckedByBuyer(MarketDealedLogCheckedByBuyerDto marketDealedLogCheckedByBuyerDto) {
+        marketMapper.insertMarketDealedLogCheckedByBuyer(marketDealedLogCheckedByBuyerDto);
+        MarketDealedLogCheckedBySellerDto marketDealedLogCheckedBySellerDto = new MarketDealedLogCheckedBySellerDto();
+        marketDealedLogCheckedBySellerDto.setSellerId(marketDealedLogCheckedByBuyerDto.getSellerId());
+        marketDealedLogCheckedBySellerDto.setBuyerId(marketDealedLogCheckedByBuyerDto.getBuyerId());
+        marketDealedLogCheckedBySellerDto.setSpecificArticleId(marketDealedLogCheckedByBuyerDto.getSpecificArticleId());
+        if (marketMapper.selectMarketDealedLogCheckedBySeller(marketDealedLogCheckedBySellerDto) != null) {
+            MarketDealedLogDto marketDealedLogDto = new MarketDealedLogDto();
+            marketDealedLogDto.setSellerId(marketDealedLogCheckedByBuyerDto.getSellerId());
+            marketDealedLogDto.setBuyerId(marketDealedLogCheckedByBuyerDto.getBuyerId());
+            marketDealedLogDto.setSpecificArticleId(marketDealedLogCheckedByBuyerDto.getSpecificArticleId());
+            marketMapper.insertMarketDealedLog(marketDealedLogDto);
+            marketMapper.updateMarketArticleToSellEnded(marketDealedLogCheckedByBuyerDto.getSpecificArticleId());
+        }
+    }
+    public void selectSpecificMarketDealedLogCheckedByBuyer(Integer buyerId, Integer specificArticleId) {
+        marketMapper.selectSpecificMarketDealedLogCheckedByBuyer(buyerId, specificArticleId);
     }
     public void deleteMarketDealedLogCheckedByBuyer(Integer specificArticleId) {
         marketMapper.deleteMarketDealedLogCheckedByBuyer(specificArticleId);
@@ -346,6 +376,9 @@ public class MarketService {
     public void deleteMarketDealedLog(MarketDealedLogDto marketDealedLogDto) {
         marketMapper.insertMarketDealedLog(marketDealedLogDto);
     } // 수정 예정 (이름만 지정했음)
+    public MarketDealedLogDto selectSpecificMarketDealedLog(Integer specificArticleId) {
+        return marketMapper.selectSpecificMarketDealedLog(specificArticleId);
+    }
     public List<Map<String, Object>> selectMarketDealedLogWhenBuyer(Integer buyerId) {
         List<Map<String, Object>> mapListSelectMarketDealedLogWhenBuyer = new ArrayList<>();
         List<MarketDealedLogDto> listMarketDealedLogDto = marketMapper.selectMarketDealedLogWhenBuyer(buyerId);

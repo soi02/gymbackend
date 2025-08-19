@@ -164,20 +164,35 @@ public class MarketController {
         marketService.insertMarketDealedLog(marketDealedLogDto);
     }
     
-    @PostMapping("/insertMarketDealedLogCheckedBySeller") // ok --- 전체적인 구조 수정 예정
+    @PostMapping("/insertMarketDealedLogCheckedBySeller") // ok
     public void insertMarketDealedLogCheckedBySeller(@RequestBody MarketDealedLogCheckedBySellerDto marketDealedLogCheckedBySellerDto) {
         marketService.insertMarketDealedLogCheckedBySeller(marketDealedLogCheckedBySellerDto);
-    }    @PostMapping("/deleteMarketDealedLogCheckedBySeller") // ok --- 전체적인 구조 수정 예정
+    }
+    @GetMapping("/selectSpecificMarketDealedLogCheckedBySeller") // ok
+    public void selectSpecificMarketDealedLogCheckedBySeller(@RequestParam("sellerId") Integer sellerId, @RequestParam("specificArticleId") Integer specificArticleId) {
+        marketService.selectSpecificMarketDealedLogCheckedBySeller(sellerId, specificArticleId);
+    }
+    @PostMapping("/deleteMarketDealedLogCheckedBySeller") // ok --- 전체적인 구조 수정 예정 (변경 못 하니까 신중하게 선택하라고 우선은 할 생각)
     public void deleteMarketDealedLogCheckedBySeller(@RequestParam("specificArticleId") Integer specificArticleId) {
         marketService.deleteMarketDealedLogCheckedBySeller(specificArticleId);
     }
     
-    @PostMapping("/insertMarketDealedLogCheckedByBuyer") // ok --- 전체적인 구조 수정 예정
+    @PostMapping("/insertMarketDealedLogCheckedByBuyer") // ok
     public void insertMarketDealedLogCheckedByBuyer(@RequestBody MarketDealedLogCheckedByBuyerDto marketDealedLogCheckedByBuyerDto) {
         marketService.insertMarketDealedLogCheckedByBuyer(marketDealedLogCheckedByBuyerDto);
-    }    @PostMapping("/deleteMarketDealedLogCheckedByBuyer") // ok --- 전체적인 구조 수정 예정
+    }
+    @GetMapping("/selectSpecificMarketDealedLogCheckedByBuyer") // ok
+    public void selectSpecificMarketDealedLogCheckedByBuyer(@RequestParam("buyerId") Integer buyerId, @RequestParam("specificArticleId") Integer specificArticleId) {
+        marketService.selectSpecificMarketDealedLogCheckedByBuyer(buyerId, specificArticleId);
+    }
+    @PostMapping("/deleteMarketDealedLogCheckedByBuyer") // ok --- 전체적인 구조 수정 예정 (변경 못 하니까 신중하게 선택하라고 우선은 할 생각)
     public void deleteMarketDealedLogCheckedByBuyer(@RequestParam("specificArticleId") Integer specificArticleId) {
         marketService.deleteMarketDealedLogCheckedByBuyer(specificArticleId);
+    }
+    
+    @GetMapping("/selectSpecificMarketDealedLog")
+    public MarketDealedLogDto selectSpecificMarketDealedLog(@RequestParam("specificArticleId") Integer specificArticleId) {
+        return marketService.selectSpecificMarketDealedLog(specificArticleId);
     }
     
     @GetMapping("/selectMarketDealedLogWhenBuyer") // ok + Front OK

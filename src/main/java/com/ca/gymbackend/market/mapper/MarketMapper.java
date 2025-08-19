@@ -47,14 +47,20 @@ public interface MarketMapper {
     
     public void insertMarketDealedLog(MarketDealedLogDto marketDealedLogDto);
     public void insertMarketDealedLogCheckedBySeller(MarketDealedLogCheckedBySellerDto marketDealedLogCheckedBySellerDto);
+    public MarketDealedLogCheckedBySellerDto selectMarketDealedLogCheckedBySeller(MarketDealedLogCheckedBySellerDto marketDealedLogCheckedBySellerDto);
+    public MarketDealedLogCheckedBySellerDto selectSpecificMarketDealedLogCheckedBySeller(@Param("buyerId") Integer sellerId, @Param("specificArticleId") Integer specificArticleId);
     public void deleteMarketDealedLogCheckedBySeller(@Param("specificArticleId") Integer specificArticleId);
-    public void insertMarketDealedLogCheckedByBuyer(MarketDealedLogCheckedByBuyerDto marketDealedLogCheckedBySellerDto);
+    public void insertMarketDealedLogCheckedByBuyer(MarketDealedLogCheckedByBuyerDto marketDealedLogCheckedByBuyerDto);
+    public MarketDealedLogCheckedByBuyerDto selectMarketDealedLogCheckedByBuyer(MarketDealedLogCheckedByBuyerDto marketDealedLogCheckedByBuyerDto);
+    public MarketDealedLogCheckedByBuyerDto selectSpecificMarketDealedLogCheckedByBuyer(@Param("buyerId") Integer buyerId, @Param("specificArticleId") Integer specificArticleId);
     public void deleteMarketDealedLogCheckedByBuyer(@Param("specificArticleId") Integer specificArticleId);
+    public MarketDealedLogDto selectSpecificMarketDealedLog(@Param("specificArticleId") Integer specificArticleId);
     public List<MarketDealedLogDto> selectMarketDealedLogWhenBuyer(@Param("buyerId") Integer buyerId);
     public Integer selectCountMarketDealedLogWhenBuyer(@Param("buyerId") Integer buyerId);
     public List<MarketDealedLogDto> selectMarketDealedLogWhenSeller(@Param("sellerId") Integer sellerId);
     public Integer selectCountMarketDealedLogWhenSeller(@Param("sellerId") Integer sellerId);
     public void deleteMarketDealedLogWhenDeleteArticle(@Param("specificArticleId") Integer specificArticleId);
+    public void updateMarketArticleToSellEnded(@Param("id") Integer id);
     
     public void insertMarketReviewToUser(MarketReviewOnUserDto marketReviewOnUserDto);
     public List<MarketReviewOnUserDto> selectMarketReviewToUser(@Param("evaluatedUserId") Integer evaluatedUserId);

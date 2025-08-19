@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ca.gymbackend.diary.mapper.DiarySqlMapper">
+    
+    <select id="hasDiaryForToday" resultType="Integer">
+        SELECT COUNT(*) 
+        FROM diary 
+        WHERE user_id = #{userId} 
+        AND DATE(created_at) = CURRENT_DATE
+    </select>
+    
+    <insert id="insertDiary">
+        INSERT INTO diary (user_id, emoji_id, content) 
+        VALUES (#{user_id}, #{emoji_id}, #{content})
+    </insert>
+    
+    <select id="getDiariesByUserId" resultType="map">
+        SELECT d.*, e.name as emoji_name, e.emoji_image 
+        FROM diary d
+        LEFT JOIN emoji e ON d.emoji_id = e.id 
+        WHERE d.user_id = #{userId} 
+        ORDER BY d.created_at DESC
+    </select>
+
+    <select id="getDiaryByUserIdAndDate" resultType="map">
+        SELECT d.*, e.name as emoji_name, e.emoji_image 
+        FROM diary d
+        LEFT JOIN emoji e ON d.emoji_id = e.id 
+        WHERE d.user_id = #{userId} 
+        AND DATE(d.created_at) = #{targetDate}
+    </select>
+    
+</mapper>

@@ -58,9 +58,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/user/login").permitAll()
                         .requestMatchers("/api/user/verify-token").permitAll() // 토큰 유효성 검증은 permilAll
                         .requestMatchers("/api/challenge/tendency-test/status").authenticated() // 성향 테스트 상태 조회는 인증 필요
-                        .requestMatchers(HttpMethod.GET, "/api/routine/getRoutinesByUserId/**").authenticated() // 루틴
-                                                                                                                // 조회는
-                                                                                                                // 인증 필요
+                        .requestMatchers(HttpMethod.GET, "/api/routine/getRoutinesByUserId/**").authenticated() // 루틴 조회는 인증 필요
+                        .requestMatchers("/api/diary/emojis").permitAll() // 이모지 목록은 인증 없이 조회 가능
+                        .requestMatchers(HttpMethod.POST, "/api/diary/write").authenticated() // 일기 작성은 인증 필요
+                        .requestMatchers("/api/diary/check-today").authenticated() // 일기 작성 여부 확인은 인증 필요
+                        .requestMatchers("/api/diary/list").authenticated() // 일기 목록 조회는 인증 필요
+                        .requestMatchers("/api/diary/date").authenticated() // 특정 날짜 일기 조회는 인증 필요
                         .anyRequest().permitAll()) // 그 외 모든 요청은 허용
 
                 .formLogin(form -> form.disable())
