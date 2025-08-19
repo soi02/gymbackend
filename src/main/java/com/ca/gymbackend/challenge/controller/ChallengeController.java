@@ -29,6 +29,7 @@ import com.ca.gymbackend.challenge.dto.ChallengeProgressResponse;
 import com.ca.gymbackend.challenge.dto.ChallengeStartRequest;
 import com.ca.gymbackend.challenge.dto.ChallengeTendencyTestRequest;
 import com.ca.gymbackend.challenge.dto.KeywordCategoryTree;
+import com.ca.gymbackend.challenge.dto.NorigaeDto;
 import com.ca.gymbackend.challenge.dto.payment.PaymentReadyResponse;
 import com.ca.gymbackend.challenge.service.ChallengeServiceImpl;
 import com.ca.gymbackend.challenge.service.PaymentServiceImpl;
@@ -348,3 +349,4 @@ public ResponseEntity<List<KeywordCategoryTree>> getKeywordTree() {
         return paymentService.kakaoPayApprove(Long.valueOf(challengeId), userId, pgToken);
     }
 }
+
