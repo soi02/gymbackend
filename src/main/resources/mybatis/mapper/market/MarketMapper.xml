@@ -158,6 +158,13 @@
     
     </select>
     
+    <select id = "selectSpecificMarketDealedLogCheckedBySeller" resultType = "com.ca.gymbackend.market.dto.MarketDealedLogCheckedBySellerDto">
+    <!-- 수정 필요 -->
+    
+        SELECT * FROM market_dealed_log_checked_by_seller WHERE seller_id = #{sellerId} AND specific_article_id = #{specificArticleId};
+    
+    </select>
+    
     <delete id = "deleteMarketDealedLogCheckedBySeller"> 
     <!-- 판매자가 한 행동인지 정밀하게 확인하려면 sellerId 를 넣을 것 -->
     
@@ -173,6 +180,13 @@
     </insert>
     
     <select id = "selectMarketDealedLogCheckedByBuyer" resultType = "com.ca.gymbackend.market.dto.MarketDealedLogCheckedByBuyerDto">
+    <!-- 수정 필요 -->
+    
+        SELECT * FROM market_dealed_log_checked_by_buyer WHERE buyer_id = #{buyerId} AND specific_article_id = #{specificArticleId};
+    
+    </select>
+    
+    <select id = "selectSpecificMarketDealedLogCheckedByBuyer" resultType = "com.ca.gymbackend.market.dto.MarketDealedLogCheckedByBuyerDto">
     <!-- 수정 필요 -->
     
         SELECT * FROM market_dealed_log_checked_by_buyer WHERE buyer_id = #{buyerId} AND specific_article_id = #{specificArticleId};
