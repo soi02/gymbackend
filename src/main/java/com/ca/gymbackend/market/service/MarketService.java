@@ -21,6 +21,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.ca.gymbackend.market.dto.MarketArticleDto;
 import com.ca.gymbackend.market.dto.MarketCommentOnArticleDto;
+import com.ca.gymbackend.market.dto.MarketDealedLogCheckedByBuyerDto;
+import com.ca.gymbackend.market.dto.MarketDealedLogCheckedBySellerDto;
 import com.ca.gymbackend.market.dto.MarketDealedLogDto;
 import com.ca.gymbackend.market.dto.MarketProductInterestedLogDto;
 import com.ca.gymbackend.market.dto.MarketReviewOnUserDto;
@@ -329,6 +331,21 @@ public class MarketService {
     public void insertMarketDealedLog(MarketDealedLogDto marketDealedLogDto) {
         marketMapper.insertMarketDealedLog(marketDealedLogDto);
     }
+    public void insertMarketDealedLogCheckedBySeller(MarketDealedLogCheckedBySellerDto marketDealedLogCheckedBySellerDto) {
+        marketMapper.insertMarketDealedLogCheckedBySeller(marketDealedLogCheckedBySellerDto);
+    }
+    public void deleteMarketDealedLogCheckedBySeller(Integer specificArticleId) {
+        marketMapper.deleteMarketDealedLogCheckedBySeller(specificArticleId);
+    }
+    public void insertMarketDealedLogCheckedByBuyer(MarketDealedLogCheckedByBuyerDto marketDealedLogDto) {
+        marketMapper.insertMarketDealedLogCheckedByBuyer(marketDealedLogDto);
+    }
+    public void deleteMarketDealedLogCheckedByBuyer(Integer specificArticleId) {
+        marketMapper.deleteMarketDealedLogCheckedByBuyer(specificArticleId);
+    }
+    public void deleteMarketDealedLog(MarketDealedLogDto marketDealedLogDto) {
+        marketMapper.insertMarketDealedLog(marketDealedLogDto);
+    } // 수정 예정 (이름만 지정했음)
     public List<Map<String, Object>> selectMarketDealedLogWhenBuyer(Integer buyerId) {
         List<Map<String, Object>> mapListSelectMarketDealedLogWhenBuyer = new ArrayList<>();
         List<MarketDealedLogDto> listMarketDealedLogDto = marketMapper.selectMarketDealedLogWhenBuyer(buyerId);
