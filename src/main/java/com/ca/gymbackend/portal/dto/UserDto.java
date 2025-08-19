@@ -1,6 +1,7 @@
 package com.ca.gymbackend.portal.dto;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
 
 import lombok.Data;
 
@@ -20,4 +21,5 @@ public class UserDto {
     private int weight;
     private int muscleMass;
     private boolean isBuddy;
+    private LocalDateTime createdAt;
 }
