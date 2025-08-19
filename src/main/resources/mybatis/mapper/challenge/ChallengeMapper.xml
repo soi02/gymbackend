@@ -321,7 +321,7 @@
             uc.personal_end_date AS personalEndDate
         FROM
             user_challenge uc
-        JOIN
+        JOIN 
             challenge c ON uc.challenge_id = c.challenge_id
         WHERE
             uc.user_id = #{userId} AND uc.challenge_id = #{challengeId}
