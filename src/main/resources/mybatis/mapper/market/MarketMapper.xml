@@ -151,6 +151,13 @@
     
     </insert>
     
+    <select id = "selectMarketDealedLogCheckedBySeller" resultType = "com.ca.gymbackend.market.dto.MarketDealedLogCheckedBySellerDto">
+    <!-- 수정 필요 -->
+    
+        SELECT * FROM market_dealed_log_checked_by_seller WHERE seller_id = #{sellerId} AND specific_article_id = #{specificArticleId};
+    
+    </select>
+    
     <delete id = "deleteMarketDealedLogCheckedBySeller"> 
     <!-- 판매자가 한 행동인지 정밀하게 확인하려면 sellerId 를 넣을 것 -->
     
@@ -165,12 +172,25 @@
     
     </insert>
     
+    <select id = "selectMarketDealedLogCheckedByBuyer" resultType = "com.ca.gymbackend.market.dto.MarketDealedLogCheckedByBuyerDto">
+    <!-- 수정 필요 -->
+    
+        SELECT * FROM market_dealed_log_checked_by_buyer WHERE buyer_id = #{buyerId} AND specific_article_id = #{specificArticleId};
+    
+    </select>
+    
     <delete id = "deleteMarketDealedLogCheckedByBuyer">
     <!-- 판매자가 한 행동인지 정밀하게 확인하려면 buyerId 를 넣을 것 -->
     
         DELETE FROM market_dealed_log_checked_by_buyer WHERE specific_article_id = #{specificArticleId};
     
     </delete>
+    
+    <select id = "selectSpecificMarketDealedLog" resultType = "com.ca.gymbackend.market.dto.MarketDealedLogDto"> <!-- 테스트용 -->
+    
+        SELECT * FROM market_dealed_log WHERE specific_article_id = #{specificArticleId};
+    
+    </select>
     
     <select id = "selectMarketDealedLogWhenBuyer" resultType = "com.ca.gymbackend.market.dto.MarketDealedLogDto"> <!-- 테스트용 -->
     
@@ -201,6 +221,12 @@
         DELETE FROM market_dealed_log WHERE specific_article_id = #{specificArticleId};
     
     </delete>
+    
+    <update id = "updateMarketArticleToSellEnded">
+    
+        UPDATE market_article ma SET sell_ended = 1 WHERE id = #{id};
+    
+    </update>
     
     <insert id = "insertMarketReviewToUser">
     
