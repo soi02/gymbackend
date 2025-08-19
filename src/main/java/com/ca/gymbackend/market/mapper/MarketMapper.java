@@ -58,6 +58,7 @@ public interface MarketMapper {
     public List<MarketDealedLogDto> selectMarketDealedLogWhenSeller(@Param("sellerId") Integer sellerId);
     public Integer selectCountMarketDealedLogWhenSeller(@Param("sellerId") Integer sellerId);
     public void deleteMarketDealedLogWhenDeleteArticle(@Param("specificArticleId") Integer specificArticleId);
+    public void updateMarketArticleToSellEnded(@Param("id") Integer id);
     
     public void insertMarketReviewToUser(MarketReviewOnUserDto marketReviewOnUserDto);
     public List<MarketReviewOnUserDto> selectMarketReviewToUser(@Param("evaluatedUserId") Integer evaluatedUserId);

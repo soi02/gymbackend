@@ -343,6 +343,7 @@ public class MarketService {
             marketDealedLogDto.setBuyerId(marketDealedLogCheckedBySellerDto.getBuyerId());
             marketDealedLogDto.setSpecificArticleId(marketDealedLogCheckedBySellerDto.getSpecificArticleId());
             marketMapper.insertMarketDealedLog(marketDealedLogDto);
+            marketMapper.updateMarketArticleToSellEnded(marketDealedLogCheckedBySellerDto.getSpecificArticleId());
         }
     }
     public void deleteMarketDealedLogCheckedBySeller(Integer specificArticleId) {
@@ -360,6 +361,7 @@ public class MarketService {
             marketDealedLogDto.setBuyerId(marketDealedLogCheckedByBuyerDto.getBuyerId());
             marketDealedLogDto.setSpecificArticleId(marketDealedLogCheckedByBuyerDto.getSpecificArticleId());
             marketMapper.insertMarketDealedLog(marketDealedLogDto);
+            marketMapper.updateMarketArticleToSellEnded(marketDealedLogCheckedByBuyerDto.getSpecificArticleId());
         }
     }
     public void deleteMarketDealedLogCheckedByBuyer(Integer specificArticleId) {

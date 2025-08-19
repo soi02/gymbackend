@@ -222,6 +222,12 @@
     
     </delete>
     
+    <update id = "updateMarketArticleToSellEnded">
+    
+        UPDATE market_article ma SET sell_ended = 1 WHERE id = #{id};
+    
+    </update>
+    
     <insert id = "insertMarketReviewToUser">
     
         INSERT INTO market_review_on_user (writer_id, evaluated_user_id, content)
