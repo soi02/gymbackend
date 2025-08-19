@@ -1,0 +1,26 @@
+meta {
+  name: 일기쓰기
+  type: http
+  seq: 16
+}
+
+post {
+  url: http://localhost:8080/api/diary/write
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzU1NjIzMzc1LCJleHAiOjE3NTU2MjY5NzV9.lnuxkB2KtBu9SHOuoRgbLQIXx5WoI9QG6csyb-R_Co0
+}
+
+body:json {
+  {
+    "emoji_id": 1,
+    "content": "오늘은 정말 즐거운 하루였어!"
+  }
+}
+
+settings {
+  encodeUrl: true
+}

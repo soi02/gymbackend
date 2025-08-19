@@ -6,8 +6,22 @@ meta {
 
 post {
   url: http://localhost:8080/api/user/update
-  body: none
+  body: json
   auth: inherit
+}
+
+body:json {
+  {
+    "id": 1,
+    "name": "홍길동",
+    "password": "1",
+    "birth": "1990-05-15",
+    "address": "서울특별시 강남구 테헤란로 123",
+    "phone": "010-9876-5432",
+    "height": 180,
+    "weight": 75,
+    "muscleMass": 45
+  }
 }
 
 settings {
