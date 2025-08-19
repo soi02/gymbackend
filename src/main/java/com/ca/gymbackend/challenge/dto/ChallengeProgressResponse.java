@@ -24,4 +24,6 @@ public class ChallengeProgressResponse {
 
     // 새로 추가할 필드: 획득한 모든 노리개 목록**
     private List<ChallengeNorigaeAwardInfo> awardedNorigaeList; 
+
+    private String challengeThumbnailPath;
 }
