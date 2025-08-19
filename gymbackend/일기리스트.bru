@@ -1,0 +1,23 @@
+meta {
+  name: 일기리스트
+  type: http
+  seq: 17
+}
+
+get {
+  url: http://localhost:8080/api/diary/list?userId=1
+  body: none
+  auth: inherit
+}
+
+params:query {
+  userId: 1
+}
+
+headers {
+  Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzU1NjIzMzc1LCJleHAiOjE3NTU2MjY5NzV9.lnuxkB2KtBu9SHOuoRgbLQIXx5WoI9QG6csyb-R_Co0
+}
+
+settings {
+  encodeUrl: true
+}
