@@ -315,7 +315,7 @@ public class MarketService {
         MarketUserInfoDto marketUserInfoDto = new MarketUserInfoDto();
         if (marketProductInterestedLogDto != null) {
             marketArticleDto = marketMapper.selectSpecificMarketArticle(marketProductInterestedLogDto.getSpecificArticleId());
-            marketUserInfoDto = marketMapper.selectMarketUserInfo(marketArticleDto.getMarketUserId());
+            marketUserInfoDto = marketMapper.selectMarketUserInfo(marketProductInterestedLogDto.getMarketUserId());
         } else {
             marketProductInterestedLogDto = new MarketProductInterestedLogDto();
         }
