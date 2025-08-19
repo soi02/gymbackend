@@ -246,9 +246,9 @@
             c.challenge_title AS challengeTitle,
             c.challenge_thumbnail_path AS challengeThumbnailPath,
             c.challenge_duration_days AS challengeDurationDays,
-            uc.personal_join_date AS personalJoinDate  
-            
-        FROM user_challenge uc         
+            c.challenge_participant_count AS challengeParticipantCount,
+            uc.personal_join_date AS personalJoinDate
+        FROM user_challenge uc
         JOIN challenge c ON uc.challenge_id = c.challenge_id
         WHERE uc.user_id = #{userId}
         ORDER BY uc.personal_join_date DESC

@@ -20,15 +20,57 @@
 
     <!-- 특정 챌린지의 모든 메시지 기록을 조회 -->
     <select id="findAllMessagesByChallengeId" resultType="com.ca.gymbackend.challenge.dto.groupchat.GroupChatMessage">
-        SELECT
-            group_chat_message_id AS groupChatMessageId,
-            challenge_id AS challengeId,
-            sender_user_id AS senderUserId,
-            group_chat_message_content AS groupChatMessageContent,
-            created_at AS createdAt
-        FROM group_chat_message
+    SELECT
+        gcm.group_chat_message_id AS groupChatMessageId,
+        gcm.challenge_id AS challengeId,
+        gcm.sender_user_id AS senderUserId,
+        gcm.group_chat_message_content AS groupChatMessageContent,
+        gcm.created_at AS createdAt,
+        u.profile_image AS senderProfileImagePath,  u.name AS senderNickname                     
+        
+    FROM
+        group_chat_message gcm
+    JOIN
+        user u ON gcm.sender_user_id = u.id
+    WHERE
+        gcm.challenge_id = #{challengeId}
+    ORDER BY
+        gcm.created_at ASC
+    </select>
+
+
+
+    <insert id="insertMessageReadStatus">
+        INSERT INTO group_chat_message_read_status (group_chat_message_id, reader_user_id)
+        VALUES (#{messageId}, #{userId})
+    </insert>
+
+    <select id="hasReadStatus" resultType="boolean">
+        SELECT EXISTS (
+            SELECT 1 
+            FROM group_chat_message_read_status
+            WHERE group_chat_message_id = #{messageId} AND reader_user_id = #{userId}
+        )
+    </select>
+    
+    <select id="countReadersByMessageId" resultType="long">
+        SELECT COUNT(reader_user_id) 
+        FROM group_chat_message_read_status 
+        WHERE group_chat_message_id = #{messageId}
+    </select>
+    
+    <select id="findChallengeIdByMessageId" resultType="long">
+        SELECT challenge_id 
+        FROM group_chat_message 
+        WHERE group_chat_message_id = #{messageId}
+    </select>
+
+
+
+   <select id="countParticipantsByChallengeId" resultType="int">
+        SELECT COUNT(user_id)
+        FROM user_challenge
         WHERE challenge_id = #{challengeId}
-        ORDER BY created_at ASC
     </select>
 
 </mapper>
