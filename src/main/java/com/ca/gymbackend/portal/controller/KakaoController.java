@@ -7,20 +7,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ca.gymbackend.portal.service.KakaoService;
+
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/user")
 public class KakaoController {
 
-    // private final String clientId = 
+    private KakaoService kakaoService;
 
-    // @GetMapping("/oauth2/kakao/login")
-    // public void login(HttpServletResponse response) throws IOException {
-    //     String kakaoAuthUrl = "https://kauth.kakao.com/oauth/authorize"
-    //         + "?response_type=code"
-    //         + "&client_id=" + clientId
-    //         + "&redirect_uri=" + redirectUri;
-    //     response.sendRedirect(kakaoAuthUrl);
-    // }
+    @GetMapping("/kakao/authorize")
+    public String kakaoLoginRequest() {
+        return kakaoService.getAuthUrl();
+    }
+
 }

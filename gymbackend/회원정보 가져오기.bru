@@ -1,0 +1,15 @@
+meta {
+  name: 회원정보 가져오기
+  type: http
+  seq: 14
+}
+
+get {
+  url: http://localhost:8080/api/user/1
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+}
