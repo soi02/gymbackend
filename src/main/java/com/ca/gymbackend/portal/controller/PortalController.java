@@ -5,7 +5,9 @@ import java.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -116,5 +118,22 @@ public class PortalController {
         } catch (Exception e) {
             return ResponseEntity.status(401).body(new ApiResponse(false, "토큰 검증 중 오류가 발생했습니다."));
         }
+    }
+
+     // 사용자 정보 수정 API
+    @PostMapping("/update")
+    public ResponseEntity<String> updateUser(@RequestBody UserDto userDto) {
+        portalService.updateUser(userDto);
+        return ResponseEntity.ok("User information updated successfully.");
+    }
+
+    // 사용자 ID로 정보를 조회하는 API 추가
+    @GetMapping("/{id}")
+    public ResponseEntity<UserDto> getUserInfo(@PathVariable("id") Integer id) {
+        UserDto user = portalService.findById(id);
+        if (user == null) {
+            return ResponseEntity.notFound().build(); // 사용자가 없으면 404 응답
+        }
+        return ResponseEntity.ok(user); // 사용자 정보 반환
     }
 }
