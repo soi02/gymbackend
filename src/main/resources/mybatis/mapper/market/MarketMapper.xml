@@ -146,17 +146,29 @@
     
     <insert id = "insertMarketDealedLogCheckedBySeller">
     
+        INSERT INTO market_dealed_log_checked_by_seller (seller_id, buyer_id, specific_article_id)
+        VALUES (#{sellerId}, #{buyerId}, #{specificArticleId});
+    
     </insert>
     
-    <delete id = "deleteMarketDealedLogCheckedBySeller">
+    <delete id = "deleteMarketDealedLogCheckedBySeller"> 
+    <!-- 판매자가 한 행동인지 정밀하게 확인하려면 sellerId 를 넣을 것 -->
+    
+        DELETE FROM market_dealed_log_checked_by_seller WHERE specific_article_id = #{specificArticleId};
     
     </delete>
     
     <insert id = "insertMarketDealedLogCheckedByBuyer">
     
+        INSERT INTO market_dealed_log_checked_by_buyer (seller_id, buyer_id, specific_article_id)
+        VALUES (#{sellerId}, #{buyerId}, #{specificArticleId});
+    
     </insert>
     
     <delete id = "deleteMarketDealedLogCheckedByBuyer">
+    <!-- 판매자가 한 행동인지 정밀하게 확인하려면 buyerId 를 넣을 것 -->
+    
+        DELETE FROM market_dealed_log_checked_by_buyer WHERE specific_article_id = #{specificArticleId};
     
     </delete>
     

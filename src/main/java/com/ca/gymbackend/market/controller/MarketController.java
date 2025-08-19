@@ -17,6 +17,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.ca.gymbackend.market.dto.MarketArticleDto;
 import com.ca.gymbackend.market.dto.MarketCommentOnArticleDto;
+import com.ca.gymbackend.market.dto.MarketDealedLogCheckedByBuyerDto;
+import com.ca.gymbackend.market.dto.MarketDealedLogCheckedBySellerDto;
 import com.ca.gymbackend.market.dto.MarketDealedLogDto;
 import com.ca.gymbackend.market.dto.MarketProductInterestedLogDto;
 import com.ca.gymbackend.market.dto.MarketReviewOnUserDto;
@@ -160,6 +162,22 @@ public class MarketController {
     @PostMapping("/insertMarketDealedLog") // ok --- 전체적인 구조 수정 예정
     public void insertMarketDealedLog(@RequestBody MarketDealedLogDto marketDealedLogDto) {
         marketService.insertMarketDealedLog(marketDealedLogDto);
+    }
+    
+    @PostMapping("/insertMarketDealedLogCheckedBySeller") // ok --- 전체적인 구조 수정 예정
+    public void insertMarketDealedLogCheckedBySeller(@RequestBody MarketDealedLogCheckedBySellerDto marketDealedLogCheckedBySellerDto) {
+        marketService.insertMarketDealedLogCheckedBySeller(marketDealedLogCheckedBySellerDto);
+    }    @PostMapping("/deleteMarketDealedLogCheckedBySeller") // ok --- 전체적인 구조 수정 예정
+    public void deleteMarketDealedLogCheckedBySeller(@RequestParam("specificArticleId") Integer specificArticleId) {
+        marketService.deleteMarketDealedLogCheckedBySeller(specificArticleId);
+    }
+    
+    @PostMapping("/insertMarketDealedLogCheckedByBuyer") // ok --- 전체적인 구조 수정 예정
+    public void insertMarketDealedLogCheckedByBuyer(@RequestBody MarketDealedLogCheckedByBuyerDto marketDealedLogCheckedByBuyerDto) {
+        marketService.insertMarketDealedLogCheckedByBuyer(marketDealedLogCheckedByBuyerDto);
+    }    @PostMapping("/deleteMarketDealedLogCheckedByBuyer") // ok --- 전체적인 구조 수정 예정
+    public void deleteMarketDealedLogCheckedByBuyer(@RequestParam("specificArticleId") Integer specificArticleId) {
+        marketService.deleteMarketDealedLogCheckedByBuyer(specificArticleId);
     }
     
     @GetMapping("/selectMarketDealedLogWhenBuyer") // ok + Front OK

@@ -7,6 +7,8 @@ import org.apache.ibatis.annotations.Param;
 
 import com.ca.gymbackend.market.dto.MarketArticleDto;
 import com.ca.gymbackend.market.dto.MarketCommentOnArticleDto;
+import com.ca.gymbackend.market.dto.MarketDealedLogCheckedByBuyerDto;
+import com.ca.gymbackend.market.dto.MarketDealedLogCheckedBySellerDto;
 import com.ca.gymbackend.market.dto.MarketDealedLogDto;
 import com.ca.gymbackend.market.dto.MarketProductInterestedLogDto;
 import com.ca.gymbackend.market.dto.MarketReviewOnUserDto;
@@ -44,6 +46,10 @@ public interface MarketMapper {
     public void deleteMarketProductInterestedLog(@Param("marketUserId") Integer marketUserId, @Param("specificArticleId") Integer specificArticleId);
     
     public void insertMarketDealedLog(MarketDealedLogDto marketDealedLogDto);
+    public void insertMarketDealedLogCheckedBySeller(MarketDealedLogCheckedBySellerDto marketDealedLogCheckedBySellerDto);
+    public void deleteMarketDealedLogCheckedBySeller(@Param("specificArticleId") Integer specificArticleId);
+    public void insertMarketDealedLogCheckedByBuyer(MarketDealedLogCheckedByBuyerDto marketDealedLogCheckedBySellerDto);
+    public void deleteMarketDealedLogCheckedByBuyer(@Param("specificArticleId") Integer specificArticleId);
     public List<MarketDealedLogDto> selectMarketDealedLogWhenBuyer(@Param("buyerId") Integer buyerId);
     public Integer selectCountMarketDealedLogWhenBuyer(@Param("buyerId") Integer buyerId);
     public List<MarketDealedLogDto> selectMarketDealedLogWhenSeller(@Param("sellerId") Integer sellerId);
