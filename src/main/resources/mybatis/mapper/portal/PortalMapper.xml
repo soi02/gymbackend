@@ -27,6 +27,7 @@
             birth = #{birth},
             address = #{address},
             phone = #{phone},
+            profile_image = #{profileImage},
             height = #{height},
             weight = #{weight},
             muscle_mass = #{muscleMass}
