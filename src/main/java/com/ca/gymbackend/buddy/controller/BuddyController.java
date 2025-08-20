@@ -41,8 +41,8 @@ public class BuddyController {
     // 버디 등록
     @PostMapping("/register")
     public String registerBuddy(@RequestBody BuddyDto buddyDto, HttpServletRequest request) {
-        String token = request.getHeader("Authorization").substring(7); // "Bearer " 제거
-        Integer userId = jwtUtil.getUserId(token); // JwtUtil에 이미 존재함
+        String token = request.getHeader("Authorization").substring(7);
+        Integer userId = jwtUtil.getUserId(token);
 
         System.out.println("Before set: " + buddyDto.getUserId());
         buddyDto.setUserId(userId);
@@ -51,42 +51,26 @@ public class BuddyController {
         buddyService.registerBuddy(buddyDto);
         buddyService.updateIsBuddy(buddyDto.getUserId());
 
-        // System.out.println("넘어온 buddyDto: " + buddyDto);
-        // System.out.println("buddyAgeList: " + buddyDto.getBuddyAgeList());
         return "버디 등록 완료";
     }
 
-    // 버디인지확인
-    /**
-     * 특정 유저의 is_buddy 상태를 조회하는 엔드포인트
-     * 
-     * @param userId 조회할 유저 ID
-     * @return is_buddy 상태를 담은 응답
-     */
+    // 버디인지 확인
     @GetMapping("/is-buddy")
     public ResponseEntity<Map<String, Boolean>> isBuddyStatus(@RequestParam("userId") int userId) {
-        // userId를 이용해 buddyService에서 is_buddy 상태를 조회합니다.
         boolean isBuddy = buddyService.isBuddy(userId);
 
         Map<String, Boolean> response = new HashMap<>();
         response.put("is_buddy", isBuddy);
 
-        // 클라이언트에 JSON 형태로 { "is_buddy": true/false } 를 반환합니다.
         return ResponseEntity.ok(response);
     }
 
-    // @GetMapping("/list")
-    // public ResponseEntity<List<Map<String, Object>>> getBuddyUserList() {
-    // List<Map<String, Object>> result = buddyService.getBuddyUserList();
-    // return ResponseEntity.ok(result);
-    // }
     @GetMapping("/list")
     public ResponseEntity<List<Map<String, Object>>> getBuddyUserList() {
-        // ✅ 현재 로그인한 유저 ID를 SecurityContextHolder에서 가져옴
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         int loggedInUserId = (int) authentication.getPrincipal();
 
-        List<Map<String, Object>> result = buddyService.getBuddyUserList(loggedInUserId); // ✅ ID 전달
+        List<Map<String, Object>> result = buddyService.getBuddyUserList(loggedInUserId);
         return ResponseEntity.ok(result);
     }
 
@@ -101,7 +85,7 @@ public class BuddyController {
     public ResponseEntity<?> sendMatchingRequest(@RequestBody MatchingDto dto) {
         try {
             System.out.println("====================");
-            System.out.println("받은 MatchingDto: " + dto); // <-- 이게 null이면 문제는 프론트 or DTO
+            System.out.println("받은 MatchingDto: " + dto);
             System.out.println("senderId: " + dto.getSendBuddyId());
             System.out.println("receiverId: " + dto.getReceiverBuddyId());
             buddyService.sendMatchingRequest(dto.getSendBuddyId(), dto.getReceiverBuddyId());
@@ -120,7 +104,6 @@ public class BuddyController {
             if ("수락".equals(dto.getStatus())) {
                 buddyService.insertInitialChat(dto.getId(), dto.getSendBuddyId());
 
-                // 웹소켓으로 초기 메시지 전송
                 ChatDto initialChat = new ChatDto();
                 initialChat.setMatchingId(dto.getId());
                 initialChat.setSendBuddyId(dto.getSendBuddyId());
@@ -162,7 +145,19 @@ public class BuddyController {
     @PostMapping("/send")
     public ResponseEntity<?> sendChat(@RequestBody ChatDto chatDto) {
         try {
-            buddyService.sendChat(chatDto);
+            // ⭐ 추가: messagingTemplate이 null인지 확인하는 로그
+            if (messagingTemplate == null) {
+                System.err.println("❌ messagingTemplate이 주입되지 않았습니다!");
+            } else {
+                System.out.println("✅ messagingTemplate이 정상적으로 주입되었습니다.");
+            }
+
+            // ⭐ 수정: Service에서 ChatDto를 반환하도록 변경했으므로, 반환값을 받음
+            ChatDto savedChat = buddyService.sendChat(chatDto);
+
+            // ⭐ 추가: 메시지를 DB에 저장한 후, 웹소켓으로 해당 채팅방에 브로드캐스팅
+            messagingTemplate.convertAndSend("/topic/" + savedChat.getMatchingId(), savedChat);
+
             return ResponseEntity.ok("메시지 전송 성공");
         } catch (Exception e) {
             return ResponseEntity.status(500).body("메시지 전송 실패: " + e.getMessage());
@@ -176,25 +171,26 @@ public class BuddyController {
         return ResponseEntity.ok(chats);
     }
 
-    // 메시지 읽음 처리 (옵션)
-    // @PostMapping("/read/{id}")
-    // public ResponseEntity<?> markChatAsRead(@PathVariable int id) {
-    // try {
-    // buddyService.markChatAsRead(id);
-    // return ResponseEntity.ok("읽음 처리 완료");
-    // } catch (Exception e) {
-    // return ResponseEntity.status(500).body("읽음 처리 실패: " + e.getMessage());
-    // }
-    // }
-    // ✅ 수정된 엔드포인트: matchingId를 받아 해당 채팅방의 메시지를 읽음 처리
     // 채팅방 입장 시 메시지를 읽음 처리
     @PostMapping("/chat/read/{matchingId}")
     public ResponseEntity<Void> markChatsAsRead(@PathVariable(value = "matchingId") int matchingId) {
-        // 현재 로그인한 사용자 정보 가져오기 (buddy_id)
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        int readerBuddyId = (int) authentication.getPrincipal(); // 예시: user_id가 principal에 저장되어 있다고 가정
+        int readerBuddyId = (int) authentication.getPrincipal();
 
-        buddyService.markMessagesAsRead(matchingId, readerBuddyId);
+        // ⭐ 수정: 읽음 처리된 메시지들의 ID 목록을 받음
+        List<Integer> readChatIds = buddyService.markMessagesAsRead(matchingId, readerBuddyId);
+
+        // ⭐ 추가: 읽음 처리 정보 브로드캐스팅
+        if (!readChatIds.isEmpty()) {
+            Map<String, Object> readStatusUpdate = new HashMap<>();
+            readStatusUpdate.put("type", "READ_STATUS");
+            readStatusUpdate.put("matchingId", matchingId);
+            readStatusUpdate.put("readerId", readerBuddyId);
+            readStatusUpdate.put("readChatIds", readChatIds);
+
+            messagingTemplate.convertAndSend("/topic/" + matchingId, readStatusUpdate);
+        }
+
         return ResponseEntity.ok().build();
     }
 }
