@@ -39,7 +39,7 @@
     </select>
 
 
-
+    <!-- 그룹 채팅 읽음 숫자 관련 -->
     <insert id="insertMessageReadStatus">
         INSERT INTO group_chat_message_read_status (group_chat_message_id, reader_user_id)
         VALUES (#{messageId}, #{userId})
@@ -71,6 +71,12 @@
         SELECT COUNT(user_id)
         FROM user_challenge
         WHERE challenge_id = #{challengeId}
+    </select>
+
+
+    <!-- 챌린지 제목을 설정 -->
+    <select id="findChallengeTitleById" resultType="String">
+        SELECT challenge_title FROM challenge WHERE challenge_id = #{challengeId}
     </select>
 
 </mapper>

@@ -65,16 +65,20 @@ public class GroupChatController {
 @GetMapping("/getChatHistoryProcess/{challengeId}")
 public ResponseEntity<List<GroupChatMessage>> getChatHistoryProcess(@PathVariable("challengeId") Long challengeId) {
     System.out.println("getChatHistoryProcess 메서드 호출. challengeId: " + challengeId);
-    
-    // 1. 기존 메시지 기록을 가져옵니다.
+
+    // 1. 챌린지 제목을 가져오는 로직 추가
+    String challengeTitle = groupChatMessageService.getChallengeTitleById(challengeId); 
+
+    // 2. 기존 메시지 기록을 가져옵니다.
     List<GroupChatMessage> groupChatMessages = groupChatMessageService.getAllMessagesByChallengeId(challengeId);
 
-    // 2. 💡 추가된 코드: 각 메시지에 대한 readCount를 조회하고 DTO에 설정합니다.
+    // 3. 각 메시지 DTO에 readCount와 함께 챌린지 제목을 설정합니다.
     for (GroupChatMessage message : groupChatMessages) {
         Long readCount = groupChatMessageService.getReadCountByMessageId(message.getGroupChatMessageId());
         message.setReadCount(readCount);
+        message.setChallengeTitle(challengeTitle);
     }
-    
+
     System.out.println("챌린지 ID " + challengeId + "에 대한 채팅 기록 " + groupChatMessages.size() + "건 조회 성공");
     return ResponseEntity.ok(groupChatMessages);
 }

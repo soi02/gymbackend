@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+// import org.apache.ibatis.annotations.Select;
 
 import com.ca.gymbackend.challenge.dto.groupchat.GroupChatMessage;
 
@@ -34,4 +35,10 @@ public interface GroupChatMessageMapper {
 
     // 챌린지 참여 인원 수 조회 메서드 추가
     public int countParticipantsByChallengeId(Long challengeId);
+
+
+
+    // 챌린지 ID로 챌린지 제목을 조회하는 SQL 쿼리 메서드 추가
+    // @Select("SELECT challenge_name FROM challenge WHERE challenge_id = #{challengeId}")
+    public String findChallengeTitleById(Long challengeId);
 }
