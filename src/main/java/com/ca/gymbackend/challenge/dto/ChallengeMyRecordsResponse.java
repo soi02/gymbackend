@@ -14,4 +14,6 @@ public class ChallengeMyRecordsResponse {
     private int daysAttended; // 총 출석일수
     private boolean todayAttended; // 오늘 출석 여부
 
+    private int challengeParticipantCount; // 참가 인원
+
 }
