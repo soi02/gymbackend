@@ -48,7 +48,7 @@ public interface MarketMapper {
     public void insertMarketDealedLog(MarketDealedLogDto marketDealedLogDto);
     public void insertMarketDealedLogCheckedBySeller(MarketDealedLogCheckedBySellerDto marketDealedLogCheckedBySellerDto);
     public MarketDealedLogCheckedBySellerDto selectMarketDealedLogCheckedBySeller(MarketDealedLogCheckedBySellerDto marketDealedLogCheckedBySellerDto);
-    public MarketDealedLogCheckedBySellerDto selectSpecificMarketDealedLogCheckedBySeller(@Param("buyerId") Integer sellerId, @Param("specificArticleId") Integer specificArticleId);
+    public MarketDealedLogCheckedBySellerDto selectSpecificMarketDealedLogCheckedBySeller(@Param("sellerId") Integer sellerId, @Param("specificArticleId") Integer specificArticleId);
     public void deleteMarketDealedLogCheckedBySeller(@Param("specificArticleId") Integer specificArticleId);
     public void insertMarketDealedLogCheckedByBuyer(MarketDealedLogCheckedByBuyerDto marketDealedLogCheckedByBuyerDto);
     public MarketDealedLogCheckedByBuyerDto selectMarketDealedLogCheckedByBuyer(MarketDealedLogCheckedByBuyerDto marketDealedLogCheckedByBuyerDto);
