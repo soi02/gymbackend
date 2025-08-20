@@ -9,8 +9,6 @@ import java.util.Map;
 import com.ca.gymbackend.buddy.dto.BuddyDto;
 import com.ca.gymbackend.buddy.dto.ChatDto;
 import com.ca.gymbackend.buddy.dto.ChatRoomDto;
-// import com.ca.gymbackend.buddy.dto.MatchingDto;
-// import com.ca.gymbackend.portal.dto.UserDto;
 import com.ca.gymbackend.buddy.dto.AgeDto;
 
 @Mapper
@@ -24,10 +22,8 @@ public interface BuddySqlMapper {
 
     public List<Map<String, Object>> getBuddyUserList(int loggedInUserId);
 
-    // 버디인지확인
     public boolean isBuddy(int userId);
 
-    // 매칭 관련 메소드
     public void insertMatching(@Param("sendBuddyId") int sendBuddyId, @Param("receiverBuddyId") int receiverBuddyId);
 
     public void updateMatchingStatus(@Param("id") int id, @Param("status") String status);
@@ -36,18 +32,18 @@ public interface BuddySqlMapper {
 
     public List<ChatRoomDto> getChatRoomsByBuddyId(@Param("buddyId") int buddyId);
 
-    // 채팅
-    // ✅ 추가: 매칭 ID로 매칭 정보 조회
     public Map<String, Object> selectMatchingInfo(int matchingId);
 
-    // void insertInitialChat(@Param("matchingId") int matchingId,
-    // @Param("sendBuddyId") int sendBuddyId);
     public void insertInitialChat(Map<String, Object> params);
 
     public void insertChat(ChatDto chatDto);
 
     public List<ChatDto> selectChatsByMatchingId(int matchingId);
+    
+    // ⭐ 추가: 읽지 않은 메시지 ID 목록을 조회하는 메서드
+    public List<Integer> selectUnreadChatIds(@Param("matchingId") int matchingId, @Param("readerBuddyId") int readerBuddyId);
 
+    // ⭐ 수정: 매개변수에 @Param 어노테이션 추가
     public void markMessagesAsRead(@Param("matchingId") int matchingId, @Param("readerBuddyId") int readerBuddyId);
 
 }

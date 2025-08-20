@@ -17,7 +17,7 @@
     
     <select id = "selectMarketArticle" resultType = "com.ca.gymbackend.market.dto.MarketArticleDto">
     
-        SELECT * FROM market_article;
+        SELECT * FROM market_article ORDER BY id DESC;
     
     </select>
     
@@ -103,7 +103,7 @@
     
     <select id = "selectCountMarketProductInterestedLogWhenUserInfo" resultType = "int">
     
-        SELECT COUNT(*) FROM market_product_interested_log WHERE market_user_id = #{marketUserId};
+        SELECT COUNT(*) FROM market_product_interested_log WHERE market_user_id = #{marketUserId} ORDER BY id DESC;
     
     </select>
     
@@ -208,7 +208,7 @@
     
     <select id = "selectMarketDealedLogWhenBuyer" resultType = "com.ca.gymbackend.market.dto.MarketDealedLogDto"> <!-- 테스트용 -->
     
-        SELECT * FROM market_dealed_log WHERE buyer_id = #{buyerId};
+        SELECT * FROM market_dealed_log WHERE buyer_id = #{buyerId} ORDER BY id DESC;
     
     </select>
     
@@ -220,7 +220,7 @@
     
     <select id = "selectMarketDealedLogWhenSeller" resultType = "com.ca.gymbackend.market.dto.MarketDealedLogDto"> <!-- 테스트용 -->
     
-        SELECT * FROM market_dealed_log WHERE seller_id = #{sellerId};
+        SELECT * FROM market_dealed_log WHERE seller_id = #{sellerId} ORDER BY id DESC;
     
     </select>
     

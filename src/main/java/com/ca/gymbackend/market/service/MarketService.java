@@ -346,8 +346,8 @@ public class MarketService {
             marketMapper.updateMarketArticleToSellEnded(marketDealedLogCheckedBySellerDto.getSpecificArticleId());
         }
     }
-    public void selectSpecificMarketDealedLogCheckedBySeller(Integer sellerId, Integer specificArticleId) {
-        marketMapper.selectSpecificMarketDealedLogCheckedBySeller(sellerId, specificArticleId);
+    public MarketDealedLogCheckedBySellerDto selectSpecificMarketDealedLogCheckedBySeller(Integer sellerId, Integer specificArticleId) {
+        return marketMapper.selectSpecificMarketDealedLogCheckedBySeller(sellerId, specificArticleId);
     }
     public void deleteMarketDealedLogCheckedBySeller(Integer specificArticleId) {
         marketMapper.deleteMarketDealedLogCheckedBySeller(specificArticleId);
@@ -367,8 +367,8 @@ public class MarketService {
             marketMapper.updateMarketArticleToSellEnded(marketDealedLogCheckedByBuyerDto.getSpecificArticleId());
         }
     }
-    public void selectSpecificMarketDealedLogCheckedByBuyer(Integer buyerId, Integer specificArticleId) {
-        marketMapper.selectSpecificMarketDealedLogCheckedByBuyer(buyerId, specificArticleId);
+    public MarketDealedLogCheckedByBuyerDto selectSpecificMarketDealedLogCheckedByBuyer(Integer buyerId, Integer specificArticleId) {
+        return marketMapper.selectSpecificMarketDealedLogCheckedByBuyer(buyerId, specificArticleId);
     }
     public void deleteMarketDealedLogCheckedByBuyer(Integer specificArticleId) {
         marketMapper.deleteMarketDealedLogCheckedByBuyer(specificArticleId);
