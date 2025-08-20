@@ -17,7 +17,7 @@
     
     <select id = "selectMarketArticle" resultType = "com.ca.gymbackend.market.dto.MarketArticleDto">
     
-        SELECT * FROM market_article;
+        SELECT * FROM market_article ORDER BY id DESC;
     
     </select>
     
@@ -103,7 +103,7 @@
     
     <select id = "selectCountMarketProductInterestedLogWhenUserInfo" resultType = "int">
     
-        SELECT COUNT(*) FROM market_product_interested_log WHERE market_user_id = #{marketUserId};
+        SELECT COUNT(*) FROM market_product_interested_log WHERE market_user_id = #{marketUserId} ORDER BY id DESC;
     
     </select>
     
@@ -158,6 +158,13 @@
     
     </select>
     
+    <select id = "selectSpecificMarketDealedLogCheckedBySeller" resultType = "com.ca.gymbackend.market.dto.MarketDealedLogCheckedBySellerDto">
+    <!-- 수정 필요 -->
+    
+        SELECT * FROM market_dealed_log_checked_by_seller WHERE seller_id = #{sellerId} AND specific_article_id = #{specificArticleId};
+    
+    </select>
+    
     <delete id = "deleteMarketDealedLogCheckedBySeller"> 
     <!-- 판매자가 한 행동인지 정밀하게 확인하려면 sellerId 를 넣을 것 -->
     
@@ -179,6 +186,13 @@
     
     </select>
     
+    <select id = "selectSpecificMarketDealedLogCheckedByBuyer" resultType = "com.ca.gymbackend.market.dto.MarketDealedLogCheckedByBuyerDto">
+    <!-- 수정 필요 -->
+    
+        SELECT * FROM market_dealed_log_checked_by_buyer WHERE buyer_id = #{buyerId} AND specific_article_id = #{specificArticleId};
+    
+    </select>
+    
     <delete id = "deleteMarketDealedLogCheckedByBuyer">
     <!-- 판매자가 한 행동인지 정밀하게 확인하려면 buyerId 를 넣을 것 -->
     
@@ -194,7 +208,7 @@
     
     <select id = "selectMarketDealedLogWhenBuyer" resultType = "com.ca.gymbackend.market.dto.MarketDealedLogDto"> <!-- 테스트용 -->
     
-        SELECT * FROM market_dealed_log WHERE buyer_id = #{buyerId};
+        SELECT * FROM market_dealed_log WHERE buyer_id = #{buyerId} ORDER BY id DESC;
     
     </select>
     
@@ -206,7 +220,7 @@
     
     <select id = "selectMarketDealedLogWhenSeller" resultType = "com.ca.gymbackend.market.dto.MarketDealedLogDto"> <!-- 테스트용 -->
     
-        SELECT * FROM market_dealed_log WHERE seller_id = #{sellerId};
+        SELECT * FROM market_dealed_log WHERE seller_id = #{sellerId} ORDER BY id DESC;
     
     </select>
     
