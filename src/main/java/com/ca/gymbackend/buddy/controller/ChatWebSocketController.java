@@ -30,6 +30,11 @@ public class ChatWebSocketController {
         // ✅ 클라가 구독하는 경로와 정확히 일치
         messagingTemplate.convertAndSend("/topic/" + savedChatDto.getMatchingId(), savedChatDto);
         System.out.println("✅ 메시지 브로드캐스팅 성공. MatchingId: " + savedChatDto.getMatchingId());
+
+        // ✅ 2. 채팅 리스트 페이지를 위한 알림 메시지 브로드캐스팅
+        // 메시지 일부 정보만 담아 전송하여 불필요한 데이터 전송을 줄임
+        // 여기서 DTO를 새로 정의하여 필요한 정보만 담아 보내는 것이 더 효율적일 수 있습니다.
+        messagingTemplate.convertAndSend("/topic/chat-list", savedChatDto);
     }
 
     // ✅ WebRTC 시그널링 메시지를 처리하는 새로운 메서드 추가 및 수정
