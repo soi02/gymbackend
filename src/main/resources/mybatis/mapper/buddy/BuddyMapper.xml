@@ -41,20 +41,12 @@
         AND u.id != #{loggedInUserId} GROUP BY u.id
     </select>
 
-    <!-- 버디인지 확인 -->
-    <!-- <select id="isBuddy" parameterType="map" resultType="boolean">
-        SELECT COUNT(*) > 0
-        FROM buddy
-        WHERE (send_buddy_id = #{userId} AND receiver_buddy_id = #{buddyId})
-           OR (send_buddy_id = #{buddyId} AND receiver_buddy_id = #{userId})
-    </select> -->
     <select id="isBuddy" parameterType="int" resultType="boolean">
         SELECT is_buddy
         FROM user
         WHERE id = #{userId}
     </select>
 
-    <!-- 매칭 -->
     <insert id="insertMatching">
         INSERT INTO matching (send_buddy_id, receiver_buddy_id)
         VALUES (#{sendBuddyId}, #{receiverBuddyId});
@@ -87,7 +79,6 @@
         GROUP BY m.id ORDER BY m.id DESC
     </select>
 
-    <!-- 채팅룸 나열 -->
     <select id="getChatRoomsByBuddyId">
          SELECT 
         m.id AS matchingId,
@@ -105,7 +96,6 @@
         END AS opponentIntro,
         ch.message AS lastMessage,
         ch.sent_at AS lastSentAt,
-        <!-- ✅ 추가된 부분: 안 읽은 메시지 수를 계산하는 서브쿼리 -->
         (
             SELECT COUNT(*)
             FROM chat
@@ -129,15 +119,11 @@
         ORDER BY ch.sent_at DESC
     </select>
 
-
-
-    <!-- // 채팅 -->
     <insert id="insertInitialChat" parameterType="map">
         INSERT INTO chat (matching_id, send_buddy_id, message, sent_at, is_read)
         VALUES (#{matchingId}, #{sendBuddyId}, '안녕하세요.', NOW(), false)
     </insert>
 
-    <!-- 상대방 이름 보이게 -->
     <select id="selectMatchingInfo" parameterType="int" resultType="map">
         SELECT 
             m.send_buddy_id AS buddy1Id,
@@ -152,11 +138,6 @@
         WHERE m.id = #{matchingId}
     </select>
 
-
-    <!-- <insert id="insertChat" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO chat(matching_id, send_buddy_id, message, is_read, sent_at)
-        VALUES(#{matchingId}, #{sendBuddyId}, #{message}, #{isRead}, #{sentAt})
-    </insert> -->
     <insert id="insertChat"  useGeneratedKeys="true" keyProperty="id">
         INSERT INTO chat (
             matching_id,
@@ -173,14 +154,6 @@
         )
     </insert>
 
-    <!-- <select id="selectChatsByMatchingId" parameterType="int">
-        SELECT id, matching_id, send_buddy_id, message, is_read, sent_at
-        FROM chat
-        WHERE matching_id = #{matchingId}
-        ORDER BY sent_at ASC
-    </select> -->
-
-    <!-- 이름,사진 추가 수정버전 -->
     <select id="selectChatsByMatchingId" parameterType="int">
          SELECT
             c.id,
@@ -200,11 +173,15 @@
         ORDER BY c.sent_at ASC
     </select>
 
-    <!-- <update id="updateChatReadStatus" parameterType="int">
-        UPDATE chat SET is_read = true WHERE id = #{id}
-    </update> -->
+    <select id="selectUnreadChatIds" resultType="int">
+        SELECT id
+        FROM chat
+        WHERE matching_id = #{matchingId}
+        AND send_buddy_id != #{readerBuddyId}
+        AND is_read = FALSE
+    </select>
 
-    <update id="markMessagesAsRead" parameterType="map">
+    <update id="markMessagesAsRead">
         UPDATE chat
         SET is_read = TRUE
         WHERE matching_id = #{matchingId}

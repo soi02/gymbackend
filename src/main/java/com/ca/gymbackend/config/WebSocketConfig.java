@@ -29,19 +29,19 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.enableSimpleBroker("/topic");
-        registry.enableSimpleBroker("/topic-group");
+        // ✅ 여기만 고치면 핵심 문제 해결
+        registry.enableSimpleBroker("/topic", "/topic-group");
         registry.setApplicationDestinationPrefixes("/app");
+        // registry.setUserDestinationPrefix("/user"); // 개인큐 필요시
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        // ✅ 순수 웹소켓으로 변경: .withSockJS()를 제거합니다.
+        // ✅ 순수 WebSocket 사용중 (클라에서 brokerURL=ws://... 로 접속해야 함)
         registry.addEndpoint("/ws/chat")
                 .setAllowedOriginPatterns("http://localhost:5173");
                 // .setAllowedOriginPatterns("http://localhost:5173","https://gymmadang.null-pointer-exception.com");
 
-        // ✅ 순수 웹소켓으로 변경: .withSockJS()를 제거합니다.
         registry.addEndpoint("/ws/group-chat")
                 .setAllowedOriginPatterns("http://localhost:5173");
                 // .setAllowedOriginPatterns("http://localhost:5173","https://gymmadang.null-pointer-exception.com");
@@ -53,10 +53,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
             @Override
             public Message<?> preSend(Message<?> message, MessageChannel channel) {
                 StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-
-                if (StompCommand.CONNECT.equals(accessor.getCommand())) {
+                if (accessor != null && StompCommand.CONNECT.equals(accessor.getCommand())) {
                     String authorizationHeader = accessor.getFirstNativeHeader("Authorization");
-
                     logger.info("STOMP CONNECT 헤더: {}", authorizationHeader);
 
                     if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {

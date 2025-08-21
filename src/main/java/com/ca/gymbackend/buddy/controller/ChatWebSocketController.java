@@ -20,23 +20,21 @@ public class ChatWebSocketController {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
-    // 클라이언트가 '/app/chat/send'로 메시지를 보내면 이 메서드가 호출됩니다.
-    @MessageMapping("/chat/send")
+    @MessageMapping("/chat/send") // 클라 publish: /app/chat/send
     public void sendMessage(@Payload ChatDto chatDto) {
         System.out.println("웹소켓으로 받은 메시지: " + chatDto.getMessage());
 
-        // // 1. 받은 메시지를 DB에 저장
-        // buddyService.sendChat(chatDto);
-
-        // // 2. 해당 채팅방을 구독하고 있는 모든 클라이언트에게 메시지 브로드캐스팅
-        // messagingTemplate.convertAndSend("/topic/" + chatDto.getMatchingId(),
-        // chatDto);
-        // ✅ DB에 저장하고, 저장된 정보를 담은 ChatDto를 반환받습니다.
+        // DB 저장 후 저장된 DTO로 브로드캐스트
         ChatDto savedChatDto = buddyService.sendChat(chatDto);
 
-        // ✅ 반환받은 savedChatDto를 브로드캐스팅합니다.
+        // ✅ 클라가 구독하는 경로와 정확히 일치
         messagingTemplate.convertAndSend("/topic/" + savedChatDto.getMatchingId(), savedChatDto);
         System.out.println("✅ 메시지 브로드캐스팅 성공. MatchingId: " + savedChatDto.getMatchingId());
+
+        // ✅ 2. 채팅 리스트 페이지를 위한 알림 메시지 브로드캐스팅
+        // 메시지 일부 정보만 담아 전송하여 불필요한 데이터 전송을 줄임
+        // 여기서 DTO를 새로 정의하여 필요한 정보만 담아 보내는 것이 더 효율적일 수 있습니다.
+        messagingTemplate.convertAndSend("/topic/chat-list", savedChatDto);
     }
 
     // ✅ WebRTC 시그널링 메시지를 처리하는 새로운 메서드 추가 및 수정
