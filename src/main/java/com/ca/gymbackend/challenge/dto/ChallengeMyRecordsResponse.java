@@ -16,4 +16,9 @@ public class ChallengeMyRecordsResponse {
 
     private int challengeParticipantCount; // 참가 인원
 
+
+    // ✅ 추가: 도넛/통계용
+    private Integer categoryId;        // keyword_category_id
+    private String categoryName;       // keyword_category_name (예: 루틴/회복/…)
+
 }
