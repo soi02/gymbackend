@@ -270,7 +270,8 @@
     
     <select id = "selectMarketArticleBySearchWord" resultType = "com.ca.gymbackend.market.dto.MarketArticleDto">
     
-        SELECT * FROM market_article ma WHERE ma.title LIKE CONCAT('%', #{searchWord}, '%') OR ma.content LIKE CONCAT('%', #{searchWord}, '%');
+        SELECT * FROM market_article ma WHERE ma.title LIKE CONCAT('%', #{searchWord}, '%') OR ma.content LIKE CONCAT('%', #{searchWord}, '%')
+        ORDER BY id DESC;
     
     </select>
 
