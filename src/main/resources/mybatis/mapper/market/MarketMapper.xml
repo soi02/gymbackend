@@ -97,13 +97,13 @@
     
     <select id = "selectMarketProductInterestedLogWhenUserInfo" resultType = "com.ca.gymbackend.market.dto.MarketProductInterestedLogDto">
     
-        SELECT * FROM market_product_interested_log WHERE market_user_id = #{marketUserId};
+        SELECT * FROM market_product_interested_log WHERE market_user_id = #{marketUserId} ORDER BY id DESC;
     
     </select>
     
     <select id = "selectCountMarketProductInterestedLogWhenUserInfo" resultType = "int">
     
-        SELECT COUNT(*) FROM market_product_interested_log WHERE market_user_id = #{marketUserId} ORDER BY id DESC;
+        SELECT COUNT(*) FROM market_product_interested_log WHERE market_user_id = #{marketUserId};
     
     </select>
     
