@@ -97,7 +97,7 @@
     
     <select id = "selectMarketProductInterestedLogWhenUserInfo" resultType = "com.ca.gymbackend.market.dto.MarketProductInterestedLogDto">
     
-        SELECT * FROM market_product_interested_log WHERE market_user_id = #{marketUserId} ORDER BY id DESC;
+        SELECT * FROM market_product_interested_log WHERE market_user_id = #{marketUserId} ORDER BY specific_article_id DESC;
     
     </select>
     
