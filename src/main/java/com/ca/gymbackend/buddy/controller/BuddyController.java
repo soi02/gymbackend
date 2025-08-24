@@ -54,15 +54,19 @@ public class BuddyController {
         return "버디 등록 완료";
     }
 
-    // 버디인지 확인
+    // 버디인지 확인 (인증 없이도 접근 가능)
     @GetMapping("/is-buddy")
     public ResponseEntity<Map<String, Boolean>> isBuddyStatus(@RequestParam("userId") int userId) {
-        boolean isBuddy = buddyService.isBuddy(userId);
-
-        Map<String, Boolean> response = new HashMap<>();
-        response.put("is_buddy", isBuddy);
-
-        return ResponseEntity.ok(response);
+        try {
+            boolean isBuddy = buddyService.isBuddy(userId);
+            Map<String, Boolean> response = new HashMap<>();
+            response.put("is_buddy", isBuddy);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Boolean> response = new HashMap<>();
+            response.put("is_buddy", false);
+            return ResponseEntity.ok(response);
+        }
     }
 
     @GetMapping("/list")
