@@ -64,6 +64,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/diary/check-today").authenticated() // 일기 작성 여부 확인은 인증 필요
                         .requestMatchers("/api/diary/list").authenticated() // 일기 목록 조회는 인증 필요
                         .requestMatchers("/api/diary/date").authenticated() // 특정 날짜 일기 조회는 인증 필요
+                        .requestMatchers("/api/buddy/**").authenticated() // 버디 관련 모든 API는 인증 필요
 
                         .requestMatchers("/api/challenge/groupchat/listWithSummary/**").permitAll()
                         .requestMatchers("/api/diary/stats/**").authenticated() // 감정 통계 관련 API는 인증 필요

@@ -68,8 +68,13 @@ public class BuddyController {
     @GetMapping("/list")
     public ResponseEntity<List<Map<String, Object>>> getBuddyUserList() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        int loggedInUserId = (int) authentication.getPrincipal();
-
+        Object principal = authentication.getPrincipal();
+        
+        if (principal.equals("anonymousUser")) {
+            return ResponseEntity.status(401).body(null); // 인증되지 않은 사용자
+        }
+        
+        int loggedInUserId = Integer.parseInt(principal.toString());
         List<Map<String, Object>> result = buddyService.getBuddyUserList(loggedInUserId);
         return ResponseEntity.ok(result);
     }
@@ -127,7 +132,7 @@ public class BuddyController {
     public ResponseEntity<Map<String, Object>> getMatchingInfo(@PathVariable("matchingId") int matchingId) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            int loggedInUserId = (int) authentication.getPrincipal();
+            int loggedInUserId = Integer.parseInt(authentication.getPrincipal().toString());
 
             Map<String, Object> matchingInfo = buddyService.getMatchingInfo(matchingId, loggedInUserId);
 
@@ -175,7 +180,7 @@ public class BuddyController {
     @PostMapping("/chat/read/{matchingId}")
     public ResponseEntity<Void> markChatsAsRead(@PathVariable(value = "matchingId") int matchingId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        int readerBuddyId = (int) authentication.getPrincipal();
+        int readerBuddyId = Integer.parseInt(authentication.getPrincipal().toString());
 
         // ⭐ 수정: 읽음 처리된 메시지들의 ID 목록을 받음
         List<Integer> readChatIds = buddyService.markMessagesAsRead(matchingId, readerBuddyId);
