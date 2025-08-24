@@ -2,9 +2,9 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ca.gymbackend.market.mapper.MarketMapper">
 
-    <select id = "selectMarketUserInfo" resultType = "com.ca.gymbackend.market.dto.MarketUserInfoDto">
+    <select id = "selectMarketUserInfo" resultType = "com.ca.gymbackend.portal.dto.UserDto">
     
-        SELECT * FROM market_user_info WHERE user_id = #{userId};
+        SELECT * FROM user WHERE id = #{userId};
     
     </select>
 
@@ -97,7 +97,7 @@
     
     <select id = "selectMarketProductInterestedLogWhenUserInfo" resultType = "com.ca.gymbackend.market.dto.MarketProductInterestedLogDto">
     
-        SELECT * FROM market_product_interested_log WHERE market_user_id = #{marketUserId} ORDER BY id DESC;
+        SELECT * FROM market_product_interested_log WHERE market_user_id = #{marketUserId} ORDER BY specific_article_id DESC;
     
     </select>
     

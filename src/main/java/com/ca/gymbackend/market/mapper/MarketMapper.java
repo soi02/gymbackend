@@ -13,13 +13,14 @@ import com.ca.gymbackend.market.dto.MarketDealedLogDto;
 import com.ca.gymbackend.market.dto.MarketProductInterestedLogDto;
 import com.ca.gymbackend.market.dto.MarketReviewOnUserDto;
 import com.ca.gymbackend.market.dto.MarketUserInfoDto;
+import com.ca.gymbackend.portal.dto.UserDto;
 
 @Mapper
 public interface MarketMapper {
     
     // [ 테이블 당 기본 crud ]
     
-    public MarketUserInfoDto selectMarketUserInfo(@Param("userId") Integer userId);
+    public UserDto selectMarketUserInfo(@Param("userId") Integer userId);
     
     public void insertMarketArticle(MarketArticleDto marketArticleDto);
     public List<MarketArticleDto> selectMarketArticle();

@@ -25,6 +25,7 @@ import com.ca.gymbackend.market.dto.MarketReviewOnUserDto;
 import com.ca.gymbackend.market.dto.MarketUserInfoDto;
 import com.ca.gymbackend.market.service.MarketService;
 import com.ca.gymbackend.security.JwtUtil;
+import com.ca.gymbackend.portal.dto.UserDto;
 
 @RestController
 @RequestMapping("/api/market")
@@ -32,14 +33,17 @@ public class MarketController {
     
     @Autowired
     private MarketService marketService;
+    // public Market
     
     @Autowired
     private JwtUtil jwtUtil;
     
     @GetMapping("/selectMarketUserInfo") // ok // Front OK
-    public MarketUserInfoDto selectMarketUserInfo(@RequestParam("userId") Integer userId) {
+    public UserDto selectMarketUserInfo(@RequestParam("userId") Integer userId) {
         return marketService.selectMarketUserInfo(userId);
     } 
+    
+    
     // temporary test code
     
     // @PostMapping("/insertMarketArticle") // ok + Front OK
@@ -51,7 +55,7 @@ public class MarketController {
     
     @PostMapping("/insertMarketArticle") // ok + Front OK
     public void insertMarketArticle(@RequestParam(value = "imageLink", required = false) MultipartFile multipartFile,
-    @RequestParam("marketUserId") Integer marketUserId, @RequestParam("title") String title, 
+    @RequestParam("marketUserId") Integer marketUserId, @RequestParam("title") String title,
     @RequestParam("productCost") Integer productCost, @RequestParam("content") String content) throws IOException {
         MarketArticleDto marketArticleDto = new MarketArticleDto();
         marketArticleDto.setMarketUserId(marketUserId);
