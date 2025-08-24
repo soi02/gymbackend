@@ -82,4 +82,10 @@ public class PortalService {
     public void updateUser(UserDto userDto) {
         portalMapper.updateUser(userDto);
     }
+
+    // 계정명 중복 체크
+    public boolean isAccountNameDuplicate(String accountName) {
+        Integer count = portalMapper.checkAccountNameDuplicate(accountName);
+        return count != null && count > 0;
+    }
 }

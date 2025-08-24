@@ -99,6 +99,12 @@ public class PortalController {
         return ResponseEntity.ok(new LoginResponse(true, token, userDto.getName(), userDto.getId()));
     }
 
+    @GetMapping("/check-account")
+    public ResponseEntity<?> checkAccountNameDuplicate(@RequestParam("accountName") String accountName) {
+        boolean isDuplicate = portalService.isAccountNameDuplicate(accountName);
+        return ResponseEntity.ok(new ApiResponse(!isDuplicate, isDuplicate ? "이미 사용 중인 아이디입니다." : "사용 가능한 아이디입니다."));
+    }
+
     @PostMapping("/verify-token")
     public ResponseEntity<?> verifyToken(@RequestHeader(value = "Authorization", required = false) String authHeader) {
         try {

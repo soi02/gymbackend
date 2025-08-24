@@ -11,4 +11,6 @@ public interface DiaryService {
     List<Map<String, Object>> getDiariesByUserId(int userId);
     List<Map<String, Object>> getAllEmojis();
     Map<String, Object> getDiaryByUserIdAndDate(int userId, String targetDate);
+    List<Map<String, Object>> getEmotionStats(int userId);
+    List<Map<String, Object>> getMonthlyEmotionStats(int userId, String startDate, String endDate);
 }

@@ -28,6 +28,7 @@ import com.ca.gymbackend.market.dto.MarketProductInterestedLogDto;
 import com.ca.gymbackend.market.dto.MarketReviewOnUserDto;
 import com.ca.gymbackend.market.dto.MarketUserInfoDto;
 import com.ca.gymbackend.market.mapper.MarketMapper;
+import com.ca.gymbackend.portal.dto.UserDto;
 
 import net.coobird.thumbnailator.Thumbnails;
 
@@ -41,7 +42,7 @@ public class MarketService {
     @Qualifier("fileRootPath")
     private String fileRootPath;
 
-    public MarketUserInfoDto selectMarketUserInfo(Integer userId) {
+    public UserDto selectMarketUserInfo(Integer userId) {
         return marketMapper.selectMarketUserInfo(userId);
     }
     
@@ -98,9 +99,9 @@ public class MarketService {
         
             for (MarketArticleDto marketArticleDto : listMarketArticleDto) {
                 Map<String, Object> map = new HashMap<>();
-                MarketUserInfoDto marketUserInfoDto = marketMapper.selectMarketUserInfo(marketArticleDto.getMarketUserId());
+                UserDto userDto = marketMapper.selectMarketUserInfo(marketArticleDto.getMarketUserId());
                 map.put("marketArticleDto", marketArticleDto);
-                map.put("marketUserInfoDto", marketUserInfoDto);
+                map.put("marketUserInfoDto", userDto);
                 mapListSelectMarketArticle.add(map);
             }
             
@@ -135,14 +136,14 @@ public class MarketService {
     public Map<String, Object> selectSpecificMarketArticleInfo(Integer id) {
         Map<String, Object> mapSelectSpecificMarketArticleInfo = new HashMap<>();
         MarketArticleDto marketArticleDto = marketMapper.selectSpecificMarketArticle(id);
-        MarketUserInfoDto marketUserInfoDto = new MarketUserInfoDto();
+        UserDto userDto = new UserDto();
         if (marketArticleDto != null) {
-            marketUserInfoDto = marketMapper.selectMarketUserInfo(marketArticleDto.getMarketUserId());
+            userDto = marketMapper.selectMarketUserInfo(marketArticleDto.getMarketUserId());
         } else {
             marketArticleDto = new MarketArticleDto();
         }
         mapSelectSpecificMarketArticleInfo.put("marketArticleDto", marketArticleDto);
-        mapSelectSpecificMarketArticleInfo.put("marketUserInfoDto", marketUserInfoDto);
+        mapSelectSpecificMarketArticleInfo.put("marketUserInfoDto", userDto);
         return mapSelectSpecificMarketArticleInfo;
     }
     
@@ -177,9 +178,9 @@ public class MarketService {
             
             for (MarketCommentOnArticleDto marketCommentOnArticleDto : listMarketCommentOnArticleDto) {
                 Map<String, Object> map = new HashMap<>();
-                MarketUserInfoDto marketUserInfoDto = marketMapper.selectMarketUserInfo(marketCommentOnArticleDto.getMarketUserId());
+                UserDto userDto = marketMapper.selectMarketUserInfo(marketCommentOnArticleDto.getMarketUserId());
                 map.put("marketCommentOnArticleDto", marketCommentOnArticleDto);
-                map.put("marketUserInfoDto", marketUserInfoDto);
+                map.put("marketUserInfoDto", userDto);
                 mapListSelectMarketCommentOnArticle.add(map);
             }
             
@@ -208,14 +209,14 @@ public class MarketService {
     public Map<String, Object> selectSpecificMarketCommentOnArticle(Integer id) {
         Map<String, Object> mapSelectSpecificMarketCommentOnArticle = new HashMap<>();
         MarketCommentOnArticleDto marketCommentOnArticleDto = marketMapper.selectSpecificMarketCommentOnArticle(id);
-        MarketUserInfoDto marketUserInfoDto = new MarketUserInfoDto();
+        UserDto userDto = new UserDto();
         if (marketCommentOnArticleDto != null) {
-            marketUserInfoDto = marketMapper.selectMarketUserInfo(marketCommentOnArticleDto.getMarketUserId());
+            userDto = marketMapper.selectMarketUserInfo(marketCommentOnArticleDto.getMarketUserId());
         } else {
             marketCommentOnArticleDto = new MarketCommentOnArticleDto();
         }
         mapSelectSpecificMarketCommentOnArticle.put("marketCommentOnArticleDto", marketCommentOnArticleDto);
-        mapSelectSpecificMarketCommentOnArticle.put("marketUserInfoDto", marketUserInfoDto);
+        mapSelectSpecificMarketCommentOnArticle.put("marketUserInfoDto", userDto);
         return mapSelectSpecificMarketCommentOnArticle;
     }
     public void updateMarketCommentOnArticle(MarketCommentOnArticleDto marketCommentOnArticleDto) {
@@ -237,10 +238,10 @@ public class MarketService {
             for (MarketProductInterestedLogDto marketProductInterestedLogDto : listMarketProductInterestedLogDto) {
                 Map<String, Object> map = new HashMap<>();
                 MarketArticleDto marketArticleDto = marketMapper.selectSpecificMarketArticle(marketProductInterestedLogDto.getSpecificArticleId());
-                MarketUserInfoDto marketUserInfoDto = marketMapper.selectMarketUserInfo(marketArticleDto.getMarketUserId());
+                UserDto userDto = marketMapper.selectMarketUserInfo(marketArticleDto.getMarketUserId());
                 map.put("marketProductInterestedLogDto", marketProductInterestedLogDto);
                 map.put("marketArticleDto", marketArticleDto);
-                map.put("marketUserInfoDto", marketUserInfoDto);
+                map.put("marketUserInfoDto", userDto);
                 mapListSelectMarketProductInterestedLogWhenUserInfo.add(map);
             }
             
@@ -277,10 +278,10 @@ public class MarketService {
             for (MarketProductInterestedLogDto marketProductInterestedLogDto : listMarketProductInterestedLogDto) {
                 Map<String, Object> map = new HashMap<>();
                 MarketArticleDto marketArticleDto = marketMapper.selectSpecificMarketArticle(marketProductInterestedLogDto.getSpecificArticleId());
-                MarketUserInfoDto marketUserInfoDto = marketMapper.selectMarketUserInfo(marketArticleDto.getMarketUserId());
+                UserDto userDto = marketMapper.selectMarketUserInfo(marketArticleDto.getMarketUserId());
                 map.put("marketProductInterestedLogDto", marketProductInterestedLogDto);
                 map.put("marketArticleDto", marketArticleDto);
-                map.put("marketUserInfoDto", marketUserInfoDto);
+                map.put("marketUserInfoDto", userDto);
                 mapListSelectMarketProductInterestedLogWhenArticleInfo.add(map);
             }
             
@@ -312,16 +313,16 @@ public class MarketService {
         Map<String, Object> mapSelectMarketProductInterestedLogWhenUserAndArticleInfo = new HashMap<>();
         MarketProductInterestedLogDto marketProductInterestedLogDto = marketMapper.selectMarketProductInterestedLogWhenUserAndArticleInfo(marketUserId, specificArticleId);
         MarketArticleDto marketArticleDto = new MarketArticleDto();
-        MarketUserInfoDto marketUserInfoDto = new MarketUserInfoDto();
+        UserDto userDto = new UserDto();
         if (marketProductInterestedLogDto != null) {
             marketArticleDto = marketMapper.selectSpecificMarketArticle(marketProductInterestedLogDto.getSpecificArticleId());
-            marketUserInfoDto = marketMapper.selectMarketUserInfo(marketProductInterestedLogDto.getMarketUserId());
+            userDto = marketMapper.selectMarketUserInfo(marketProductInterestedLogDto.getMarketUserId());
         } else {
             marketProductInterestedLogDto = new MarketProductInterestedLogDto();
         }
         mapSelectMarketProductInterestedLogWhenUserAndArticleInfo.put("marketProductInterestedLogDto", marketProductInterestedLogDto);
         mapSelectMarketProductInterestedLogWhenUserAndArticleInfo.put("marketArticleDto", marketArticleDto);
-        mapSelectMarketProductInterestedLogWhenUserAndArticleInfo.put("marketUserInfoDto", marketUserInfoDto);
+        mapSelectMarketProductInterestedLogWhenUserAndArticleInfo.put("marketUserInfoDto", userDto);
         return mapSelectMarketProductInterestedLogWhenUserAndArticleInfo;
     }
     public void deleteMarketProductInterestedLog(Integer marketUserId, Integer specificArticleId) {
@@ -388,10 +389,10 @@ public class MarketService {
             for (MarketDealedLogDto marketDealedLogDto : listMarketDealedLogDto) {
                 Map<String, Object> map = new HashMap<>();
                 MarketArticleDto marketArticleDto = marketMapper.selectSpecificMarketArticle(marketDealedLogDto.getSpecificArticleId());
-                MarketUserInfoDto marketUserInfoDto = marketMapper.selectMarketUserInfo(marketArticleDto.getMarketUserId());
+                UserDto userDto = marketMapper.selectMarketUserInfo(marketArticleDto.getMarketUserId());
                 map.put("marketDealedLogDto", marketDealedLogDto);
                 map.put("marketArticleDto", marketArticleDto);
-                map.put("marketUserInfoDto", marketUserInfoDto);
+                map.put("marketUserInfoDto", userDto);
                 mapListSelectMarketDealedLogWhenBuyer.add(map);
             }
             
@@ -428,10 +429,10 @@ public class MarketService {
             for (MarketDealedLogDto marketDealedLogDto : listMarketDealedLogDto) {
                 Map<String, Object> map = new HashMap<>();
                 MarketArticleDto marketArticleDto = marketMapper.selectSpecificMarketArticle(marketDealedLogDto.getSpecificArticleId());
-                MarketUserInfoDto marketUserInfoDto = marketMapper.selectMarketUserInfo(marketArticleDto.getMarketUserId());
+                UserDto userDto = marketMapper.selectMarketUserInfo(marketArticleDto.getMarketUserId());
                 map.put("marketDealedLogDto", marketDealedLogDto);
                 map.put("marketArticleDto", marketArticleDto);
-                map.put("marketUserInfoDto", marketUserInfoDto);
+                map.put("marketUserInfoDto", userDto);
                 mapListSelectMarketDealedLogWhenSeller.add(map);
             }
             
@@ -476,9 +477,9 @@ public class MarketService {
             
             for (MarketReviewOnUserDto marketReviewOnUserDto : listMarketReviewOnUserDto) {
                 Map<String, Object> map = new HashMap<>();
-                MarketUserInfoDto marketUserInfoDto = marketMapper.selectMarketUserInfo(marketReviewOnUserDto.getEvaluatedUserId());
+                UserDto userDto = marketMapper.selectMarketUserInfo(marketReviewOnUserDto.getEvaluatedUserId());
                 map.put("marketReviewOnUserDto", marketReviewOnUserDto);
-                map.put("marketUserInfoDto", marketUserInfoDto);
+                map.put("marketUserInfoDto", userDto);
                 mapListSelectMarketReviewToUser.add(map);
             }
             
@@ -521,9 +522,9 @@ public class MarketService {
         
             for (MarketArticleDto marketArticleDto : listMarketArticleDto) {
                 Map<String, Object> map = new HashMap<>();
-                MarketUserInfoDto marketUserInfoDto = marketMapper.selectMarketUserInfo(marketArticleDto.getMarketUserId());
+                UserDto userDto = marketMapper.selectMarketUserInfo(marketArticleDto.getMarketUserId());
                 map.put("marketArticleDto", marketArticleDto);
-                map.put("marketUserInfoDto", marketUserInfoDto);
+                map.put("marketUserInfoDto", userDto);
                 mapListSelectMarketArticle.add(map);
             }
             
