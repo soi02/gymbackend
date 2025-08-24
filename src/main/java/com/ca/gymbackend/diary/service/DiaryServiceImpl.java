@@ -44,4 +44,14 @@ public class DiaryServiceImpl implements DiaryService {
     public Map<String, Object> getDiaryByUserIdAndDate(int userId, String targetDate) {
         return diarySqlMapper.getDiaryByUserIdAndDate(userId, targetDate);
     }
+
+    @Override
+    public List<Map<String, Object>> getEmotionStats(int userId) {
+        return diarySqlMapper.getEmotionStats(userId);
+    }
+
+    @Override
+    public List<Map<String, Object>> getMonthlyEmotionStats(int userId, String startDate, String endDate) {
+        return diarySqlMapper.getMonthlyEmotionStats(userId, startDate, endDate);
+    }
 }

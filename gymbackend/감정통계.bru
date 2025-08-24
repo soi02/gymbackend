@@ -1,0 +1,15 @@
+meta {
+  name: 감정통계
+  type: http
+  seq: 20
+}
+
+get {
+  url: http://localhost:8080/api/diary//stats/emotions
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+}

@@ -14,4 +14,9 @@ public interface DiarySqlMapper {
     void insertDiary(DiaryDto diaryDto);
     List<Map<String, Object>> getDiariesByUserId(@Param("userId") int userId);
     Map<String, Object> getDiaryByUserIdAndDate(@Param("userId") int userId, @Param("targetDate") String targetDate);
+    List<Map<String, Object>> getEmotionStats(@Param("userId") int userId);
+    List<Map<String, Object>> getMonthlyEmotionStats(
+        @Param("userId") int userId, 
+        @Param("startDate") String startDate, 
+        @Param("endDate") String endDate);
 }

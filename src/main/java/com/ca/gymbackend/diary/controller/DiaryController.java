@@ -60,4 +60,19 @@ public class DiaryController {
         List<Map<String, Object>> emojis = diaryService.getAllEmojis();
         return ResponseEntity.ok(emojis);
     }
+
+    @GetMapping("/stats/emotions")
+    public ResponseEntity<List<Map<String, Object>>> getEmotionStats(@RequestParam("userId") int userId) {
+        List<Map<String, Object>> stats = diaryService.getEmotionStats(userId);
+        return ResponseEntity.ok(stats);
+    }
+
+    @GetMapping("/stats/monthly-emotions")
+    public ResponseEntity<List<Map<String, Object>>> getMonthlyEmotionStats(
+            @RequestParam("userId") int userId,
+            @RequestParam(value = "startDate", required = false) String startDate,
+            @RequestParam(value = "endDate", required = false) String endDate) {
+        List<Map<String, Object>> stats = diaryService.getMonthlyEmotionStats(userId, startDate, endDate);
+        return ResponseEntity.ok(stats);
+    }
 }
