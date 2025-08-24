@@ -43,6 +43,7 @@ dependencies {
 
 	// WebClient 사용 (OpenAI REST 호출)
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
+	implementation 'com.github.ben-manes.caffeine:caffeine:3.1.8'   // 캐시
 }
 
 tasks.named('test') {
