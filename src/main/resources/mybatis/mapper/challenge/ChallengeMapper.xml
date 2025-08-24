@@ -333,6 +333,14 @@
         WHERE user_id = #{userId} AND challenge_id = #{challengeId}
     </select>
 
+<!-- 특정 챌린지의 모든 인증 날짜를 조회하는 새로운 -->
+<select id="findAttendanceDatesByChallengeAndUser" resultType="java.lang.String">
+    SELECT attendance_date
+    FROM attendance_record
+    WHERE user_id = #{userId} AND challenge_id = #{challengeId}
+    ORDER BY attendance_date ASC
+</select>
+
 
 
 

@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ca.gymbackend.challenge.dto.groupchat.GroupChatListItemDto;
 import com.ca.gymbackend.challenge.dto.groupchat.GroupChatMessage;
 import com.ca.gymbackend.challenge.service.GroupChatMessageServiceImpl;
 
@@ -144,6 +145,12 @@ public ResponseEntity<List<GroupChatMessage>> getChatHistoryProcess(@PathVariabl
     }
 
 
+
+        @GetMapping("/listWithSummary/{userId}")
+    public ResponseEntity<List<GroupChatListItemDto>> listWithSummary(@PathVariable Long userId) {
+        List<GroupChatListItemDto> list = groupChatMessageService.getJoinedChallengesWithChatSummary(userId);
+        return ResponseEntity.ok(list);
+    }
 
 
 

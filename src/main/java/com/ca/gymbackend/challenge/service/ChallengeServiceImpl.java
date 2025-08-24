@@ -385,27 +385,32 @@ private void processKeywords(Object challengeResponse) {
     // 나의 수련기록
     // 내가 참여한 챌린지 목록 조회
 
-    public List<ChallengeMyRecordsResponse> getAllMyChallengeList(int userId) {
-        
-        // 1. 참여한 챌린지 목록의 기본정보 조회
-        List<ChallengeMyRecordsResponse> myChallengeList = challengeMapper.findAllMyChallengeList(userId);
+public List<ChallengeMyRecordsResponse> getAllMyChallengeList(int userId) {
+    
+    // 1. 참여한 챌린지 목록의 기본정보 조회
+    List<ChallengeMyRecordsResponse> myChallengeList = challengeMapper.findAllMyChallengeList(userId);
 
-        // 2. 스트림을 사용하여 각 챌린지에 대한 추가 출석정보를 조회하고 DTO에 설정
-        return myChallengeList.stream().map(challenge -> {
-            int challengeId = challenge.getChallengeId(); // 현재 처리중인 챌린지에서 챌린지 ID 가져옴
+    // 2. 스트림을 사용하여 각 챌린지에 대한 추가 출석정보 및 인증 날짜 목록을 조회하고 DTO에 설정
+    return myChallengeList.stream().map(challenge -> {
+        int challengeId = challenge.getChallengeId(); // 현재 처리중인 챌린지 ID
 
-            // 챌린지별 총 출석일수 조회
-            int daysAttended = challengeMapper.countAttendanceDays(userId, challengeId); // 출석일수 매퍼 통해서 데베에서 조회
-            challenge.setDaysAttended(daysAttended);
+        // 챌린지별 총 출석일수 조회
+        int daysAttended = challengeMapper.countAttendanceDays(userId, challengeId);
+        challenge.setDaysAttended(daysAttended);
 
-            // 챌린지별 오늘 출석여부 조회
-            // 0이면 false, 1 이상이면 true
-            boolean todayAttended = challengeMapper.hasAttendedToday(userId, challengeId) > 0; // 출석여부 매퍼 통해서 데베에서 조회
-            challenge.setTodayAttended(todayAttended);
+        // 챌린지별 오늘 출석여부 조회
+        boolean todayAttended = challengeMapper.hasAttendedToday(userId, challengeId) > 0;
+        challenge.setTodayAttended(todayAttended);
 
-            return challenge; // 출석일수, 출석여부 정보 추가된 객체임
-        }).collect(Collectors.toList()); // challenge 객체를 List 형태로 다시 묶어준다        
-    }
+        // ✅ 핵심 수정: 이 부분을 추가합니다.
+        // 챌린지별 모든 인증 날짜 목록을 조회
+        List<String> daysAttendedList = challengeMapper.findAttendanceDatesByChallengeAndUser(userId, challengeId);
+        // DTO에 날짜 목록 설정
+        challenge.setDaysAttendedList(daysAttendedList);
+
+        return challenge;
+    }).collect(Collectors.toList());
+}
 
 
 

@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.ca.gymbackend.challenge.dto.groupchat.GroupChatListItemDto;
 import com.ca.gymbackend.challenge.dto.groupchat.GroupChatMessage;
 import com.ca.gymbackend.challenge.mapper.GroupChatMessageMapper;
 
@@ -64,4 +65,12 @@ public String getChallengeTitleById(Long challengeId) {
     // 챌린지 제목 조회는 Challenge 관련 Service가 담당하는 것이 더 적절할 수 있습니다.
     // 하지만 이 프로젝트 구조 내에서는 GroupChatMessageMapper에 쿼리를 추가하는 방식으로 처리해도 무방합니다.
 }
+
+
+
+public List<GroupChatListItemDto> getJoinedChallengesWithChatSummary(Long userId) {
+    return groupChatMessageMapper.selectJoinedChallengesWithChatSummary(userId);
+}
+
+
 }

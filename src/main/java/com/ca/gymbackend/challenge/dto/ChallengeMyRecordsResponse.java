@@ -1,6 +1,7 @@
 package com.ca.gymbackend.challenge.dto;
 
 import java.sql.Date;
+import java.util.List;
 
 import lombok.Data;
 
@@ -20,5 +21,8 @@ public class ChallengeMyRecordsResponse {
     // ✅ 추가: 도넛/통계용
     private Integer categoryId;        // keyword_category_id
     private String categoryName;       // keyword_category_name (예: 루틴/회복/…)
+
+    // ✅ 핵심 수정: 일별 인증 기록을 담을 리스트 추가
+    private List<String> daysAttendedList; 
 
 }

@@ -79,4 +79,62 @@
         SELECT challenge_title FROM challenge WHERE challenge_id = #{challengeId}
     </select>
 
+
+
+
+
+
+
+
+<!-- 사용자가 참여 중인 챌린지 + 채팅 요약(최신 메시지/시간/안읽음) -->
+<select id="selectJoinedChallengesWithChatSummary"
+        parameterType="long"
+        resultType="com.ca.gymbackend.challenge.dto.groupchat.GroupChatListItemDto">
+
+  SELECT
+    c.challenge_id                             AS challengeId,
+    c.challenge_title                           AS challengeTitle,
+    c.challenge_thumbnail_path                  AS challengeThumbnailPath,
+
+    (SELECT COUNT(*) FROM user_challenge uc2
+     WHERE uc2.challenge_id = c.challenge_id)   AS challengeParticipantCount,
+
+    uc.personal_join_date                       AS personalJoinDate,
+
+    lm.group_chat_message_content               AS lastMessage,
+    lm.created_at                               AS lastMessageTime,
+
+    COALESCE((
+      SELECT COUNT(*)
+      FROM group_chat_message gm
+      WHERE gm.challenge_id = c.challenge_id
+        /* 여기 ↓↓↓ */
+        AND (uc.personal_join_date IS NULL OR gm.created_at >= uc.personal_join_date)
+        AND NOT EXISTS (
+          SELECT 1
+          FROM group_chat_message_read_status rs
+          WHERE rs.group_chat_message_id = gm.group_chat_message_id
+            AND rs.reader_user_id = #{userId}
+        )
+    ),0)                                        AS unreadCount
+
+  FROM user_challenge uc
+  JOIN challenge c ON c.challenge_id = uc.challenge_id
+
+  LEFT JOIN (
+    SELECT g1.challenge_id, g1.group_chat_message_content, g1.created_at
+    FROM group_chat_message g1
+    INNER JOIN (
+      SELECT challenge_id, MAX(created_at) AS max_created
+      FROM group_chat_message
+      GROUP BY challenge_id
+    ) g2 ON g1.challenge_id = g2.challenge_id AND g1.created_at = g2.max_created
+  ) lm ON lm.challenge_id = c.challenge_id
+
+  WHERE uc.user_id = #{userId}
+  ORDER BY (lm.created_at IS NULL), lm.created_at DESC
+</select>
+
+
+
 </mapper>

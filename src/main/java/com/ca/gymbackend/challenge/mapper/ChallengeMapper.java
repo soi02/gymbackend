@@ -97,6 +97,8 @@ public interface ChallengeMapper {
     public int hasAttendedToday(@Param("userId") int userId, @Param("challengeId") int challengeId);
 
 
+    // ✅ 추가: 새로운 메서드 정의
+    public List<String> findAttendanceDatesByChallengeAndUser(@Param("userId") int userId, @Param("challengeId") int challengeId);
 
 
 
