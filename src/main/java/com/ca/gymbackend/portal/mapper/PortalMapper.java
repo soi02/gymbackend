@@ -19,4 +19,6 @@ public interface PortalMapper {
     // 사용자 정보 수정 메서드 추가
     public void updateUser(UserDto userDto);
 
+    // 계정명 중복 체크
+    public Integer checkAccountNameDuplicate(@Param("accountName") String accountName);
 }

@@ -33,4 +33,11 @@
             muscle_mass = #{muscleMass}
         WHERE id = #{id}
     </update>
+
+    <!-- 계정명 중복 체크 -->
+    <select id="checkAccountNameDuplicate" resultType="Integer">
+        SELECT COUNT(*)
+        FROM user
+        WHERE account_name = #{accountName}
+    </select>
 </mapper>
