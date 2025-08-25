@@ -20,6 +20,7 @@ import com.ca.gymbackend.challenge.dto.ChallengeRecordInfo;
 import com.ca.gymbackend.challenge.dto.ChallengeTestScore;
 import com.ca.gymbackend.challenge.dto.ChallengeUserInfo;
 import com.ca.gymbackend.challenge.dto.KeywordItem;
+import com.ca.gymbackend.challenge.dto.WeeklyRankItem;
 import com.ca.gymbackend.challenge.dto.payment.ChallengePayment;
 import com.ca.gymbackend.challenge.dto.payment.ChallengeRaffleTicket;
 
@@ -229,6 +230,17 @@ public interface ChallengeMapper {
     public void deleteAttendanceRecords(@Param("userId") int userId, @Param("challengeId") int challengeId);
     public void deleteUserChallengeNorigae(@Param("userId") int userId, @Param("challengeId") int challengeId);
 
+
+
+    // home
+    // 이번 주 유저의 '고유 출석일' 갯수
+    public int countDistinctAttendanceDaysThisWeek(@Param("userId") int userId);
+    
+    // 이번 주 랭킹 (고유 출석일 기준) TOP N
+    public List<WeeklyRankItem> findWeeklyRankingTopN(@Param("limit") int limit);
+
+    // 인기 수련: 참가자수 기준 desc
+    public List<ChallengeListResponse> findPopularChallenges(@Param("limit") int limit);
 }
 
 

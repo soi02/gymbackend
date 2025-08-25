@@ -30,6 +30,8 @@ import com.ca.gymbackend.challenge.dto.ChallengeStartRequest;
 import com.ca.gymbackend.challenge.dto.ChallengeTendencyTestRequest;
 import com.ca.gymbackend.challenge.dto.KeywordCategoryTree;
 import com.ca.gymbackend.challenge.dto.NorigaeDto;
+import com.ca.gymbackend.challenge.dto.WeeklyRankItem;
+import com.ca.gymbackend.challenge.dto.WeeklySummaryResponse;
 import com.ca.gymbackend.challenge.dto.payment.PaymentReadyResponse;
 import com.ca.gymbackend.challenge.service.ChallengeServiceImpl;
 import com.ca.gymbackend.challenge.service.PaymentServiceImpl;
@@ -326,7 +328,7 @@ public ResponseEntity<List<KeywordCategoryTree>> getKeywordTree() {
 
     
 
-    // 결제 준비 API
+    // 결제 준비 API 
     @PostMapping("/join/payment")
     public ResponseEntity<PaymentReadyResponse> startChallengeWithPayment(
             @RequestParam("userId") int userId,
@@ -348,5 +350,46 @@ public ResponseEntity<List<KeywordCategoryTree>> getKeywordTree() {
         // PaymentService에서 리다이렉션 응답을 직접 처리하도록 위임
         return paymentService.kakaoPayApprove(Long.valueOf(challengeId), userId, pgToken);
     }
+
+
+
+
+
+
+
+
+
+    // home
+    // 이번 주 유저의 '고유 출석일' 갯수
+    @GetMapping("/weekly/summary")
+    public ResponseEntity<WeeklySummaryResponse> getWeeklySummary(@RequestParam("userId") int userId) {
+        if (userId <= 0) return ResponseEntity.badRequest().build();
+        return ResponseEntity.ok(challengeService.getWeeklySummary(userId));
+    }
+
+    // 이번 주 랭킹 (고유 출석일 기준) TOP N
+    @GetMapping("/weekly/ranking")
+    public ResponseEntity<List<WeeklyRankItem>> getWeeklyRanking(@RequestParam(value = "limit", defaultValue = "5") int limit) {
+        return ResponseEntity.ok(challengeService.getWeeklyRankingTopN(limit));
+    }
+
+    // 인기 수련: 참가자수 기준 desc
+    @GetMapping("/popular")
+    public ResponseEntity<List<ChallengeListResponse>> getPopular(@RequestParam(value="limit", defaultValue="12") int limit) {
+        return ResponseEntity.ok(challengeService.getPopularChallenges(limit));
+    }
+
+
+
+    @GetMapping("/{challengeId}")
+    public ResponseEntity<ChallengeDetailResponse> getChallengeDetailByPath(
+            @PathVariable int challengeId,
+            @RequestParam(value = "userId", required = false) Integer userId) {
+        System.out.println("챌린지 상세(Path) 조회 요청 challengeId: " + challengeId + ", userId: " + userId);
+        ChallengeDetailResponse detail = challengeService.getChallengeDetailById(challengeId, userId);
+        if (detail == null) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(detail);
+    }
+
 }
 

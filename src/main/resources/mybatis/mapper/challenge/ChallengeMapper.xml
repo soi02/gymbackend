@@ -729,4 +729,79 @@
         WHERE user_id = #{userId} AND challenge_id = #{challengeId}
     </delete>
 
+
+
+
+
+<!-- home -->
+<!-- 이번 주 유저의 '고유 출석일' 갯수 -->
+<select id="countDistinctAttendanceDaysThisWeek" resultType="int">
+  SELECT COUNT(DISTINCT attendance_date)
+  FROM attendance_record
+  WHERE user_id = #{userId}
+    AND YEARWEEK(attendance_date, 1) = YEARWEEK(CURDATE(), 1)
+</select>
+
+<!-- 이번 주 랭킹 (고유 출석일 기준) : 조인 없이 안전하게 -->
+<select id="findWeeklyRankingTopN" resultType="com.ca.gymbackend.challenge.dto.WeeklyRankItem">
+    SELECT 
+        t.user_id AS userId,
+        COALESCE(u.account_name, CONCAT('사용자 ', t.user_id)) AS userName,
+        u.profile_image AS profileImagePath,
+        t.distinct_days AS distinctDaysThisWeek
+    FROM (
+        SELECT 
+            ar.user_id,
+            COUNT(DISTINCT ar.attendance_date) AS distinct_days,
+            MIN(ar.attendance_date) AS first_attendance
+        FROM attendance_record ar
+        WHERE YEARWEEK(ar.attendance_date, 1) = YEARWEEK(CURDATE(), 1)
+        GROUP BY ar.user_id
+        ORDER BY distinct_days DESC, first_attendance ASC
+        LIMIT #{limit}
+    ) t
+    LEFT JOIN `user` u
+        ON u.id = t.user_id
+    ORDER BY t.distinct_days DESC, t.first_attendance ASC;
+</select>
+
+<!-- 인기 수련: 참가자수 기준 desc -->
+<select id="findPopularChallenges" resultType="com.ca.gymbackend.challenge.dto.ChallengeListResponse">
+  SELECT
+    c.challenge_id                AS challengeId,
+    c.challenge_title             AS challengeTitle,
+    c.challenge_description       AS challengeDescription,  <!-- ✅ 설명 포함 -->
+    c.challenge_thumbnail_path    AS challengeThumbnailPath,
+    c.challenge_participant_count AS challengeParticipantCount,
+    c.challenge_duration_days     AS challengeDurationDays,
+    (
+      SELECT GROUP_CONCAT(k.keyword_name ORDER BY k.keyword_name SEPARATOR ',')
+      FROM challenge_keyword ck
+      JOIN keyword k ON ck.keyword_id = k.keyword_id
+      WHERE ck.challenge_id = c.challenge_id
+    ) AS keywordNamesString
+  FROM challenge c
+  ORDER BY c.challenge_participant_count DESC, c.challenge_id DESC
+  LIMIT #{limit}
+</select>
+
+<!-- 전체 목록 -->
+<select id="getAllChallengesWithKeywords" resultType="com.ca.gymbackend.challenge.dto.ChallengeListResponse">
+  SELECT
+    c.challenge_id                AS challengeId,
+    c.challenge_title             AS challengeTitle,
+    c.challenge_description       AS challengeDescription,  <!-- ✅ 설명 포함 -->
+    c.challenge_thumbnail_path    AS challengeThumbnailPath,
+    c.challenge_participant_count AS challengeParticipantCount,
+    c.challenge_duration_days     AS challengeDurationDays,
+    (
+      SELECT GROUP_CONCAT(k.keyword_name ORDER BY k.keyword_name SEPARATOR ',')
+      FROM challenge_keyword ck
+      JOIN keyword k ON ck.keyword_id = k.keyword_id
+      WHERE ck.challenge_id = c.challenge_id
+    ) AS keywordNamesString
+  FROM challenge c
+  ORDER BY c.challenge_id DESC
+</select>
+
 </mapper>

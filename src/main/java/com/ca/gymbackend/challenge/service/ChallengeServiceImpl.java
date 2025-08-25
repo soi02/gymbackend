@@ -17,6 +17,8 @@ import com.ca.gymbackend.challenge.dto.ChallengeTestScore;
 import com.ca.gymbackend.challenge.dto.ChallengeUserInfo;
 import com.ca.gymbackend.challenge.dto.KeywordCategoryTree;
 import com.ca.gymbackend.challenge.dto.KeywordItem;
+import com.ca.gymbackend.challenge.dto.WeeklyRankItem;
+import com.ca.gymbackend.challenge.dto.WeeklySummaryResponse;
 import com.ca.gymbackend.challenge.dto.payment.ChallengeRaffleTicket;
 import com.ca.gymbackend.challenge.dto.payment.PaymentReadyResponse;
 import com.ca.gymbackend.challenge.mapper.ChallengeMapper;
@@ -756,6 +758,42 @@ private int checkAndAwardNorigaeAndRaffleTicket(int userId, int challengeId, int
     
 
     
+
+
+    // home
+    // 이번 주 유저의 '고유 출석일' 갯수
+    public WeeklySummaryResponse getWeeklySummary(int userId) {
+        WeeklySummaryResponse res = new WeeklySummaryResponse();
+        res.setUserId(userId);
+        int cnt = challengeMapper.countDistinctAttendanceDaysThisWeek(userId);
+        res.setTotalDistinctDaysThisWeek(cnt);
+        res.setProgressPercent(Math.min(100, Math.round(cnt * 100f / 7f)));
+        return res;
+    }
+
+    // 이번 주 랭킹 (고유 출석일 기준) TOP N
+    public List<WeeklyRankItem> getWeeklyRankingTopN(int limit) {
+        List<WeeklyRankItem> raw = challengeMapper.findWeeklyRankingTopN(limit);
+        int rank = 1;
+        for (WeeklyRankItem item : raw) {
+            int pct = Math.min(100, Math.round(item.getDistinctDaysThisWeek() * 100f / 7f));
+            item.setProgressPercent(pct);
+            item.setRank(rank++);
+        }
+        return raw;
+    }
+    
+    // 인기 수련: 참가자수 기준 desc
+    public List<ChallengeListResponse> getPopularChallenges(int limit) {
+        List<ChallengeListResponse> list = challengeMapper.findPopularChallenges(limit);
+        // 키워드 CSV → 리스트 변환 (네가 기존에 하던 방식)
+        for (ChallengeListResponse c : list) {
+            if (c.getKeywordNamesString() != null && !c.getKeywordNamesString().isEmpty()) {
+                c.setKeywords(java.util.Arrays.asList(c.getKeywordNamesString().split("\\s*,\\s*")));
+            }
+        }
+        return list;
+    }
 
 
 }

@@ -9,6 +9,7 @@ import lombok.Data;
 public class ChallengeListResponse {
     private int challengeId;
     private String challengeTitle;
+    private String  challengeDescription; 
     private String challengeThumbnailPath;
     private LocalDate challengeRecruitStartDate;
     private LocalDate challengeRecruitEndDate;
