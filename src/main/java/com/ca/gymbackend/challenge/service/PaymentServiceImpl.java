@@ -66,39 +66,43 @@ public class PaymentServiceImpl {
         body.put("cancel_url", cancelUrl);
         body.put("fail_url", failUrl);
 
-        try {
-            KakaoPayReadyResponse kakaoResponse = restClient.post()
-                    .uri("/online/v1/payment/ready")
-                    .headers(h -> h.addAll(headers))
-                    .body(body)
-                    .retrieve()
-                    .body(KakaoPayReadyResponse.class);
+    try {
+        KakaoPayReadyResponse kakaoResponse = restClient.post()
+                .uri("/online/v1/payment/ready")
+                .headers(h -> h.addAll(headers))
+                .body(body)
+                .retrieve()
+                .body(KakaoPayReadyResponse.class);
 
-            if (kakaoResponse == null) {
-                throw new RuntimeException("카카오페이 결제 준비 응답이 비어 있습니다.");
-            }
-
-            // DB에 'READY' 상태로 결제 정보 저장
-            ChallengePayment payment = new ChallengePayment();
-            payment.setUserId(userId);
-            payment.setChallengeId(challengeId.intValue());
-            payment.setChallengePaymentAmount(totalAmount);
-            payment.setChallengePaymentStatus("READY");
-            payment.setChallengePaymentTid(kakaoResponse.getTid());
-            challengeMapper.insertPayment(payment);
-
-            // 프론트엔드 응답용 DTO 생성
-            PaymentReadyResponse frontEndResponse = new PaymentReadyResponse();
-            frontEndResponse.setTid(kakaoResponse.getTid());
-            frontEndResponse.setRedirectUrl(kakaoResponse.getNext_redirect_pc_url());
-
-            return frontEndResponse;
-        } catch (HttpClientErrorException e) {
-            System.err.println("카카오페이 결제 준비 실패: " + e.getResponseBodyAsString());
-            throw new RuntimeException("카카오페이 결제 준비 중 오류가 발생했습니다.", e);
+        if (kakaoResponse == null) {
+            throw new RuntimeException("카카오페이 결제 준비 응답이 비어 있습니다.");
         }
-    }
 
+        // DB에 'READY' 상태로 결제 정보 저장
+        ChallengePayment payment = new ChallengePayment();
+        payment.setUserId(userId);
+        payment.setChallengeId(challengeId.intValue());
+        payment.setChallengePaymentAmount(totalAmount);
+        payment.setChallengePaymentStatus("READY");
+        payment.setChallengePaymentTid(kakaoResponse.getTid());
+        challengeMapper.insertPayment(payment);
+
+        // 프론트엔드 응답용 DTO 생성
+        PaymentReadyResponse frontEndResponse = new PaymentReadyResponse();
+        frontEndResponse.setTid(kakaoResponse.getTid());
+
+        // ⭐ 수정된 부분: PC 및 모바일 리다이렉트 URL 모두 담아서 전달
+        // 기존의 redirectUrl 필드에 PC URL을 할당합니다.
+        frontEndResponse.setRedirectUrl(kakaoResponse.getNext_redirect_pc_url());
+        // 새로 추가된 next_redirect_mobile_url 필드에 모바일 URL을 할당합니다.
+        frontEndResponse.setNext_redirect_mobile_url(kakaoResponse.getNext_redirect_mobile_url());
+
+        return frontEndResponse;
+    } catch (HttpClientErrorException e) {
+        System.err.println("카카오페이 결제 준비 실패: " + e.getResponseBodyAsString());
+        throw new RuntimeException("카카오페이 결제 준비 중 오류가 발생했습니다.", e);
+    }
+}
     /**
      * 카카오페이 결제 승인 및 챌린지 참가 처리
      * 결제 성공/실패에 따라 프론트엔드 URL로 리다이렉션 응답을 반환합니다.
