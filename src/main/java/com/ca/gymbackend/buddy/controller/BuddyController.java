@@ -91,14 +91,27 @@ public class BuddyController {
 
     // 매칭 요청 보내기 (하트 누르기)
     @PostMapping("/request")
-    public ResponseEntity<?> sendMatchingRequest(@RequestBody MatchingDto dto) {
+    public ResponseEntity<?> sendMatchingRequest(@RequestBody MatchingDto dto, HttpServletRequest request) {
         try {
+            // 토큰에서 사용자 ID 추출
+            String token = request.getHeader("Authorization");
+            if (token == null || !token.startsWith("Bearer ")) {
+                return ResponseEntity.status(401).body("인증이 필요합니다.");
+            }
+            Integer userId = jwtUtil.getUserId(token.substring(7));
+            
             System.out.println("====================");
             System.out.println("받은 MatchingDto: " + dto);
+            System.out.println("토큰에서 추출한 userId: " + userId);
             System.out.println("senderId: " + dto.getSendBuddyId());
             System.out.println("receiverId: " + dto.getReceiverBuddyId());
+            
+            // 토큰의 사용자 ID와 요청의 sendBuddyId가 일치하는지 확인
+            if (!userId.equals(dto.getSendBuddyId())) {
+                return ResponseEntity.status(403).body("권한이 없습니다.");
+            }
+            
             buddyService.sendMatchingRequest(dto.getSendBuddyId(), dto.getReceiverBuddyId());
-            System.out.println(dto.getReceiverBuddyId());
             return ResponseEntity.ok("매칭 요청 성공");
         } catch (Exception e) {
             return ResponseEntity.status(500).body("매칭 요청 실패: " + e.getMessage());
