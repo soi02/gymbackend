@@ -90,7 +90,7 @@
     
     <insert id = "insertMarketProductInterestedLog">
     
-        INSERT INTO market_product_interested_log (market_user_id, specific_article_id)
+        INSERT IGNORE INTO market_product_interested_log (market_user_id, specific_article_id)
         VALUES (#{marketUserId}, #{specificArticleId})
     
     </insert>
@@ -139,14 +139,14 @@
     
     <insert id = "insertMarketDealedLog">
     
-        INSERT INTO market_dealed_log (seller_id, buyer_id, specific_article_id)
+        INSERT IGNORE INTO market_dealed_log (seller_id, buyer_id, specific_article_id)
         VALUES (#{sellerId}, #{buyerId}, #{specificArticleId});
     
     </insert>
     
     <insert id = "insertMarketDealedLogCheckedBySeller">
     
-        INSERT INTO market_dealed_log_checked_by_seller (seller_id, buyer_id, specific_article_id)
+        INSERT IGNORE INTO market_dealed_log_checked_by_seller (seller_id, buyer_id, specific_article_id)
         VALUES (#{sellerId}, #{buyerId}, #{specificArticleId});
     
     </insert>
@@ -174,7 +174,7 @@
     
     <insert id = "insertMarketDealedLogCheckedByBuyer">
     
-        INSERT INTO market_dealed_log_checked_by_buyer (seller_id, buyer_id, specific_article_id)
+        INSERT IGNORE INTO market_dealed_log_checked_by_buyer (seller_id, buyer_id, specific_article_id)
         VALUES (#{sellerId}, #{buyerId}, #{specificArticleId});
     
     </insert>
