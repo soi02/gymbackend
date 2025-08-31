@@ -56,9 +56,13 @@ public interface MarketMapper {
     public MarketDealedLogCheckedByBuyerDto selectSpecificMarketDealedLogCheckedByBuyer(@Param("buyerId") Integer buyerId, @Param("specificArticleId") Integer specificArticleId);
     public void deleteMarketDealedLogCheckedByBuyer(@Param("specificArticleId") Integer specificArticleId);
     public MarketDealedLogDto selectSpecificMarketDealedLog(@Param("specificArticleId") Integer specificArticleId);
+    public void updateMarketArticleToDealerVerified(@Param("id") Integer id);
     public List<MarketDealedLogDto> selectMarketDealedLogWhenBuyer(@Param("buyerId") Integer buyerId);
     public Integer selectCountMarketDealedLogWhenBuyer(@Param("buyerId") Integer buyerId);
     public List<MarketDealedLogDto> selectMarketDealedLogWhenSeller(@Param("sellerId") Integer sellerId);
+    public List<MarketArticleDto> selectMarketArticleWhenSeller(@Param("marketUserId") Integer marketUserId);
+    public Integer selectCountMarketTotalLogWhenSeller(@Param("marketUserId") Integer marketUserId);
+    public Integer selectCountMarketUndealedLogWhenSeller(@Param("marketUserId") Integer marketUserId);
     public Integer selectCountMarketDealedLogWhenSeller(@Param("sellerId") Integer sellerId);
     public void deleteMarketDealedLogWhenDeleteArticle(@Param("specificArticleId") Integer specificArticleId);
     public void updateMarketArticleToSellEnded(@Param("id") Integer id);

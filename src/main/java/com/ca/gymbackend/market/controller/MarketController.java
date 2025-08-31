@@ -199,6 +199,11 @@ public class MarketController {
         return marketService.selectSpecificMarketDealedLog(specificArticleId);
     }
     
+    @PostMapping("/updateMarketArticleToDealerVerified")
+    public void updateMarketArticleToDealerVerified(@RequestParam("id") Integer id) {
+        marketService.updateMarketArticleToDealerVerified(id);
+    }
+    
     @GetMapping("/selectMarketDealedLogWhenBuyer") // ok + Front OK
     public List<Map<String, Object>> selectMarketDealedLogWhenBuyer(@RequestParam("buyerId") Integer buyerId) {
         return marketService.selectMarketDealedLogWhenBuyer(buyerId);
@@ -214,9 +219,29 @@ public class MarketController {
         return marketService.selectMarketDealedLogWhenSeller(sellerId);
     }
     
+    @GetMapping("/selectMarketArticleWhenSeller") // ok + Front OK (구조 수정해야 됨)
+    public List<Map<String, Object>> selectMarketArticleWhenSeller(@RequestParam("marketUserId") Integer marketUserId) {
+        return marketService.selectMarketArticleWhenSeller(marketUserId);
+    }
+    
+    @GetMapping("/selectCountMarketTotalLogWhenSeller") // ok
+    public Integer selectCountMarketTotalLogWhenSeller(@RequestParam("marketUserId") Integer marketUserId) {
+        return marketService.selectCountMarketTotalLogWhenSeller(marketUserId);
+    }
+    
+    @GetMapping("/selectCountMarketUndealedLogWhenSeller") // ok
+    public Integer selectCountMarketUndealedLogWhenSeller(@RequestParam("marketUserId") Integer marketUserId) {
+        return marketService.selectCountMarketUndealedLogWhenSeller(marketUserId);
+    }
+    
     @GetMapping("/selectCountMarketDealedLogWhenSeller") // ok
     public Integer selectCountMarketDealedLogWhenSeller(@RequestParam("sellerId") Integer sellerId) {
         return marketService.selectCountMarketDealedLogWhenSeller(sellerId);
+    }
+    
+    @PostMapping("/updateMarketArticleToSellEnded")
+    public void updateMarketArticleToSellEnded(@RequestParam("id") Integer id) {
+        marketService.updateMarketArticleToSellEnded(id);
     }
     
     @PostMapping("/insertMarketReviewToUser") // ok
