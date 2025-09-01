@@ -53,7 +53,7 @@
     
     <select id = "selectMarketCommentOnArticle" resultType = "com.ca.gymbackend.market.dto.MarketCommentOnArticleDto">
     
-        SELECT * FROM market_comment_on_article WHERE article_id = 1
+        SELECT * FROM market_comment_on_article WHERE article_id = #{articleId}
         ORDER BY
             CASE
                 WHEN comment_of_comment = 1 THEN target_comment_id
