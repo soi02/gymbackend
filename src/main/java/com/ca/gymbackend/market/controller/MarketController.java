@@ -235,8 +235,8 @@ public class MarketController {
     }
     
     @GetMapping("/selectCountMarketDealedLogWhenSeller") // ok
-    public Integer selectCountMarketDealedLogWhenSeller(@RequestParam("sellerId") Integer sellerId) {
-        return marketService.selectCountMarketDealedLogWhenSeller(sellerId);
+    public Integer selectCountMarketDealedLogWhenSeller(@RequestParam("marketUserId") Integer marketUserId) {
+        return marketService.selectCountMarketDealedLogWhenSeller(marketUserId);
     }
     
     @PostMapping("/updateMarketArticleToSellEnded")

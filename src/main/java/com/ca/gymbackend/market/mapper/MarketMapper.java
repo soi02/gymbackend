@@ -63,7 +63,7 @@ public interface MarketMapper {
     public List<MarketArticleDto> selectMarketArticleWhenSeller(@Param("marketUserId") Integer marketUserId);
     public Integer selectCountMarketTotalLogWhenSeller(@Param("marketUserId") Integer marketUserId);
     public Integer selectCountMarketUndealedLogWhenSeller(@Param("marketUserId") Integer marketUserId);
-    public Integer selectCountMarketDealedLogWhenSeller(@Param("sellerId") Integer sellerId);
+    public Integer selectCountMarketDealedLogWhenSeller(@Param("marketUserId") Integer marketUserId);
     public void deleteMarketDealedLogWhenDeleteArticle(@Param("specificArticleId") Integer specificArticleId);
     public void updateMarketArticleToSellEnded(@Param("id") Integer id);
     

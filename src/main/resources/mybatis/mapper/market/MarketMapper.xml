@@ -257,7 +257,7 @@
     
     <select id = "selectCountMarketDealedLogWhenSeller" resultType = "int"> <!-- 위의 방식과 통일 예정 -->
     
-        SELECT COUNT(*) FROM market_dealed_log WHERE seller_id = #{sellerId};
+        SELECT COUNT(*) FROM market_article WHERE market_user_id = #{marketUserId} AND sell_ended = 1;
     
     </select>
     

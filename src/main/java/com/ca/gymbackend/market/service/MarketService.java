@@ -497,8 +497,8 @@ public class MarketService {
     public Integer selectCountMarketUndealedLogWhenSeller(Integer marketUserId) {
         return marketMapper.selectCountMarketUndealedLogWhenSeller(marketUserId);
     }
-    public Integer selectCountMarketDealedLogWhenSeller(Integer sellerId) {
-        return marketMapper.selectCountMarketDealedLogWhenSeller(sellerId);
+    public Integer selectCountMarketDealedLogWhenSeller(Integer marketUserId) {
+        return marketMapper.selectCountMarketDealedLogWhenSeller(marketUserId);
     }
     
     public void updateMarketArticleToSellEnded(Integer id) {
