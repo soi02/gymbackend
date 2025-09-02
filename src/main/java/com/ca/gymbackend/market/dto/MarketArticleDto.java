@@ -17,6 +17,7 @@ public class MarketArticleDto {
     private int productCost;
     private int viewedCount;
     private int sellEnded;
+    private int dealerVerified;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

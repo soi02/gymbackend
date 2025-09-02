@@ -46,14 +46,21 @@
     
     <insert id = "insertMarketCommentOnArticle">
     
-        INSERT INTO market_comment_on_article (article_id, market_user_id, content)
-        VALUES (#{articleId}, #{marketUserId}, #{content});
+        INSERT INTO market_comment_on_article (article_id, market_user_id, comment_of_comment, target_comment_id, content)
+        VALUES (#{articleId}, #{marketUserId}, #{commentOfComment}, #{targetCommentId}, #{content});
     
     </insert>
     
     <select id = "selectMarketCommentOnArticle" resultType = "com.ca.gymbackend.market.dto.MarketCommentOnArticleDto">
     
-        SELECT * FROM market_comment_on_article WHERE article_id = #{articleId};
+        SELECT * FROM market_comment_on_article WHERE article_id = #{articleId}
+        ORDER BY
+            CASE
+                WHEN comment_of_comment = 1 THEN target_comment_id
+                ELSE id
+            END ASC,
+            comment_of_comment ASC,
+	        id ASC;
     
     </select>
     
@@ -90,7 +97,7 @@
     
     <insert id = "insertMarketProductInterestedLog">
     
-        INSERT INTO market_product_interested_log (market_user_id, specific_article_id)
+        INSERT IGNORE INTO market_product_interested_log (market_user_id, specific_article_id)
         VALUES (#{marketUserId}, #{specificArticleId})
     
     </insert>
@@ -139,14 +146,14 @@
     
     <insert id = "insertMarketDealedLog">
     
-        INSERT INTO market_dealed_log (seller_id, buyer_id, specific_article_id)
+        INSERT IGNORE INTO market_dealed_log (seller_id, buyer_id, specific_article_id)
         VALUES (#{sellerId}, #{buyerId}, #{specificArticleId});
     
     </insert>
     
     <insert id = "insertMarketDealedLogCheckedBySeller">
     
-        INSERT INTO market_dealed_log_checked_by_seller (seller_id, buyer_id, specific_article_id)
+        INSERT IGNORE INTO market_dealed_log_checked_by_seller (seller_id, buyer_id, specific_article_id)
         VALUES (#{sellerId}, #{buyerId}, #{specificArticleId});
     
     </insert>
@@ -174,7 +181,7 @@
     
     <insert id = "insertMarketDealedLogCheckedByBuyer">
     
-        INSERT INTO market_dealed_log_checked_by_buyer (seller_id, buyer_id, specific_article_id)
+        INSERT IGNORE INTO market_dealed_log_checked_by_buyer (seller_id, buyer_id, specific_article_id)
         VALUES (#{sellerId}, #{buyerId}, #{specificArticleId});
     
     </insert>
@@ -192,6 +199,12 @@
         SELECT * FROM market_dealed_log_checked_by_buyer WHERE buyer_id = #{buyerId} AND specific_article_id = #{specificArticleId};
     
     </select>
+    
+    <update id = "updateMarketArticleToDealerVerified">
+    
+        UPDATE market_article ma SET dealer_verified = 1 WHERE id = #{id};
+    
+    </update>
     
     <delete id = "deleteMarketDealedLogCheckedByBuyer">
     <!-- 판매자가 한 행동인지 정밀하게 확인하려면 buyerId 를 넣을 것 -->
@@ -224,9 +237,27 @@
     
     </select>
     
-    <select id = "selectCountMarketDealedLogWhenSeller" resultType = "int"> <!-- 테스트용 -->
+    <select id = "selectMarketArticleWhenSeller" resultType = "com.ca.gymbackend.market.dto.MarketArticleDto">
     
-        SELECT COUNT(*) FROM market_dealed_log WHERE seller_id = #{sellerId};
+        SELECT * FROM market_article WHERE market_user_id = #{marketUserId} ORDER BY id DESC;
+    
+    </select>
+    
+    <select id = "selectCountMarketTotalLogWhenSeller" resultType = "int">
+    
+        SELECT COUNT(*) FROM market_article WHERE market_user_id = #{marketUserId};
+    
+    </select>
+    
+    <select id = "selectCountMarketUndealedLogWhenSeller" resultType = "int">
+    
+        SELECT COUNT(*) FROM market_article WHERE market_user_id = #{marketUserId} AND sell_ended = 0;
+    
+    </select>
+    
+    <select id = "selectCountMarketDealedLogWhenSeller" resultType = "int"> <!-- 위의 방식과 통일 예정 -->
+    
+        SELECT COUNT(*) FROM market_article WHERE market_user_id = #{marketUserId} AND sell_ended = 1;
     
     </select>
     

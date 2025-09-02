@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ca.gymbackend.diary.mapper.DiarySqlMapper">
+
+    <!-- 특정 월의 감정 통계 -->
+    <select id="getSpecificMonthEmotionStats" resultType="java.util.Map">
+        SELECT 
+            e.id as emoji_id,
+            e.name as emoji_name,
+            e.emoji_image,
+            COUNT(*) as count,
+            ROUND((COUNT(*) * 100.0 / (
+                SELECT COUNT(*) 
+                FROM diary 
+                WHERE user_id = #{userId} 
+                AND DATE_FORMAT(created_at, '%Y-%m') = #{yearMonth}
+            )), 1) as percentage
+        FROM diary d
+        JOIN emoji e ON d.emoji_id = e.id
+        WHERE d.user_id = #{userId}
+        AND DATE_FORMAT(d.created_at, '%Y-%m') = #{yearMonth}
+        GROUP BY e.id, e.name, e.emoji_image
+        ORDER BY count DESC
+    </select>
+
+</mapper>

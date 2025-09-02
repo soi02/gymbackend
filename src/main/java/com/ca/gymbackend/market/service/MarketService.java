@@ -17,6 +17,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.ca.gymbackend.market.dto.MarketArticleDto;
@@ -344,6 +345,7 @@ public class MarketService {
             marketDealedLogDto.setBuyerId(marketDealedLogCheckedBySellerDto.getBuyerId());
             marketDealedLogDto.setSpecificArticleId(marketDealedLogCheckedBySellerDto.getSpecificArticleId());
             marketMapper.insertMarketDealedLog(marketDealedLogDto);
+            marketMapper.updateMarketArticleToDealerVerified(marketDealedLogCheckedBySellerDto.getSpecificArticleId());
             marketMapper.updateMarketArticleToSellEnded(marketDealedLogCheckedBySellerDto.getSpecificArticleId());
         }
     }
@@ -365,6 +367,7 @@ public class MarketService {
             marketDealedLogDto.setBuyerId(marketDealedLogCheckedByBuyerDto.getBuyerId());
             marketDealedLogDto.setSpecificArticleId(marketDealedLogCheckedByBuyerDto.getSpecificArticleId());
             marketMapper.insertMarketDealedLog(marketDealedLogDto);
+            marketMapper.updateMarketArticleToDealerVerified(marketDealedLogCheckedBySellerDto.getSpecificArticleId());
             marketMapper.updateMarketArticleToSellEnded(marketDealedLogCheckedByBuyerDto.getSpecificArticleId());
         }
     }
@@ -379,6 +382,9 @@ public class MarketService {
     } // 수정 예정 (이름만 지정했음)
     public MarketDealedLogDto selectSpecificMarketDealedLog(Integer specificArticleId) {
         return marketMapper.selectSpecificMarketDealedLog(specificArticleId);
+    }
+    public void updateMarketArticleToDealerVerified(Integer id) {
+        marketMapper.updateMarketArticleToDealerVerified(id);
     }
     public List<Map<String, Object>> selectMarketDealedLogWhenBuyer(Integer buyerId) {
         List<Map<String, Object>> mapListSelectMarketDealedLogWhenBuyer = new ArrayList<>();
@@ -457,8 +463,46 @@ public class MarketService {
         
         return mapListSelectMarketDealedLogWhenSeller;
     }
-    public Integer selectCountMarketDealedLogWhenSeller(Integer sellerId) {
-        return marketMapper.selectCountMarketDealedLogWhenSeller(sellerId);
+    
+    //
+    
+    public List<Map<String, Object>> selectMarketArticleWhenSeller(Integer marketUserId) {
+        List<Map<String, Object>> mapListSelectMarketArticleWhenSeller = new ArrayList<>();
+        List<MarketArticleDto> listMarketArticleDto = marketMapper.selectMarketArticleWhenSeller(marketUserId);
+        
+        if (listMarketArticleDto != null) {
+        
+            for (MarketArticleDto marketArticleDto : listMarketArticleDto) {
+                Map<String, Object> map = new HashMap<>();
+                UserDto userDto = marketMapper.selectMarketUserInfo(marketArticleDto.getMarketUserId());
+                map.put("marketArticleDto", marketArticleDto);
+                map.put("marketUserInfoDto", userDto);
+                mapListSelectMarketArticleWhenSeller.add(map);
+            }
+            
+        } else {
+            
+            listMarketArticleDto = new ArrayList<>();
+            
+        }
+        
+        return mapListSelectMarketArticleWhenSeller;
+    }
+    
+    // ▲ 수정 예정 중
+    
+    public Integer selectCountMarketTotalLogWhenSeller(Integer marketUserId) {
+        return marketMapper.selectCountMarketTotalLogWhenSeller(marketUserId);
+    }
+    public Integer selectCountMarketUndealedLogWhenSeller(Integer marketUserId) {
+        return marketMapper.selectCountMarketUndealedLogWhenSeller(marketUserId);
+    }
+    public Integer selectCountMarketDealedLogWhenSeller(Integer marketUserId) {
+        return marketMapper.selectCountMarketDealedLogWhenSeller(marketUserId);
+    }
+    
+    public void updateMarketArticleToSellEnded(Integer id) {
+        marketMapper.updateMarketArticleToSellEnded(id);
     }
     
     public void insertMarketReviewToUser(MarketReviewOnUserDto marketReviewOnUserDto) {
