@@ -26,27 +26,27 @@ public interface GroupChatMessageMapper {
     public boolean hasReadStatus(@Param("messageId") Long messageId, @Param("userId") Long userId);
     
     // 특정 메시지를 읽은 사용자 수 조회
-    public Long countReadersByMessageId(Long messageId);
+    public Long countReadersByMessageId(@Param("messageId") Long messageId);
     
     // 메시지 ID로 챌린지 ID 조회
-    public Long findChallengeIdByMessageId(Long messageId);
+    public Long findChallengeIdByMessageId(@Param("messageId") Long messageId);
 
 
 
 
     // 챌린지 참여 인원 수 조회 메서드 추가
-    public int countParticipantsByChallengeId(Long challengeId);
+    public int countParticipantsByChallengeId(@Param("challengeId") Long challengeId);
 
 
 
     // 챌린지 ID로 챌린지 제목을 조회하는 SQL 쿼리 메서드 추가
     // @Select("SELECT challenge_name FROM challenge WHERE challenge_id = #{challengeId}")
-    public String findChallengeTitleById(Long challengeId);
+    public String findChallengeTitleById(@Param("challengeId") Long challengeId);
 
 
 
 
 
-
+    // 채팅 목록 + 요약
     public List<GroupChatListItemDto> selectJoinedChallengesWithChatSummary(@Param("userId") Long userId);
 }
