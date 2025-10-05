@@ -17,7 +17,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.time.Duration;
 import java.util.*;
-import java.util.Base64;
 
 @RestController
 @RequiredArgsConstructor
@@ -46,7 +45,14 @@ public class ChallengeAIController {
             @RequestParam("userId") int userId,
             @RequestParam(value = "topN", defaultValue = "5") int topN
     ) {
-        final String recKey = userId + ":" + topN;
+        // 기존
+        // 결과 캐시 키에 유저 프로필 해시 포함해서 정합성 높이려고 변경함. 기존꺼는 유저 프로필이 바뀌어도 6시간동안 예전 추천이 나올 수 있음.
+        //  final String recKey = userId + ":" + topN;
+
+        // 개선
+        String profile = buildUserProfileTextSlim(userId);
+        String profileKey = userId + ":" + md5(profile);
+        final String recKey = profileKey + ":" + topN;
 
         // 0) 결과 캐시 (버튼 연타 방지)
         var cached = userRecCache.getIfPresent(recKey);
@@ -59,7 +65,7 @@ public class ChallengeAIController {
             List<ChallengeListResponse> all = challengeService.getAllChallengesWithKeywords();
             if (all == null || all.isEmpty()) return List.of();
 
-            // 🔒 2) 예산 가드: 임베딩 호출이 필요한 상황이면 먼저 체크
+            // 2) 예산 가드: 임베딩 호출이 필요한 상황이면 먼저 체크
             boolean needAnyEmbedding = needsAnyEmbedding(all, userId);
             if (needAnyEmbedding && budget.overBudget()) {
                 log.warn("[REC] Budget mode → heuristic fallback");
@@ -67,7 +73,6 @@ public class ChallengeAIController {
                 userRecCache.put(recKey, fb);
                 return fb;
             }
-
             // 3) 수련 텍스트 다이어트 + 변경분만 임베딩
             List<String> toEmbedTexts = new ArrayList<>();
             List<Integer> toEmbedIds   = new ArrayList<>();
@@ -82,7 +87,7 @@ public class ChallengeAIController {
                 }
             }
             if (!toEmbedTexts.isEmpty()) {
-                budget.inc(); // ★ 임베딩 실제로 부를 때만 카운트
+                budget.inc(); // 임베딩 실제로 부를 때만 카운트
                 List<List<Double>> newVecs = embedding.embedBatchChunked(toEmbedTexts, 16);
                 for (int i = 0; i < toEmbedIds.size(); i++) {
                     challengeVecCache.put(toEmbedIds.get(i), newVecs.get(i));
@@ -91,11 +96,9 @@ public class ChallengeAIController {
             }
 
             // 4) 유저 벡터 (12h 캐시)
-            String profile = buildUserProfileTextSlim(userId);
-            String profileKey = userId + ":" + md5(profile);
             List<Double> userVec = userVecCache.getIfPresent(profileKey);
             if (userVec == null || userVec.isEmpty()) {
-                budget.inc(); // ★ 유저 임베딩 호출도 카운트
+                budget.inc();
                 userVec = embedding.embedOne(profile);
                 userVecCache.put(profileKey, userVec);
             }

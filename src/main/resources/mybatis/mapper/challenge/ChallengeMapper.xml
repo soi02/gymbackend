@@ -249,7 +249,7 @@
       c.challenge_participant_count AS challengeParticipantCount,
       uc.personal_join_date AS personalJoinDate,
 
-      /* ✅ 대표 카테고리: 키워드의 카테고리 중 최빈값 */
+      /* 대표 카테고리: 키워드의 카테고리 중 최빈값 */
       (
         SELECT kk.keyword_category_id
         FROM challenge_keyword ck2
@@ -638,22 +638,7 @@
     ORDER BY completed_at DESC
     LIMIT 1
 </select>
-    
-    <!-- <insert id="insertRaffleTicket">
-        INSERT INTO raffle_ticket (
-            user_id, 
-            challenge_id, 
-            raffle_ticket_count, 
-            raffle_ticket_source_type, 
-            created_at
-        ) VALUES (
-            #{userId}, 
-            #{challengeId}, 
-            #{raffleTicketCount}, 
-            #{raffleTicketSourceType}, 
-            NOW()
-        )
-    </insert> -->
+
     
 <insert id="insertUserChallengeInfo">
     INSERT INTO user_challenge (
@@ -670,27 +655,6 @@
         '0'
     )
 </insert>
-
-
-
-    <!-- 추첨권 관련 -->
-    <!-- <insert id="insertRaffleTicket" parameterType="com.ca.gymbackend.challenge.dto.payment.ChallengeRaffleTicket">
-        INSERT INTO raffle_ticket (
-            user_id, 
-            challenge_id, 
-            raffle_ticket_count, 
-            raffle_ticket_source_type, 
-            created_at
-        ) VALUES (
-            #{userId}, 
-            #{challengeId}, 
-            #{raffleTicketCount}, 
-            #{raffleTicketSourceType}, 
-            NOW()
-        )
-    </insert>
-     -->
-        
 
 
     <insert id="createChallengeKeyword">
