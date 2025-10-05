@@ -195,26 +195,6 @@ public class ChallengeServiceImpl {
     }
     
 
-    // 챌린지 전체 목록 조회
-    // public List<ChallengeCreateRequest> getAllChallengeList() {
-    //     List<ChallengeCreateRequest> challenges = challengeMapper.findAllChallengeList();
-
-    //     for (ChallengeCreateRequest challenge : challenges) {
-    //         String keywordNamesString = challenge.getKeywordNames(); 
-    //         if (keywordNamesString != null && !keywordNamesString.isEmpty()) {
-    //             List<String> keywordsList = Arrays.asList(keywordNamesString.split(",")).stream()
-    //                                             .map(String::trim)
-    //                                             .collect(Collectors.toList());
-    //             challenge.setKeywords(keywordsList); 
-    //         } else {
-    //             challenge.setKeywords(new ArrayList<>());
-    //         }
-    //         // 사용 후 임시 필드는 null로 비워줌
-    //         challenge.setKeywordNames(null);
-    //     }
-    //     return challenges;
-    // }
-
         // 챌린지 전체 목록 조회 (키워드 포함)
     public List<ChallengeListResponse> getAllChallengesWithKeywords() {
         List<ChallengeListResponse> challenges = challengeMapper.findAllChallengesWithKeywords();
@@ -248,23 +228,6 @@ public List<KeywordCategoryTree> getKeywordTree() {
     return tree;
 }
 
-    // // 카테고리 ID로 챌린지 목록 조회
-    // public List<ChallengeCreateRequest> getChallengesByCategoryId(Integer categoryId) {
-    //     if (categoryId == null || categoryId <= 0) {
-    //         throw new IllegalArgumentException("유효하지 않은 카테고리 ID입니다.");
-    //     }
-        
-    //     // 1. 카테고리별 챌린지 목록 조회 (키워드 정보는 없는 상태)
-    //     List<ChallengeCreateRequest> challenges = challengeMapper.findChallengesByCategoryId(categoryId);
-        
-    //     // 2. 각 챌린지에 대해 키워드 ID 목록을 조회하여 DTO에 설정
-    //     for (ChallengeCreateRequest challenge : challenges) {
-    //         List<Integer> keywordIds = challengeMapper.findKeywordIdsByChallengeId(challenge.getChallengeId());
-    //         challenge.setChallengeKeywordIds(keywordIds);
-    //     }
-        
-    //     return challenges;
-    // }
 
 public List<ChallengeListResponse> getChallengesByCategoryId(int categoryId) {
     if (categoryId <= 0) throw new IllegalArgumentException("유효하지 않은 카테고리 ID입니다.");
@@ -275,45 +238,6 @@ public List<ChallengeListResponse> getChallengesByCategoryId(int categoryId) {
 
 
 
-
-
-    // 챌린지 상세보기
-    // public ChallengeDetailResponse getChallengeDetailByChallengeId(int challengeId, Integer userId) {
-
-    //     ChallengeDetailResponse challengeDetailResponse = challengeMapper.findChallengeDetailByChallengeId(challengeId);
-
-    //     if (challengeDetailResponse == null) {
-    //         // 키워드가 없는 챌린지라면 null 반환 예외처리
-    //         return null;
-    //     }
-
-    //     // 서비스 계층에서 수동으로 데이터 가공 (키워드만
-    //     // challengeKeywordsString (String)을 challengeKeywords List<String>타입으로 변환
-    //     // INNER JOIN을 사용했으므로 이 keywordsString은 보통 NULL이 아니겠지만,
-    //     // 혹시 모를 상황(예: GROUP_CONCAT이 빈 문자열 반환)을 대비하여 NULL/빈 문자열 체크는 유지
-    //     String challengeKeywordsString = challengeDetailResponse.getChallengeKeywordsString();
-    //     if (challengeKeywordsString != null && !challengeKeywordsString.trim().isEmpty()) {
-    //         List<String> keywords = Arrays.asList(challengeKeywordsString.split(","))
-    //                                         .stream()
-    //                                         .map(String::trim)
-    //                                         .collect(Collectors.toList());
-    //         challengeDetailResponse.setChallengeKeywords(keywords);
-    //     } else {
-    //         // INNER JOIN으로 왔는데도 여기가 실행된다면, 논리적으로 키워드는 있었지만 GROUP_CONCAT이 빈 문자열을 반환한 경우입니다.
-    //         challengeDetailResponse.setChallengeKeywords(new ArrayList<>());
-    //     }
-    //     // challengeKeywordsString 필드는 클라이언트에 불필요하므로 null로 설정
-    //     challengeDetailResponse.setChallengeKeywordsString(null);
-
-    //     // challengeStatus는 이미 SQL 쿼리에서 계산되어 들어왔으므로 별도 로직이 필요 없습니다.
-
-    //     // 추가된 로직: userId를 사용하여 참여 여부 확인
-    //     // Mapper에 existsUserChallenge(int userId, int challengeId) 메서드가 필요
-    //     boolean isParticipating = challengeMapper.existsUserChallenge(userId, challengeId) > 0;
-    //     challengeDetailResponse.setUserParticipating(isParticipating);
-
-    //     return challengeDetailResponse;
-    // }
 
         // 챌린지 상세 조회
     public ChallengeDetailResponse getChallengeDetailById(int challengeId, Integer userId) {

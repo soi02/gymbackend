@@ -73,16 +73,6 @@ public class ChallengeController {
 
 
 
-
-    // 챌린지 리스트 가져오기
-    // @GetMapping("/getAllChallengeListProcess")
-    // public ResponseEntity<List<ChallengeCreateRequest>> getAllChallengeListProcess() {
-    //     System.out.println("[챌린지 목록 응답]");
-    //     List<ChallengeCreateRequest> challengeCreateRequestList = challengeService.getAllChallengeList();
-    //     return ResponseEntity.ok(challengeCreateRequestList);
-    // }
-
-
     // 모든 키워드 카테고리 목록을 가져오는 API
     @GetMapping("/getAllCategories")
     public ResponseEntity<List<ChallengeKeywordCategory>> getAllCategories() {
@@ -112,29 +102,6 @@ public ResponseEntity<List<KeywordCategoryTree>> getKeywordTree() {
         }
     }
 
-
-    // 챌린지 상세보기
-    // @GetMapping("/getChallengeDetailByChallengeIdProcess")
-    // public ResponseEntity<ChallengeDetailResponse> getChallengeDetailByChallengeIdProcess(
-    //     @RequestParam("challengeId") int challengeId,
-    //     @RequestParam(value = "userId", required = false) Integer userId) {
-
-    //     System.out.println(">>> getChallengeDetailByChallengeIdProcess 호출됨. challengeId: " + challengeId + ", userId: " + userId); 
-
-    //     if (userId == null) {
-    //         userId = 0;
-    //     }
-
-    //     ChallengeDetailResponse challengeDetailResponse = challengeService.getChallengeDetailByChallengeId(challengeId, userId);
-
-    //     // 챌린지를 찾을 수 없으면 404 Not Found 반환
-    //     if(challengeDetailResponse == null) {
-    //         System.out.println("챌린지를 찾을 수 없습니다.");
-    //         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-    //     }
-
-    //     return ResponseEntity.ok(challengeDetailResponse);
-    // }
 
         // 챌린지 목록 API
     @GetMapping("/list")
@@ -245,20 +212,6 @@ public ResponseEntity<List<KeywordCategoryTree>> getKeywordTree() {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
     }
 }
-    // try { (테스트용입니다)
-    //     // testDate 파라미터를 서비스 메서드로 전달
-    //     challengeService.attendChallenge(userId, challengeId, photo, testDate);
-    //     return ResponseEntity.ok("챌린지 인증 완료!");
-    // } catch (IllegalStateException e) {
-    //     return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
-    // } catch (Exception e) {
-    //     e.printStackTrace();
-    //     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("인증 처리 중 오류 발생");
-    // }
-    
-
-
-
 
 
     // 키워드에 따른 챌린지 추천
