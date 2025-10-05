@@ -18,71 +18,32 @@ public class SecurityConfig {
         this.jwtAuthFilter = jwtAuthFilter;
     }
 
-    // @Bean
-    // public SecurityFilterChain securityFilterChain(HttpSecurity http) throws
-    // Exception {
-    // http
-    // .csrf(csrf -> csrf.disable())
-    // .sessionManagement(session ->
-    // session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-    // .authorizeHttpRequests(auth -> auth
-    // .requestMatchers("/ws-buddy/**").permitAll() // ✅ WebSocket 경로 허용
-    // .requestMatchers(HttpMethod.POST, "/api/article").authenticated()
-    // .requestMatchers(HttpMethod.PUT, "/api/article/*").authenticated()
-    // .requestMatchers(HttpMethod.DELETE, "/api/article/*").authenticated()
-    // .anyRequest().permitAll())
-    // .formLogin(form -> form.disable())
-    // .httpBasic(basic -> basic.disable())
-    // .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-    // .exceptionHandling(ex -> ex
-    // .authenticationEntryPoint((request, response, authException) -> {
-    // response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
-    // }));
-
-    // return http.build();
-    // }
-
-        @Bean
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        System.out.println("DEBUG: SecurityFilterChain 설정이 적용되었습니다.");
-
         http
-                .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configure(http)) // WebConfig의 CORS 설정을 사용
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-
-                        // ✅ 이 부분을 클라이언트의 URL과 동일하게 수정하세요.
-                        .requestMatchers("/ws/chat/**").permitAll()
-                        .requestMatchers("/ws/group-chat/**").permitAll()// ✅ 그룹 채팅 웹소켓 경로 추가
-                        .requestMatchers(HttpMethod.POST, "/api/user/login").permitAll()
-                        .requestMatchers("/api/user/verify-token").permitAll() // 토큰 유효성 검증은 permilAll
-                        .requestMatchers("/api/challenge/tendency-test/status").authenticated() // 성향 테스트 상태 조회는 인증 필요
-                        .requestMatchers(HttpMethod.GET, "/api/routine/getRoutinesByUserId/**").authenticated() // 루틴 조회는 인증 필요
-                        .requestMatchers("/api/diary/emojis").permitAll() // 이모지 목록은 인증 없이 조회 가능
-                        .requestMatchers(HttpMethod.POST, "/api/diary/write").authenticated() // 일기 작성은 인증 필요
-                        .requestMatchers("/api/diary/check-today").authenticated() // 일기 작성 여부 확인은 인증 필요
-                        .requestMatchers("/api/diary/list").authenticated() // 일기 목록 조회는 인증 필요
-                        .requestMatchers("/api/diary/date").authenticated() // 특정 날짜 일기 조회는 인증 필요
-                        .requestMatchers("/api/buddy/is-buddy").permitAll() // is-buddy API는 인증 없이 접근 가능
-                        .requestMatchers("/api/buddy/**").authenticated() // 나머지 버디 관련 API는 인증 필요
-
-                        .requestMatchers("/api/challenge/groupchat/listWithSummary/**").permitAll()
-                        .requestMatchers("/api/diary/stats/**").authenticated() // 감정 통계 관련 API는 인증 필요
-                        .anyRequest().permitAll()) // 그 외 모든 요청은 허용
-
-                .formLogin(form -> form.disable())
-                .httpBasic(basic -> basic.disable())
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint((request, response, authException) -> {
-                            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
-                        }));
-
-
-
+            .csrf(csrf -> csrf.disable())
+            .cors(cors -> {}) // ★ WebMvc가 아니라 CorsConfig 빈 사용
+            .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll() // ★ Preflight 허용
+                .requestMatchers("/ws/chat/**", "/ws/group-chat/**").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/user/login").permitAll()
+                .requestMatchers("/api/user/verify-token").permitAll()
+                .requestMatchers("/api/challenge/groupchat/listWithSummary/**").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/routine/getRoutinesByUserId/**").authenticated()
+                .requestMatchers("/api/diary/emojis").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/diary/write").authenticated()
+                .requestMatchers("/api/diary/check-today", "/api/diary/list", "/api/diary/date").authenticated()
+                .requestMatchers("/api/buddy/is-buddy").permitAll()
+                .requestMatchers("/api/buddy/**").authenticated()
+                .anyRequest().permitAll()
+            )
+            .formLogin(f -> f.disable())
+            .httpBasic(b -> b.disable())
+            .addFilterBefore(jwtAuthFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)
+            .exceptionHandling(ex -> ex.authenticationEntryPoint(
+                (req, res, e) -> res.sendError(jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")
+            ));
         return http.build();
     }
-
-    // CORS 설정은 WebConfig에서 관리합니다.
 }
