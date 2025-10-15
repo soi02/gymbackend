@@ -15,15 +15,15 @@ public class WebConfig implements WebMvcConfigurer {
     @Qualifier("fileRootPath")
     private String fileRootPath; // 변수명도 명확하게 변경 (externalUploadPath 대신)
 
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        System.out.println("DEBUG: CORS 설정이 적용되었습니다.");
-        registry.addMapping("/**")
-                .allowedOriginPatterns("*")
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
-                .allowedHeaders("*")
-                .allowCredentials(true);
-    }
+//     @Override
+//     public void addCorsMappings(CorsRegistry registry) {
+//         System.out.println("DEBUG: CORS 설정이 적용되었습니다.");
+//         registry.addMapping("/**")
+//                 .allowedOriginPatterns("*")
+//                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
+//                 .allowedHeaders("*")
+//                 .allowCredentials(true);
+//     }
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {

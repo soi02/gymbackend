@@ -101,7 +101,7 @@ public ResponseEntity<List<GroupChatMessage>> getChatHistoryProcess(@PathVariabl
 
     // 클라이언트가 '/app/sendGroupMessage/{challengeId}'로 메시지를 보내면 이 메서드가 호출됨
     @MessageMapping("/sendGroupMessage/{challengeId}")
-    public void sendGroupMessage(@DestinationVariable Long challengeId,
+    public void sendGroupMessage(@DestinationVariable("challengeId") Long challengeId,
                                  @Payload GroupChatMessage groupChatMessage) {
 
         System.out.println("STOMP 메시지 수신: destination=/app/sendGroupMessage/" + challengeId + ", payload=" + groupChatMessage);
@@ -147,7 +147,7 @@ public ResponseEntity<List<GroupChatMessage>> getChatHistoryProcess(@PathVariabl
 
 
         @GetMapping("/listWithSummary/{userId}")
-    public ResponseEntity<List<GroupChatListItemDto>> listWithSummary(@PathVariable Long userId) {
+        public ResponseEntity<List<GroupChatListItemDto>> listWithSummary(@PathVariable("userId") Long userId) {
         List<GroupChatListItemDto> list = groupChatMessageService.getJoinedChallengesWithChatSummary(userId);
         return ResponseEntity.ok(list);
     }
